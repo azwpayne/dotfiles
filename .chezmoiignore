@@ -1,0 +1,22 @@
+# 本地覆盖与备份
+*.local
+*.local.*
+*.bak
+**/REAMDME.md
+README.md
+LICENSE
+docs/
+docs/**
+**/dot_git
+dot_gitconfig
+**/dot_DS_Store
+
+# 敏感信息
+*token*
+*secret*
+*credential*
+*client_secret*
+
+# 构建产物
+node_modules/
+.pnpm-store/
