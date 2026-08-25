@@ -12,6 +12,6 @@
     "npm:@gotgenes/pi-permission-system"
   ],
   "defaultProvider": "zai-coding-cn",
-  "defaultModel": "glm-5.2",
-  "defaultThinkingLevel": "xhigh"
+  "defaultModel": "glm-5.3",
+  "defaultThinkingLevel": "max"
 }
