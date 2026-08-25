@@ -1,0 +1,63 @@
+# Alacritty Configuration File
+# Configuration for Alacritty, a GPU-accelerated terminal emulator.
+# For more information, see the Alacritty documentation:
+# config-alacritty: https://alacritty.org/config-alacritty.html
+# see also: https://alacritty.org/config-alacritty-bindings.html
+# see also: https://alacritty.org/cmd-alacritty-msg.html
+# see also: https://www.kevnu.com/zh/posts/18
+
+[env]
+TERM = "xterm-256color"
+
+[font]
+size = 15
+normal = { family = "JetBrainsMono Nerd Font Mono", style = "Regular" }
+bold = { family = "JetBrainsMono Nerd Font Mono", style = "Bold" }
+italic = { family = "JetBrainsMono Nerd Font Mono", style = "Italic" }
+bold_italic = { family = "JetBrainsMono Nerd Font Mono", style = "Bold Italic" }
+
+
+[colors]
+primary = { background = '0x282a36', foreground = '0xf8f8f2' }
+cursor = { background = '0x44475a', foreground = '0xf8f8f2' }
+normal = { black = '0x21222c', red = '0xff5555', green = '0x50fa7b', yellow = '0xf1fa8c', blue = '0xbd93f9', magenta = '0xff79c6', cyan = '0x8be9fd', white = '0xbfbfbf' }
+bright = { black = '0x4d4d4d', red = '0xff6e67', green = '0x5af78e', yellow = '0xf4f99d', blue = '0xcaa9fa', magenta = '0xff92d0', cyan = '0x9aedfe', white = '0xe6e6e6' }
+dim = { black = '0x21222c', red = '0xff5555', green = '0x50fa7b', yellow = '0xf1fa8c', blue = '0xbd93f9', magenta = '0xff79c6', cyan = '0x8be9fd', white = '0xbfbfbf' }
+
+[window]
+blur = true
+option_as_alt = "OnlyRight"
+# dimensions = { columns = 120, lines = 35 }
+# decorations = "Buttonless"
+startup_mode = "Fullscreen"
+
+
+[selection]
+save_to_clipboard = true
+
+[terminal]
+# # shell configuration for Alacritty with tmux
+# shell = { program = "/opt/homebrew/bin/fish", args = [
+#  "-c",
+#  "tmux attach || tmux new -t $(date '+%H%M%S_%Y%m%d')",
+# ] }
+# shell = { program = "/bin/zsh", args = ["-l"] }
+# shell = { program = "/opt/homebrew/bin/fish", args = ["-l"] }
+
+[keyboard]
+# Key bindings for Alacritty
+# referer: https://github.com/theniceboy/.config/blob/master/alacritty/alacritty.yml
+bindings = [
+  # { key = "Return", mods = "Command", action = "ToggleSimpleFullscreen" },
+  { mods = "Command", key = "Enter", action = "ToggleFullscreen" },
+  # { key = "N", mods = "Control", command = "tm" },
+  # { key = "F", mods = "Function", action = "ToggleFullscreen" },
+  # { key = "N", mods = "Alt", action = "ReceiveChar" },
+  # { key = "P", mods = "Alt", action = "ReceiveChar" },
+  { mods = "Command", key = "t", action = "None" },
+  { mods = "Command", key = "n", action = "None" },
+]
+
+# [scrolling]
+# history = 0
+# multiplier = 3

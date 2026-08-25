@@ -1,0 +1,17 @@
+{
+  "theme": "dark",
+  "lastChangelogVersion": "0.84.2",
+  "defaultProvider": "opencode",
+  "defaultModel": "x-preview-f-free",
+  "defaultThinkingLevel": "max",
+  "hideThinkingBlock": true,
+  "packages": [
+    "npm:pi-web-access",
+    "npm:pi-subagents",
+    "npm:@quintinshaw/pi-dynamic-workflows",
+    "npm:@narumitw/pi-btw",
+    "npm:@narumitw/pi-goal",
+    "npm:pi-landstrip",
+    "npm:@gotgenes/pi-permission-system"
+  ]
+}

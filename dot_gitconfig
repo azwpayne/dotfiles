@@ -1,0 +1,35 @@
+[core]
+	editor = 'code'
+	autocrlf = input
+	excludesfile = /Users/payne/.gitignore_global
+[filter "lfs"]
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+	clean = git-lfs clean -- %f
+
+[user]
+	name = azwpayne
+	email = paynewu0719@gmail.com
+[init]
+	defaultBranch = main
+
+[http "https://github.com"]
+	proxy = socks5://127.0.0.1:7890
+[https "https://github.com"]
+	proxy = socks5://127.0.0.1:7890
+[ssh "ssh.github.com"]
+    proxy = socks5://127.0.0.1:7890
+
+# [http]
+# 	proxy = http://127.0.0.1:7890
+
+# [https]
+# 	proxy = http://127.0.0.1:7890
+
+[push]
+	default = current
+	autoSetupRemote = true
+    rebase = true
+[safe]
+	directory = *

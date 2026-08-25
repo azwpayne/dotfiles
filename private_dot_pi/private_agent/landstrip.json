@@ -1,0 +1,7 @@
+{
+  "maxSubagents": 16,
+  "toolFilesystemPolicy": "sandbox",
+  "permission": {
+    "task": { "*": "deny", "review": "allow" }
+  }
+}

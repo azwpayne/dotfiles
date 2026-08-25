@@ -1,0 +1,67 @@
+{
+    "$schema": "https://raw.githubusercontent.com/gotgenes/pi-packages/main/packages/pi-permission-system/schemas/permissions.schema.json",
+    "promptMaxRows": 32,
+    "permission": {
+        "*": "allow",
+        "mcp": {"*": "ask", "mcp_status": "allow", "mcp_list": "allow"},
+        "skill": {"*": "ask"},
+        "read": {
+            "*"            : "allow",
+            "*.env"        : "deny",
+            "*.env.*"      : "deny",
+            "*.env.example": "allow",
+            "~/.ssh/*"     : "deny",
+            "~/.aws/*"     : "deny",
+            "~/.gnupg/*"   : "deny"
+        },
+        "write": {"*": "ask", "*.env": "deny", "*.env.*": "deny", "~/.ssh/*": "deny", "~/.aws/*": "deny"},
+        "edit": {"*": "ask", "*.env": "deny", "*.env.*": "deny", "~/.ssh/*": "deny", "~/.aws/*": "deny"},
+        "bash": {
+            "*"               : "ask",
+            "pwd"             : "allow",
+            "for *"           : "allow",
+            "cd *"            : "allow",
+            "ls *"            : "allow",
+            "cat *"           : "allow",
+            "echo *"          : "allow",
+            "mkdir *"         : "allow",
+            "touch *"         : "allow",
+            "sudo *"          : "deny",
+            "mv *"            : "deny",
+            "rm *"            : "deny",
+            "unlink *"        : "deny",
+            "dd if=* of=*"    : "deny",
+            "mkfs.*"          : "deny",
+            // git
+            "git *"           : "ask",
+            "git add"         : "allow",
+            "git commit -m"   : "allow",
+            "git push"        : "ask",
+            "git reset --hard": "ask",
+            "git clean -fd"   : "ask",
+            "git status"      : "allow",
+            "git diff"        : "allow",
+            "git log"         : "allow",
+            "git branch"      : "allow",
+            "git checkout"    : "ask",
+            // project management
+            "node -e"         : "ask",
+            "npm install"     : "ask",
+            "npm ci"          : "ask",
+            "pnpm *"          : "ask",
+            "cargo *"         : "ask"
+        },
+        "path": {
+            "*"            : "allow",
+            "*.env"        : "deny",
+            "*.env.*"      : "deny",
+            "*.env.example": "allow",
+            "*.pem"        : "deny",
+            "*.key"        : "deny",
+            "~/.ssh/*"     : "deny",
+            "/etc/*"       : "deny",
+            "/var/*"       : "deny"
+        },
+        "external_directory": {"*": "ask", "~/.cargo/registry/*": "allow", "~/.npm/*": "allow", "~/.cache/*": "allow"}
+    }
+}

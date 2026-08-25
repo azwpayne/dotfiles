@@ -1,0 +1,163 @@
+# ============================================
+# Ghostty Terminal - Complete Configuration
+# ============================================
+# File: ~/.config/ghostty/config
+# Reload: Cmd+Shift+, (macOS)
+# View options: ghostty +show-config --default --docs
+
+
+# language = zh
+command = /bin/zsh -l
+# command = /opt/homebrew/bin/fish -l
+# command = /opt/homebrew/bin/tmux new -As main
+
+# option-as-meta = true
+macos-option-as-alt = right
+#--- Typography ---
+font-family = "JetBrainsMono Nerd Font Mono"
+font-feature = "+calt"
+font-size = 15
+font-thicken = true
+font-thicken-strength = 1
+
+# 精细调整字重与渲染（macOS 独有优化）
+font-thicken = true
+font-thicken-strength = 1
+alpha-blending = linear
+
+adjust-cell-height = 2
+
+# 微调字符间距（-1 到 2 之间，依字体而定）
+adjust-cell-width = -1
+adjust-cell-height = 2
+
+# --- Theme and Colors ---
+# Catppuccin with automatic light/dark switching
+theme = Catppuccin Mocha
+# theme = Dracula+
+# theme = "Warm Neon"
+
+# --- Window and Appearance ---
+# # 背景透明度：微妙的毛玻璃效果（0.85-0.95 之间最优雅）
+background-opacity = 0.92
+background-blur-radius = 20
+
+# # 窗口边距：呼吸感的关键，避免文字贴边
+window-padding-x = 12
+window-padding-y = 12
+window-padding-balance = true
+
+window-width = 0
+window-height = 0
+
+window-save-state = always
+window-theme = auto
+
+window-decoration = true
+
+# 移除多余装饰（macOS）
+macos-window-shadow = false
+macos-titlebar-proxy-icon = hidden
+
+# --- Cursor ---
+# cursor-style = underline
+cursor-style = block
+cursor-style-blink = true
+cursor-opacity = 0.8
+# adjust-cursor-thickness = 2px
+cursor-color = #ff0000
+
+# 输入时自动隐藏鼠标指针
+mouse-hide-while-typing = true
+mouse-scroll-multiplier = 1.0
+# 禁用调整大小时的浮层提示（更干净）
+resize-overlay = never
+
+# 工作目录继承，保持上下文连贯
+window-inherit-working-directory = true
+window-inherit-font-size = true
+
+# --- Mouse ---
+mouse-hide-while-typing = true
+clipboard-read = allow
+clipboard-write = allow
+copy-on-select = clipboard
+
+# --- Quick Terminal (Quake-style dropdown) ---
+quick-terminal-position = top
+quick-terminal-screen = mouse
+quick-terminal-autohide = true
+quick-terminal-animation-duration = 0.15
+
+# --- Security ---
+clipboard-paste-protection = true
+clipboard-paste-bracketed-safe = true
+clipboard-trim-trailing-spaces = true
+
+# --- Shell Integration ---
+# shell-integration = detect
+# shell-integration-features = no-cursor
+
+
+# --- Keybindings ---
+# Tabs
+keybind = cmd+t=new_tab
+keybind = cmd+shift+left=previous_tab
+keybind = cmd+shift+right=next_tab
+keybind = cmd+w=close_surface
+
+# Splits
+keybind = cmd+d=new_split:right
+keybind = cmd+shift+d=new_split:down
+keybind = cmd+alt+left=goto_split:left
+keybind = cmd+alt+right=goto_split:right
+keybind = cmd+alt+up=goto_split:top
+keybind = cmd+alt+down=goto_split:bottom
+
+
+macos-option-as-alt = right
+# macos-option-as-alt = true
+
+# Font size
+keybind = cmd+plus=increase_font_size:1
+keybind = cmd+minus=decrease_font_size:1
+keybind = cmd+zero=reset_font_size
+
+# Quick terminal global hotkey
+keybind = global:ctrl+grave_accent=toggle_quick_terminal
+
+# Splits management
+keybind = cmd+shift+e=equalize_splits
+keybind = cmd+shift+f=toggle_split_zoom
+
+# Reload config
+# keybind = cmd+shift+comma=reload_config
+
+# --- Performance ---
+# Generous scrollback (64MB) 1024 * 1024 * 64
+scrollback-limit = 67108864
+
+# 图像内存限制（防止 Kitty Graphics Protocol 图像占用过多 GPU 内存）256MB，适合 16GB 内存机型
+image-storage-limit = 268435456
+
+
+# GTK 单实例模式（Linux 性能关键）
+gtk-single-instance = true
+# # 无限滚动缓冲，但保留确认提示避免误删
+confirm-close-surface = false
+
+
+quick-terminal-screen = main
+quick-terminal-animation-duration = 0.15
+
+# 启用自动更新检查但异步进行，不阻塞启动
+auto-update = check
+auto-update-channel = stable
+
+# macOS 特有的单实例模式优化
+## 减少 Core Animation 开销
+macos-window-shadow = false
+
+resize-overlay = never
+
+quit-after-last-window-closed = true
