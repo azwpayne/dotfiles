@@ -101,6 +101,7 @@
 | `window.blur` | `true` | 毛玻璃 |
 | `window.option_as_alt` | `OnlyRight` | 同 Ghostty 的左右 Option 策略，仅右 Option 作 Alt |
 | `selection.save_to_clipboard` | `true` | 选中即复制 |
+| `terminal.shell` | 无生效值（各选项均已注释） | 实际启动登录用户的默认 `$SHELL`（本机为 zsh），与 Ghostty 显式指定 `/bin/zsh -l` 不同；如需固定，取消对应注释即可 |
 
 ### 字体
 
@@ -123,6 +124,7 @@ bold_italic = { family = "JetBrainsMono Nerd Font Mono", style = "Bold Italic" }
 | `colors.cursor` | `background 0x44475a` / `foreground 0xf8f8f2` |
 | `colors.normal` | `black 0x21222c` `red 0xff5555` `green 0x50fa7b` `yellow 0xf1fa8c` `blue 0xbd93f9` `magenta 0xff79c6` `cyan 0x8be9fd` `white 0xbfbfbf` |
 | `colors.bright` | `black 0x4d4d4d` `red 0xff6e67` `green 0x5af78e` `yellow 0xf4f99d` `blue 0xcaa9fa` `magenta 0xff92d0` `cyan 0x9aedfe` `white 0xe6e6e6` |
+| `colors.dim` | 与 `normal` 各项相同（`black 0x21222c` … `white 0xbfbfbf`） |
 
 ### 键位
 
@@ -140,4 +142,4 @@ bold_italic = { family = "JetBrainsMono Nerd Font Mono", style = "Bold Italic" }
 brew install --cask font-jetbrains-mono-nerd-font
 ```
 
-两个终端均要求 Nerd Font 变体——starship 提示符与 `lsd`/`exa` 类工具依赖其中的图标字形（powerline 箭头、OS logo、目录图标）。
+两个终端均要求 Nerd Font 变体——starship 提示符与 `lsd`（含 fzf 预览）等工具依赖其中的图标字形（powerline 箭头、OS logo、目录图标）。
