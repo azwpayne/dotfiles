@@ -8,7 +8,7 @@
 
 | 文件 | 职责 | 主要内容 |
 | --- | --- | --- |
-| `aliases.zsh` | 通用别名与函数 | 目录跳转（dl/dt/doc/wp）、系统信息（ff/fastfetch、时间戳）、进程资源（htop/df/du）、基础命令增强（lsd/bat/rm -i）、包管理更新（brew_update/sdk_update/.../auto_update）、K8s 别名、编辑器/AI 助手别名、`ruff_auto`/`y`/`jdx`/`scr` 等函数 |
+| `aliases.zsh` | 通用别名与函数 | 目录跳转（dl/dt/doc/wp）、系统信息（ff/fastfetch、时间戳）、进程资源（htop/df/du）、基础命令增强（lsd/bat/rm -i）、包管理更新（brew_update/sdk_update/.../auto_update/update-all；`auto_update` 为守卫式串行（`onproxy`→`uv`/`sdk`/`rustup`/`tldr`/`brew`），`update-all` 为关联数组+参数过滤、失败计数与耗时统计，支持 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise` 六目标）、K8s 别名、编辑器/AI 助手别名、`ruff_auto`/`y`/`jdx`/`scr` 等函数 |
 | `fzf.zsh` | fzf 与 fzf-tab 配置 | 前缀探测与缓存、全局选项（FZF_DEFAULT_OPTS / CTRL_R/T/C_OPTS）、交互式函数 `frg` `fkill` `find_large_files` `ftm` `flf` `flkill` `flnet` `fluser`、fzf-tab zstyle |
 | `sdk.zsh` | SDK 环境与补全 | pnpm 补全、SDKMAN（可选）、Android NDK、Go/Rust 环境、Docker/Kubectl 补全、kubecolor 包装与短别名 `k` |
 
@@ -60,6 +60,7 @@ export VISUAL='nvim'
 | 函数 | 所在文件 | 用途 | 关键实现 |
 | --- | --- | --- | --- |
 | `auto_update` | aliases.zsh | 全量更新各包管理器（逐个 `command -v` 守卫，未安装即跳过；若存在 `onproxy` 函数则先切代理） | `uv_update` / `sdk_update` / `rust_update` / `tldr_update` / `brew_update` |
+| `update-all` | aliases.zsh | 选择性批量更新（默认全部，参数过滤） | `tasks` 关联数组（`brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise`）+ `targets` 过滤 + `command -v` 守卫 + 失败/耗时统计 + 彩色输出 |
 | `ruff_auto [dir]` | aliases.zsh | ruff 自动修复 lint 并格式化（默认当前目录） | `ruff check --fix --exit-zero && ruff format` |
 | `y [args]` | aliases.zsh | yazi 包装：退出后 cd 到最后浏览的目录 | `yazi --cwd-file` + `mktemp` |
 | `jdx [args]` / `scr [args]` | aliases.zsh | 后台启动 jadx-gui / scrcpy | `nohup ... &` |
@@ -95,12 +96,12 @@ export VISUAL='nvim'
 
 ### 有守卫的可选组件（未安装时静默跳过）
 
-`pnpm`（tabtab 补全）、SDKMAN（`~/.sdkman/bin/sdkman-init.sh`）、`docker`（`docker completion zsh`）、`kubectl`+`kubecolor`（补全 + 函数包装 + `k` 别名）、`~/.cargo/env`（rustup）、`onproxy` 函数（仓库外定义，若存在则 `auto_update` 前自动切代理）
+`pnpm`（tabtab 补全）、SDKMAN（`~/.sdkman/bin/sdkman-init.sh`）、`docker`（`docker completion zsh`）、`kubectl`+`kubecolor`（补全 + 函数包装 + `k` 别名）、`~/.cargo/env`（rustup）、`onproxy` 函数（仓库外定义，若存在则 `auto_update` 前自动切代理；`update-all` 同样对 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise` 逐项 `command -v` 守卫，未安装时黄色提示跳过）
 
 ### 运行时工具（对应别名/函数调用时才需要）
 
 `fd`（缺省回退 `rg`）、`bat`、`lsd`、`nvim`、`code`、`htop`、`fastfetch`、`tmux`、
-`yazi`、`gh`、`lazygit`、`claude`、`opencode`、`ruff`、`uv`、`rustup`、`tldr`、
+`yazi`、`gh`、`lazygit`、`claude`、`opencode`、`ruff`、`uv`、`rustup`、`tldr`、`mise`、
 `nproc`（coreutils）、`jadx-gui`、`scrcpy`。
 另：`java` 仅在 SDKMAN 存在时经 `sdk_update` 间接使用，本仓库无直接引用。
 
