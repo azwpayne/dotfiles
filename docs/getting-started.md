@@ -44,9 +44,9 @@ exec zsh   # 重启 shell 使全部配置生效（或重新打开终端）
 
 ### 网络与代理前提
 
-GitHub 可达性强依赖**本机代理在线**：`dot_gitconfig` 中三处 proxy 均指向 `socks5://127.0.0.1:7890`；`private_dot_ssh/config` 的 `ProxyCommand` 会先探测 `127.0.0.1:5376`，在线时经其代理连接，离线则直连。首次启动 zsh 时 zimfw 拉取模块走 HTTPS 直连，通常不受影响。
+GitHub 可达性强依赖**本机代理在线**：`dot_gitconfig` 中三处 proxy 均指向 `socks5://127.0.0.1:5376`，与 `private_dot_ssh/config` 的 `ProxyCommand` 探测端口一致（现已统一为 `5376`，原文档中 `7890`/`5376` 混合的描述已过时）。SSH 侧同样先探测 `127.0.0.1:5376`，在线时经 `socks5` 代理连接，离线则直连；首次启动 zsh 时 zimfw 拉取模块走 HTTPS 直连，通常不受影响。
 
-若代理未运行，第 5 节的 git/SSH 相关验证会失败（git 卡住或报 `Connection refused`、`ssh -T git@github.com` 超时等）。排查方法：确认代理进程监听 `7890`/`5376` 端口（如 `nc -z 127.0.0.1 7890 && echo ok`），或临时取消代理后重试。
+若代理未运行，第 5 节的 git/SSH 相关验证会失败（git 卡住或报 `Connection refused`、`ssh -T git@github.com` 超时等）。排查方法：确认代理进程监听 `5376` 端口（如 `nc -z 127.0.0.1 5376 && echo ok`），或临时取消代理后重试。
 
 ## 3. 首次启动会发生什么
 
@@ -89,7 +89,7 @@ brew install bat lsd htop fastfetch neovim tmux yazi gh lazygit tldr coreutils \
 
 - `coreutils` 提供 `nproc`（`makes`/`xargsp` 半核并行依赖它）
 - `bat`/`lsd`/`htop` 分别接管 `cat`/`ls`/`top`；脚本中需要原生行为用 `command cat` 等
-- `gh` 配合 `~/.ssh/config` 的 `Host github.com → ssh.github.com:443` 与 `dot_gitconfig` 的 `socks5://127.0.0.1:7890` 代理共同保证 GitHub 可达（依赖本机代理在线，见下文「网络与代理前提」）
+- `gh` 配合 `~/.ssh/config` 的 `Host github.com → ssh.github.com:443` 与 `dot_gitconfig` 的 `socks5://127.0.0.1:5376` 代理共同保证 GitHub 可达（依赖本机代理在线，见上文「网络与代理前提」——现已统一为 `5376`，不再区分 `7890`）
 
 按需补装（别名/函数指向的目标，未装时对应功能退化）：
 
@@ -144,9 +144,11 @@ nvim --headless +qa                  # 无插件加载错误；首次运行会�
 
 # SSH / GitHub 可达性
 cat ~/.ssh/config                    # 顶部含 Include ~/.orbstack/ssh/config，github.com 走 ssh.github.com:443
-git config --get-regexp proxy        # github.com 指向 socks5://127.0.0.1:7890（仅当已手工恢复/合并 ~/.gitconfig 时才有输出，
-                                     # 因 .chezmoiignore 不应用 dot_gitconfig；也可直接校验源文件：
+git config --get-regexp proxy        # github.com 指向 socks5://127.0.0.1:5376（仅当已手工恢复/合并 ~/.gitconfig 时才有输出，
+                                     # 因 .chezmoiignore 不自动部署 dot_gitconfig；也可直接校验源文件：
                                      # git config --file ~/.local/share/chezmoi/dot_gitconfig --get-regexp proxy）
 ```
+
+> **日常更新速览**：`private_dot_config/zsh/aliases.zsh` 提供 `auto_update`（按工具守卫逐项 `brew_update`/`mise upgrade`/…）与更细粒度的 `update-all [brew|mise|rustup|tldr|uv|sdk]`；验证通过后可按需执行 `zsh -ic 'auto_update'` 或 `zsh -ic 'update-all'`，详见 [maintenance.md](maintenance.md) 与 `aliases.zsh` 源码。
 
 全部通过后即可进入日常使用；更多维护流程见 [maintenance.md](maintenance.md)，完整映射见 [layout.md](layout.md)。
