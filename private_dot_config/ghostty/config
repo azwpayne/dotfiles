@@ -7,7 +7,6 @@
 
 env = LANG=zh_CN.UTF-8
 
-
 command = /bin/zsh -l
 # command = /opt/homebrew/bin/fish -l
 # command = /opt/homebrew/bin/tmux new -As main
