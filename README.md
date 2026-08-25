@@ -1,11 +1,11 @@
-# Payne's Dotfiles
+# Dotfiles
 
 基于 [chezmoi](https://www.chezmoi.io/) 管理的 macOS（Apple Silicon）个人开发环境配置。
 
 本仓库是 chezmoi 的**源目录**（source directory，位于 `~/.local/share/chezmoi`），
 通过 `chezmoi apply` 将文件渲染到 `$HOME` 下对应位置。全部为静态文件——没有模板、
 没有脚本，所见即所得；通过 `.chezmoiignore` 将 `README.md` / `LICENSE` / `docs/` /
-`*.local` / `*.bak` 等仅供仓库查阅或本地覆盖的文件排除在部署之外，避免污染目标家目录。
+`*.local` / `*.bak` 等仅供仓库查阅或本地覆盖的文件排除在部署之外，避免污染目标HOME目录。
 
 ## ✨ 特性总览
 
@@ -134,3 +134,7 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 - 目标平台：macOS (Apple Silicon)，Homebrew 前缀 `/opt/homebrew`
 - 已验证版本（2026-08）：chezmoi v2.72 · zsh 5.9 · fzf 0.74.3 · starship 1.26 · Neovim 0.12
 - 维护者：[azwpayne](https://github.com/azwpayne)
+
+## License
+
+MIT - See the [LICENSE](LICENSE) file for details.
