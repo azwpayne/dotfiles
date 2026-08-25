@@ -13,7 +13,7 @@
 | `empty_` | 目标为空文件（占位保证目录存在） | `private_empty_config.toml` → `~/.codex/empty_config.toml` |
 | （无前缀） | 原样同名复制 | `starship.toml` → `~/.config/starship.toml` |
 
-前缀可叠加，如 `private_dot_config` = 隐藏目录 + 目录内文件默认 0600，`private_dot_ssh` 同理。
+前缀可叠加，如 `private_dot_config` = 隐藏目录 + 该目录本身权限 0700，`private_dot_ssh` 同理。
 
 > 注：`private_dot_config` 下未加 `private_` 的子项（如 `zsh/`、`nvim/`、`alacritty/`、`ghostty/`、`mise/`）保持默认 0644；
 > 只有显式带 `private_` 的条目（`private_fish/`、`private_dot_ssh/`、`private_dot_pi/`）才收紧为 0600。
@@ -41,8 +41,8 @@
 | --- | --- | --- |
 | `private_dot_config/zsh/aliases.zsh` | `~/.config/zsh/aliases.zsh` | 别名与通用函数（`auto_update`、`y`、`ruff_auto` 等） |
 | `private_dot_config/zsh/fzf.zsh` | `~/.config/zsh/fzf.zsh` | fzf 前缀探测/缓存、全局选项、Ctrl-R/T/Alt-C 及 `frg`/`fkill`/`ftm`/`fl*` 函数 |
-| `private_dot_config/zsh/sdk.zsh` | `~/.config/zsh/sdk.zsh` | SDK 环境与补全（pnpm/SDKMAN/Android NDK/Go/Rust/Docker/kubectl） |
-| `private_dot_config/zsh/dot_gitignore` | `~/.config/zsh/.gitignore` | 忽略运行时产物（`*.zwc`、`.fzf_prefix_cache`） |
+| `private_dot_config/zsh/sdk.zsh` | `~/.config/zsh/sdk.zsh` | SDK 环境与补全（pnpm/SDKMAN(可选)/Android NDK/Python(uv)/Go/Rust/Docker/kubectl+kubecolor） |
+| `private_dot_config/zsh/dot_gitignore` | `~/.config/zsh/.gitignore` | 忽略运行时产物（`*.zwc`、`.fzf_prefix_cache`、`.DS_Store`） |
 | `private_dot_config/zsh/README.md` | `~/.config/zsh/README.md` | 模块内部文档（加载顺序契约、函数速查） |
 
 ### 终端与提示符
@@ -57,7 +57,9 @@
 
 | 源文件 | 目标路径 | 说明 |
 | --- | --- | --- |
-| `private_dot_config/nvim/**` | `~/.config/nvim/**` | LazyVim 配置（`init.lua` + `lua/config/*` + `lua/plugins/*`，含 `lazy-lock.json` 锁定 44 个插件、`lazyvim.json` extras、`stylua.toml`） |
+| `private_dot_config/nvim/**` | `~/.config/nvim/**` | LazyVim 配置（`init.lua` + `lua/config/*` + `lua/plugins/*`，含 `lazy-lock.json` 锁定 44 个插件、`lazyvim.json`（extras 清单当前为空）、`stylua.toml`） |
+| `private_dot_config/nvim/README.md` | `~/.config/nvim/README.md` | LazyVim 上游模板自带，随 `nvim/**` 部署（当前因 `.chezmoiignore` 中 `**/REAMDME.md` 拼写错误未被排除） |
+| `private_dot_config/nvim/LICENSE` | `~/.config/nvim/LICENSE` | LazyVim 上游模板自带，随 `nvim/**` 部署 |
 | `private_dot_config/nvim/dot_gitignore` | `~/.config/nvim/.gitignore` | 忽略插件数据等运行时目录 |
 | `private_dot_config/nvim/dot_neoconf.json` | `~/.config/nvim/.neoconf.json` | neoconf 本地配置 |
 | `private_dot_config/mise/config.toml` | `~/.config/mise/config.toml` | bun/deno/go/node/pnpm = latest |
@@ -76,7 +78,7 @@
 | `.../private_conf.d/.keep`、`.../private_functions/.keep` | 对应 `.keep` | 占位保留空目录结构 |
 
 > Fish 在本环境中不是登录 shell，仅用于偶尔使用时获得 docker/kubectl/orbctl 补全；
-> Ghostty/Alacritty 的默认 shell 均为 zsh。
+> Ghostty 显式指定 `command = /bin/zsh -l`；Alacritty 未设置 shell（跟随系统登录 shell）。
 
 ### pi coding agent（四件套 + workflows）
 
@@ -94,14 +96,16 @@
 （chezmoi 始终忽略点文件中的该文件名），作用是在源目录中**排除**部分文件不参与渲染：
 
 ```
-README.md / LICENSE / docs/** / *.local / *.bak
+README.md / LICENSE / docs/** / *.local / *.local.* / *.bak
 **/dot_git / dot_gitconfig / **/dot_DS_Store
 *token* / *secret* / *credential* / *client_secret*
 node_modules/ / .pnpm-store/
 ```
 
-效果：`chezmoi diff` / `chezmoi apply` 会自动跳过文档、本地覆盖、敏感文件名匹配与构建产物；
-`docs/README` 等仅留在源仓库供人阅读，不会污染目标机器。详见 [getting-started.md](getting-started.md)。
+效果：`chezmoi diff` / `chezmoi apply` 会自动跳过文档、本地覆盖、敏感文件名匹配与构建产物。
+注意：根级模式 `README.md` / `LICENSE` 只匹配根目录本身，不匹配嵌套路径——因此
+`~/.config/nvim/README.md` 与 `~/.config/nvim/LICENSE` 目前仍会随 `nvim/**` 部署到目标机；
+本应用于排除嵌套 README 的规则在文件中拼写为 `**/REAMDME.md`（typo），暂未生效。详见 [getting-started.md](getting-started.md)。
 
 ## 仓库特性说明
 
