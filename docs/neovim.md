@@ -6,8 +6,8 @@ Neovim 配置，目标 Neovim ≥ 0.9（本机验证 0.12）。源目录通过 `
 `lazy.nvim` 并按 `lazy-lock.json` 安装插件。
 
 > **文档分工**：本文档是 chezmoi 仓库视角（结构 / extras / 选项 / 键位 / autocmds 与仓库实值逐行一致）；
-> 编辑器面向用户的安装与功能概览见应用后的 [`~/.config/nvim/README.md`](../private_dot_config/nvim/README.md)
-> （即源文件 `private_dot_config/nvim/README.md`），二者互补不重复，详细分工见文末。
+> 编辑器面向用户的安装与功能概览见 [`private_dot_config/nvim/README.md`](../private_dot_config/nvim/README.md)
+> （仓库内文档，由 `**/README.md` 排除、不部署到 `~/.config/nvim/README.md`），二者互补不重复，详细分工见文末。
 
 ## 目录结构
 
@@ -29,12 +29,14 @@ nvim/  (private_dot_config/nvim → ~/.config/nvim)
 ├── stylua.toml               Lua 格式化规则（Spaces 2 宽 120 列）
 ├── dot_gitignore             → .gitignore  忽略 tag / log / data 等运行时产物
 ├── dot_neoconf.json          → .neoconf.json  LSP 项目级设置（neoconf / lua_ls 配置）
-├── LICENSE                   LazyVim starter 自带的 MIT 许可证
-└── README.md                 应用后说明（LazyVim starter 模板，chezmoi 视角补充见本文）
+├── LICENSE                   上游 LazyVim starter 原件（Apache-2.0）；**/LICENSE 排除，不部署
+└── README.md                 仓库内文档（LazyVim starter 模板）；**/README.md 排除，不部署
 ```
 
-> 完整映射与忽略规则见 [layout.md](layout.md)；`.chezmoiignore` 对嵌套 `README.md`/`LICENSE` 的排除
-> 当前因拼写 `**/REAMDME.md` 未生效，故 `README.md`/`LICENSE` 仍会随 `nvim/**` 部署，属已知待修。
+> 完整映射与忽略规则见 [layout.md](layout.md)；`.chezmoiignore` 已修复为按目标名匹配的 `**/README.md` / `**/LICENSE`，
+> 本目录的 `README.md` 与 `LICENSE` 不再随 `nvim/**` 部署（历史上的 `**/REAMDME.md` 拼写失配已修复）。
+> `LICENSE` 为上游 LazyVim starter 原件（Apache-2.0，与根 LICENSE 同哈希；nvim/README.md 中
+> "MIT" 的旧表述与上游实发内容不符，上游与根 LICENSE 均为 Apache-2.0）。
 
 ## 启用的 Extras（lua/config/lazy.lua）
 
@@ -158,7 +160,7 @@ Leader 为空格（LazyVim 默认），以下为本仓库在 LazyVim 默认之�
 ## 与 private_dot_config/nvim/README.md 的分工
 
 - 本文档（`docs/neovim.md`）：**chezmoi 仓库视角**，面向维护者，逐行核对源文件与目标路径、extras 清单、选项/键位/autocmds 实值、lock 数量与 checker 策略、与 shell `update-all` 的边界。
-- `private_dot_config/nvim/README.md`（应用后为 `~/.config/nvim/README.md`）：**应用后视角**，面向新机器使用者，基于 LazyVim starter 模板的安装步骤、功能概览、键位与设置速览，术语与本文档保持一致（10 extras / 44 锁定 / 键位 8 项等）。
+- `private_dot_config/nvim/README.md`（仓库内文档，由 `**/README.md` 排除、不再部署到 `~/.config/nvim/README.md`）：**应用后视角**，面向新机器使用者，基于 LazyVim starter 模板的安装步骤、功能概览、键位与设置速览，术语与本文档保持一致（10 extras / 44 锁定 / 键位 8 项等）。
 
 二者互补不矛盾；改动配置时以 `lua/config/*.lua` 与 `lazy-lock.json` 为权威来源。
 术语统一：`extras` 指 `lazyvim.plugins.extras.*` 的 `import`；`lazy-lock.json` 为 commit 级锁定；`checker` 指 `lazy.lua` 的更新检查。
@@ -166,5 +168,5 @@ Leader 为空格（LazyVim 默认），以下为本仓库在 LazyVim 默认之�
 ## 参见
 
 - [仓库结构与映射](layout.md) · [安装与验证](getting-started.md) · [维护流程](maintenance.md)
-- 应用后说明：[`private_dot_config/nvim/README.md`](../private_dot_config/nvim/README.md)
+- 子目录 README（仓库内，不部署）：[`private_dot_config/nvim/README.md`](../private_dot_config/nvim/README.md)
 - 上游文档：[LazyVim](https://www.lazyvim.org/) · [lazy.nvim](https://github.com/folke/lazy.nvim)

@@ -4,7 +4,7 @@
 
 本仓库是 chezmoi 的**源目录**（source directory，位于 `~/.local/share/chezmoi`），
 通过 `chezmoi apply` 将文件渲染到 `$HOME` 下对应位置。全部为静态文件——没有模板、
-没有脚本，所见即所得；通过 `.chezmoiignore` 将根级 `README.md` / `LICENSE`、`docs/`、
+没有脚本，所见即所得；通过 `.chezmoiignore` 将根级与嵌套的 `README.md` / `LICENSE`、`docs/`、`REPO-INSIGHT.md`、
 `*.local` / `*.bak` 等仅供仓库查阅或本地覆盖的文件排除在部署之外，避免污染目标 HOME 目录。
 
 ## ✨ 特性总览
@@ -19,7 +19,7 @@
 | 运行时管理 | mise | bun / deno / go / node / pnpm 一键切换 |
 | Git 工作流 | git + gh (CLI) | LFS、GitHub 走本地 SOCKS5 代理、`push.default=current` + `autoSetupRemote` |
 | SSH | OpenSSH `~/.ssh/config` | `ssh.github.com:443` + 自适应 `ProxyCommand`（探活 `127.0.0.1:5376` SOCKS5，失败直连）+ OrbStack `Include` |
-| AI Agent | pi coding agent | 默认 `zai-coding-cn` / `glm-5.2`（`xhigh`）；文件系统沙箱 + 禁网策略（`allowNetwork: false`）+ 允许优先的工具权限矩阵（敏感路径与高危命令 deny）；`workflows/settings.json` 控制进度面板并发/展示上限（8，`progressPanelMaxAgents`），子代理总数由 `landstrip.json` 限定（8，`maxSubagents`） |
+| AI Agent | pi coding agent | 默认 `zai-coding-cn` / `glm-5.2`（`xhigh`）；文件系统沙箱 + 禁网策略（`allowNetwork: false`）+ 允许优先的工具权限矩阵（敏感路径与高危命令 deny）；`workflows/settings.json` 控制进度面板并发/展示上限（8，`progressPanelMaxAgents`），`workflows/model-tiers.json` 定义三档模型分层（small/medium/big，与主模型不同代，用于成本分级），子代理总数由 `landstrip.json` 限定（8，`maxSubagents`） |
 
 ## 🚀 快速开始
 
@@ -65,21 +65,21 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 
 ```text
 ~/.local/share/chezmoi                    应用到 $HOME
-├── .chezmoiignore                     →  (不部署) 过滤根级 README.md / LICENSE / docs/ 与 *.local / *.bak / *token* 等，避免污染家目录
+├── .chezmoiignore                     →  (不部署) 过滤根级与嵌套 README.md / LICENSE、docs/、REPO-INSIGHT.md 与 *.local / *.bak / *token* 等，避免污染家目录
 ├── .gitignore                         →  (git 侧) 忽略 .vscode / .git / node_modules / .DS_Store 等
 ├── dot_zshrc                          →  ~/.zshrc                     Zsh 入口：Zim 引导 + 工具 eval + 模块加载
 ├── dot_zimrc                          →  ~/.zimrc                     Zim 模块清单
 ├── dot_gitconfig                      →  ~/.gitconfig                 用户信息 / 代理 / LFS / push 行为
 ├── dot_gitignore_global               →  ~/.gitignore_global          全局忽略规则
 ├── dot_codex/
-│   └── private_empty_config.toml      →  ~/.codex/empty_config.toml   Codex 占位配置（0600 空文件，保证目录存在）
+│   └── private_empty_config.toml      →  ~/.codex/config.toml         Codex 占位配置（0600 空文件，保证目录存在）
 ├── private_dot_config/
-│   ├── zsh/                           →  ~/.config/zsh/               ★ 三模块 zsh 配置（含独立 README）
+│   ├── zsh/                           →  ~/.config/zsh/               ★ 三模块 zsh 配置（含独立 README，不部署）
 │   │   ├── aliases.zsh                →  ~/.config/zsh/aliases.zsh
 │   │   ├── fzf.zsh                    →  ~/.config/zsh/fzf.zsh
 │   │   ├── sdk.zsh                    →  ~/.config/zsh/sdk.zsh
 │   │   ├── dot_gitignore              →  ~/.config/zsh/.gitignore
-│   │   └── README.md                  →  ~/.config/zsh/README.md
+│   │   └── README.md                  →  (不部署) 模块文档，由 **/README.md 排除
 │   ├── starship.toml                  →  ~/.config/starship.toml      Starship 提示符
 │   ├── ghostty/config                 →  ~/.config/ghostty/config     Ghostty 终端
 │   ├── alacritty/alacritty.toml       →  ~/.config/alacritty/alacritty.toml  Alacritty 备用
@@ -97,10 +97,12 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
     │   ├── sandbox.json               →  ~/.pi/agent/sandbox.json     文件系统与网络沙箱策略（`allowNetwork: false` 禁网、`allowLocalBinding: false`，域名白名单 3 项）
     │   ├── landstrip.json             →  ~/.pi/agent/landstrip.json   子代理总数上限 `maxSubagents: 8`（`toolFilesystemPolicy: sandbox`，任务权限 `review` allow 其余 deny）
     │   └── extensions/pi-permission-system/config.json → 细粒度工具权限矩阵（允许优先：默认 allow，敏感路径/高危命令 deny）
-    └── workflows/settings.json        →  ~/.pi/workflows/settings.json 工作流设置（progressPanelMaxAgents=8）
+    └── workflows/
+        ├── settings.json              →  ~/.pi/workflows/settings.json 工作流设置（defaultConcurrency=5 / progressPanelMaxAgents=8）
+        └── model-tiers.json           →  ~/.pi/workflows/model-tiers.json 三档模型分层（small=glm-5-turbo / medium=glm-5.1 / big=glm-5.3，与主模型 glm-5.2 不同代，用于成本分级）
 ```
 
-> 仅根级 `README.md` / `LICENSE` / `docs/` 由 `.chezmoiignore` 排除、不部署；子目录内的 `zsh/README.md`、`nvim/README.md`、`nvim/LICENSE` 仍会随 `apply` 部署（排除规则 `**/REAMDME.md` 为拼写笔误，未生效）。
+> 根级 `README.md` / `LICENSE` / `docs/` / `REPO-INSIGHT.md` 与全部嵌套 `README.md` / `LICENSE`（含 `zsh/README.md`、`nvim/README.md`、`nvim/LICENSE`）均由 `.chezmoiignore`（`**/README.md`、`**/LICENSE` 等按目标名书写的模式）排除、不部署；历史上的 `**/REAMDME.md` 拼写失配与 `dot_git`/`dot_DS_Store`/`dot_gitconfig` 源名失配已修复，`managed` 目标数 59→55。
 
 ## 📚 文档索引
 
@@ -121,7 +123,7 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 ## 🔒 安全与隐私
 
 - 敏感度较高的路径使用 `private_` 前缀收紧权限：目录 `0700`（如 `~/.ssh/`、
-  `~/.pi/agent/`、`~/.config/fish/`），文件 `0600`（如 `private_empty_` 前缀的 `~/.codex/empty_config.toml`）。
+  `~/.pi/agent/`、`~/.config/fish/`），文件 `0600`（如 `private_empty_` 前缀的 `~/.codex/config.toml`）。
 - `~/.config/gh/` 下的 `config.yml` 与 `hosts.yml` 均由 `gh auth login`
   在目标机器上生成，含凭据，不入仓库。
 - pi agent 的沙箱与权限策略显式拒绝读取 `*.env`、`~/.ssh/*`、`~/.aws/*` 等，
@@ -137,4 +139,4 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 
 ## License
 
-MIT - See the [LICENSE](LICENSE) file for details.
+Apache-2.0 - See the [LICENSE](LICENSE) file for details.

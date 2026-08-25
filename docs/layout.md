@@ -10,14 +10,14 @@
 | `dot_` | 目标名以 `.` 开头（隐藏目录/文件） | `dot_zshrc` → `~/.zshrc` |
 | `private_` | 目标仅所有者可访问：文件 0600、目录 0700 | `private_dot_ssh/config` → `~/.ssh/config` (0600) |
 | `symlink_` | 目标是符号链接，**文件内容即链接指向的路径** | `symlink_docker.fish` 内容为一行 OrbStack 路径 |
-| `empty_` | 目标为空文件（占位保证目录存在） | `private_empty_config.toml` → `~/.codex/empty_config.toml` |
+| `empty_` | 目标为空文件（占位保证目录存在） | `private_empty_config.toml` → `~/.codex/config.toml` |
 | （无前缀） | 原样同名复制 | `starship.toml` → `~/.config/starship.toml` |
 
 前缀可叠加，如 `private_dot_config` = 隐藏目录 + 该目录本身权限 0700，`private_dot_ssh` 同理。
 
 > 注：`private_` 前缀只作用于它直接修饰的那一级——目录得 0700、文件得 0600，目录内未再带前缀的子项保持默认 0644。
 > 实测（stat）：`~/.config`、`~/.config/fish`、`~/.pi`、`~/.pi/agent` 均为 0700，而其内部文件（`config.fish`、
-> `~/.pi/agent/*.json` 等）均为 0644；仅文件本身带前缀的 `~/.ssh/config` 与 `~/.codex/empty_config.toml` 为 0600。
+> `~/.pi/agent/*.json` 等）均为 0644；仅文件本身带前缀的 `~/.ssh/config` 与 `~/.codex/config.toml` 为 0600。
 
 ## 完整映射表
 
@@ -27,7 +27,7 @@
 | --- | --- | --- |
 | `dot_zshrc` | `~/.zshrc` | Zim 引导、PATH、工具 eval（zoxide/mise/starship/fzf/brew）、模块加载入口（aliases→fzf→sdk） |
 | `dot_zimrc` | `~/.zimrc` | Zim 模块清单（仅供 zimfw 读取，非 shell 启动时 source） |
-| `dot_gitconfig` | `~/.gitconfig` | 用户/代理（github.com 走 socks5://127.0.0.1:5376）/LFS/push 行为 — ⚠️ 当前被 `.chezmoiignore` 排除，不随 `chezmoi apply` 部署，仅作本地参考快照 |
+| `dot_gitconfig` | `~/.gitconfig` | 用户/代理（github.com 走 socks5://127.0.0.1:5376）/LFS/push 行为；`core.excludesfile = ~/.gitignore_global`（`~` 由 git 原生展开，无用户名硬编码）。旧版 `.chezmoiignore` 中按源名书写的 `dot_gitconfig` 行从不匹配任何目标、未生效，现该行已删除，本文件正常随 `apply` 部署 |
 | `dot_gitignore_global` | `~/.gitignore_global` | 全局忽略（.DS_Store、IDE、日志等） |
 
 ### SSH
@@ -44,7 +44,7 @@
 | `private_dot_config/zsh/fzf.zsh` | `~/.config/zsh/fzf.zsh` | fzf 前缀探测/缓存、全局选项、Ctrl-R/T/Alt-C 及 `frg`/`fkill`/`ftm`/`fl*` 函数 |
 | `private_dot_config/zsh/sdk.zsh` | `~/.config/zsh/sdk.zsh` | SDK 环境与补全（pnpm/SDKMAN(可选)/Android NDK/Python(uv)/Go/Rust/Docker/kubectl+kubecolor） |
 | `private_dot_config/zsh/dot_gitignore` | `~/.config/zsh/.gitignore` | 忽略运行时产物（`*.zwc`、`.fzf_prefix_cache`、`.DS_Store`） |
-| `private_dot_config/zsh/README.md` | `~/.config/zsh/README.md` | 模块内部文档（加载顺序契约、函数速查）；未被 `.chezmoiignore` 排除，会随 apply 部署 |
+| `private_dot_config/zsh/README.md` | —（不部署） | 模块内部文档（加载顺序契约、函数速查）；由 `**/README.md` 排除，仅仓库内查阅 |
 
 ### 终端与提示符
 
@@ -59,12 +59,12 @@
 | 源文件 | 目标路径 | 说明 |
 | --- | --- | --- |
 | `private_dot_config/nvim/**` | `~/.config/nvim/**` | LazyVim 配置（`init.lua` + `lua/config/*` + `lua/plugins/*`，含 `lazy-lock.json` 锁定 44 个插件、`lazyvim.json`（extras 清单当前为空）、`stylua.toml`） |
-| `private_dot_config/nvim/README.md` | `~/.config/nvim/README.md` | LazyVim 上游模板自带，随 `nvim/**` 部署（`.chezmoiignore` 的排除模式误写为 `**/REAMDME.md`，未生效） |
-| `private_dot_config/nvim/LICENSE` | `~/.config/nvim/LICENSE` | LazyVim 上游模板自带，随 `nvim/**` 部署 |
+| `private_dot_config/nvim/README.md` | —（不部署） | LazyVim 上游模板自带；由 `**/README.md` 排除，仅仓库内查阅（历史排除模式误写为 `**/REAMDME.md` 未生效，已修复） |
+| `private_dot_config/nvim/LICENSE` | —（不部署） | 上游 LazyVim starter 原件（Apache-2.0，与根 LICENSE 同哈希）；由 `**/LICENSE` 排除 |
 | `private_dot_config/nvim/dot_gitignore` | `~/.config/nvim/.gitignore` | 忽略插件数据等运行时目录 |
 | `private_dot_config/nvim/dot_neoconf.json` | `~/.config/nvim/.neoconf.json` | neoconf 本地配置 |
 | `private_dot_config/mise/config.toml` | `~/.config/mise/config.toml` | bun/deno/go/node/pnpm = latest |
-| `dot_codex/private_empty_config.toml` | `~/.codex/empty_config.toml` (0600) | 空占位文件，保证 `~/.codex/` 目录存在 |
+| `dot_codex/private_empty_config.toml` | `~/.codex/config.toml` (0600) | 空占位文件，保证 `~/.codex/` 目录存在 |
 
 > `~/.config/gh/config.yml` 与 `hosts.yml` 由 `gh auth login` 在目标机生成，含凭据，**不入库**（见下文“不在仓库内的重要文件”）。
 
@@ -104,14 +104,15 @@
 *.local
 *.local.*
 *.bak
-**/REAMDME.md
+**/README.md
 README.md
 LICENSE
+**/LICENSE
 docs/
 docs/**
-**/dot_git
-dot_gitconfig
-**/dot_DS_Store
+**/.git
+**/.DS_Store
+REPO-INSIGHT.md
 
 # 敏感信息
 *token*
@@ -124,14 +125,15 @@ node_modules/
 .pnpm-store/
 ```
 
-效果：`chezmoi diff` / `chezmoi apply` 自动跳过根级 `README.md`、`LICENSE`、`docs/**`、`dot_gitconfig`、
-任意 `dot_git`（`.git` 目录），以及匹配 `*.local`/`*.bak`/`*token*` 等敏感与构建产物模式的文件。
+效果（按目标名匹配）：`chezmoi diff` / `chezmoi apply` 自动跳过根级与任意嵌套的 `README.md`、
+`LICENSE`（含 `zsh/README.md`、`nvim/README.md`、`nvim/LICENSE`）、`docs/**`、`REPO-INSIGHT.md`、
+任意 `.git` / `.DS_Store`，以及匹配 `*.local` / `*.bak` / `*token*` 等敏感与构建产物模式的文件。
 
-⚠️ `**/REAMDME.md` 是拼写错误（REAMDME ≠ README），不匹配任何文件、**未生效**——因此嵌套的
-`~/.config/nvim/README.md`、`~/.config/zsh/README.md` 与 `~/.config/nvim/LICENSE` 并未被排除，
-会随 `apply` 部署到目标机（根级 `README.md`/`LICENSE` 模式只匹配源目录根，不匹配嵌套路径）。
-如需排除嵌套 README/LICENSE，应将其改为 `**/README.md` 并追加 `**/LICENSE`。
-详见 [getting-started.md](getting-started.md)。
+✅ 历史失配已修复（2026-08 收口）：旧版按**源名**书写了 `**/dot_git` / `**/dot_DS_Store` / `dot_gitconfig`
+（模式按目标名匹配，从不命中 `.git` / `.DS_Store` / `.gitconfig`，均未生效），且 `**/README.md`
+误拼为 `**/REAMDME.md`——现全部改写为目标名形式、删除无效行 `dot_gitconfig` 并追加 `**/LICENSE` 与
+`REPO-INSIGHT.md`。`dot_gitconfig` → `~/.gitconfig` 恢复其本来的正常部署语义；`chezmoi managed`
+目标数由 59 降至 55（不再包含嵌套 README×2、`nvim/LICENSE`、`~/REPO-INSIGHT.md`）。
 
 ## 仓库特性说明
 
@@ -140,7 +142,7 @@ node_modules/
   如需按机器差异化，再引入模板即可。
 - **运行时产物不入库**：`~/.config/zsh/.gitignore` 和 `~/.config/nvim/.gitignore`
   分别忽略 `*.zwc`、`.fzf_prefix_cache` 及插件数据目录。
-- **仅服务于仓库管理、不部署的文件**：根目录的 `.gitignore` 与 `.chezmoiignore` 被 chezmoi 默认忽略（源目录中点开头文件不参与 apply）；根级 `README.md`、`LICENSE`、`docs/`（本文档所在）被 `.chezmoiignore` 排除。
+- **仅服务于仓库管理、不部署的文件**：根目录的 `.gitignore` 与 `.chezmoiignore` 被 chezmoi 默认忽略（源目录中点开头文件不参与 apply）；根级 `README.md`、`LICENSE`、`docs/`（本文档所在）、`REPO-INSIGHT.md` 以及全部嵌套 `README.md` / `LICENSE`（如 `zsh/README.md`、`nvim/README.md`、`nvim/LICENSE`）被 `.chezmoiignore` 排除。
 - **不在仓库内的重要文件**：
   - `~/.config/gh/hosts.yml` / `config.yml`——由 `gh auth login` 生成，含凭据，切勿加入仓库；
   - `~/.zim/`——由 zimfw 自动管理（`dot_zimrc` 仅为其配置）；

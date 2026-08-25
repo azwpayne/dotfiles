@@ -154,14 +154,14 @@ rm -f ~/.fzf_prefix_cache && exec zsh
 
 ### .chezmoiignore 生效范围
 
-`.chezmoiignore`（仓库根）控制 `chezmoi add` / `apply` 时忽略的源文件模式，当前包括：
+`.chezmoiignore`（仓库根）控制 `chezmoi add` / `apply` 时忽略的**目标名**模式（模式按部署后的目标路径匹配，不是源文件名），当前包括：
 
-- 本地覆盖与备份：`*.local`、`*.local.*`、`*.bak`、`README.md`、`LICENSE`、`docs/`、`docs/**`、`**/dot_DS_Store`、`**/dot_git`
+- 本地覆盖与备份：`*.local`、`*.local.*`、`*.bak`、`README.md` + `**/README.md`（含嵌套 `zsh/README.md`、`nvim/README.md`）、`LICENSE` + `**/LICENSE`（含 `nvim/LICENSE`）、`docs/`、`docs/**`、`**/.git`、`**/.DS_Store`
+- 仓库文档：`REPO-INSIGHT.md`（仓库根洞察报告，不部署到 `$HOME`）
 - 敏感信息：`*token*`、`*secret*`、`*credential*`、`*client_secret*`
 - 构建产物：`node_modules/`、`.pnpm-store/`
-- 显式排除：`dot_gitconfig`（不部署 `~/.gitconfig`，保留本地手工维护）
 
-> 嵌套 `**/README.md` 曾拼写为 `**/REAMDME.md` 未生效，见 [layout.md](layout.md) 与 Scan 清单；根级 `README.md` / `LICENSE` 不受影响。
+> 历史修正（2026-08 收口）：旧版曾按源名书写 `**/dot_git` / `**/dot_DS_Store` / `dot_gitconfig`（均不匹配目标名 `.git` / `.DS_Store` / `.gitconfig`，从未生效），且 `**/README.md` 误拼为 `**/REAMDME.md`、缺 `**/LICENSE`——现已全部按目标名改写、删除无效行并补齐。因此 `dot_gitconfig` → `~/.gitconfig` 为**正常部署目标**（旧文档称其被排除、"仅作本地参考快照"系对无效行的误读）；修复后 `chezmoi managed` 目标数 59→55。详见 [layout.md](layout.md)。
 
 注意：`docs/` 被忽略意味着文档改动仅在仓库内维护，不会 `apply` 到 `$HOME`。新增文档请同步更新 [layout.md](layout.md) 的索引。
 
