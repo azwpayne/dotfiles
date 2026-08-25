@@ -8,18 +8,19 @@ Neovim 配置，目标 Neovim ≥ 0.9（本机验证版本 0.12）。
 ```
 nvim/
 ├── init.lua                  入口：仅 require("config.lazy")
-├── lazy-lock.json            46 个插件的 commit 级锁定（可复现环境）
+├── lazy-lock.json            44 个插件的 commit 级锁定（可复现环境）
 ├── lazyvim.json              LazyVim 元数据（extras 为空、news 已读至 11866、version 8）
 ├── stylua.toml               Lua 格式化规则（Spaces 2 宽 120 列）
 ├── dot_gitignore             忽略 tag/log/data 等
-├── dot_neoconf.json
+├── dot_neoconf.json          LSP 项目级设置（neoconf / lua_ls 配置）
+├── LICENSE                   LazyVim starter 自带的 MIT 许可证
 └── lua/
     ├── config/
     │   ├── lazy.lua          lazy.nvim bootstrap 与插件 spec（含 9 个 extras + plugins 导入）
     │   ├── options.lua       全局选项
     │   ├── keymaps.lua       自定义键位（在 LazyVim 默认之后加载，可直接覆盖）
     │   └── autocmds.lua      自动命令（VeryLazy 时加载）
-    └── plugins/example.lua   自定义插件 spec（往此目录加文件即生效，含示例配置）
+    └── plugins/example.lua   自定义插件 spec（往此目录加文件即生效，含已生效的示例配置）
 ```
 
 > 本文档聚焦 chezmoi 视角的配置说明；编辑器功能全貌与安装步骤见
@@ -63,10 +64,10 @@ mason + nvim-lspconfig + conform + nvim-lint 组合处理；首次打开对应�
 - `install.colorscheme = { "tokyonight", "habamax" }`。
 - `checker.enabled = true, notify = false`：后台静默检查更新，不弹通知。
 - `performance.rtp.disabled_plugins = { "tarPlugin", "tohtml", "tutor", "zipPlugin" }` 四项禁用来加速启动。
-- **复现**：换机器后首次启动按 `lazy-lock.json` 安装同版本插件（当前 46 条，见下）。
+- **复现**：换机器后首次启动按 `lazy-lock.json` 安装同版本插件（当前 44 条，见下）。
 - **升级**：`:Lazy update` 更新并同步 lock 文件；回滚用 `:Lazy restore`。
 
-### lazy-lock.json（46 个）
+### lazy-lock.json（44 个）
 
 当前锁定：`LazyVim`、`SchemaStore.nvim`、`blink.cmp`、`bufferline.nvim`、`catppuccin`、`cmake-tools.nvim`、
 `conform.nvim`、`crates.nvim`、`flash.nvim`、`friendly-snippets`、`fzf-lua`、`gitsigns.nvim`、
@@ -76,13 +77,16 @@ mason + nvim-lspconfig + conform + nvim-lint 组合处理；首次打开对应�
 `nvim-treesitter`、`nvim-treesitter-textobjects`、`nvim-ts-autotag`、`persistence.nvim`、
 `plenary.nvim`、`render-markdown.nvim`、`rustaceanvim`、`snacks.nvim`、`telescope.nvim`、
 `todo-comments.nvim`、`tokyonight.nvim`、`trouble.nvim`、`ts-comments.nvim`、
-`venv-selector.nvim`、`which-key.nvim` 共 46 个，均为 `branch: main/master` + commit 锁定。
+`venv-selector.nvim`、`which-key.nvim` 共 44 个，均为 `branch: main/master` + commit 锁定。
 
 ### stylua.toml / example.lua 补充
 
 - `stylua.toml`：`indent_type = "Spaces"`, `indent_width = 2`, `column_width = 120`。
-- `lua/plugins/example.lua` 为示例 spec，默认返回空 spec，仅演示如何覆盖 LazyVim、
-  配置 trouble、nvim-cmp、telescope、lspconfig、treesitter、lualine、mason 等。
+- `lua/plugins/example.lua` 中 starter 自带的空 spec 守卫（`if true then return {} end`）
+  当前处于注释状态，文件内的示例配置实际生效，包括：默认配色 `catppuccin`、trouble 的
+  `use_diagnostic_signs = true`、telescope 的 "Find Plugin File" 快捷键、nvim-cmp 追加
+  `cmp-emoji` source、lspconfig 强制 pyright、treesitter/mason `ensure_installed` 列表等。
+  如只想把它当模板用，应取消该守卫行的注释。
 
 ## 自定义键位速查（lua/config/keymaps.lua）
 
@@ -90,7 +94,7 @@ Leader 键为空格（LazyVim 默认），以下为叠加的自定义项（在 L
 
 | 键位 | 模式 | 动作 | 说明 |
 | --- | --- | --- | --- |
-| `<leader>u` | n | `UndotreeToggle` | 打开/关闭 Undotree |
+| `<leader>u` | n | `UndotreeToggle` | 打开/关闭 Undotree（见下方注意） |
 | `jk` | i | `<ESC>` | 替代 Esc 退出插入模式 |
 | `<leader><space>` | n | `<cmd>nohlsearch<CR>` | 清除搜索高亮 |
 | `<leader>sv` | n | `<C-w>v` | 垂直分屏 |
@@ -99,14 +103,18 @@ Leader 键为空格（LazyVim 默认），以下为叠加的自定义项（在 L
 | `<leader>f` | n | `vim.lsp.buf.format` | LSP 格式化当前文件 |
 | `<leader>rl` | n | `<cmd>set relativenumber!<CR>` | 切换相对行号 |
 
-其余键位沿用 LazyVim 默认（`<leader><space>` 面板、flash 跳转、neo-tree 等），
+注意：`<leader>u` 依赖 undotree 插件，但当前 `lazy-lock.json` 中并未锁定该插件，
+`lua/plugins/` 下也没有对应 spec，直接按下会报 `E492: Not an editor command`。
+如需使用，请在 `lua/plugins/` 下新增 `{ "mbbill/undotree" }`。
+
+其余键位沿用 LazyVim 默认（flash 跳转、neo-tree、snacks 面板等），
 可用 `<leader>` 停顿唤出 which-key 查看全部。
 
 ## 自动命令（lua/config/autocmds.lua）
 
 | 事件 | 分组 | 动作 |
 | --- | --- | --- |
-| `TextYankPost` | — | yank 后 300ms `IncSearch` 高亮反馈 |
+| `TextYankPost` | 无分组（可考虑加入 augroup 以便清理） | yank 后 300ms `IncSearch` 高亮反馈 |
 | `VimResized` | `ResizeWindows` | 窗口尺寸变化后 `tabdo wincmd =` 均分所有分屏 |
 | `InsertEnter` / `InsertLeave` | `HighlightCursorLine` | 仅普通模式高亮 `cursorline`（插入时关闭） |
 | `FileType python` | `FileTypeSettings` | 局部强制 `tabstop=4` `shiftwidth=4` `expandtab` |
