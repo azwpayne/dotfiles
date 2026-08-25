@@ -1,7 +1,7 @@
 {
   "tiers": {
     "small" : "zai-coding-cn/glm-5-turbo:minimal",
-    "medium": "zai-coding-cn/glm-5.1:medium",
-    "big"   : "zai-coding-cn/glm-5.2:max"
+    "medium": "zai-coding-cn/glm-5.2:medium",
+    "big"   : "zai-coding-cn/glm-5.2:xhigh"
   }
 }
