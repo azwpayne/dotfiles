@@ -1,0 +1,113 @@
+# Payne's Dotfiles
+
+基于 [chezmoi](https://www.chezmoi.io/) 管理的 macOS（Apple Silicon）个人开发环境配置。
+
+本仓库是 chezmoi 的**源目录**（source directory，位于 `~/.local/share/chezmoi`），
+通过 `chezmoi apply` 将文件渲染到 `$HOME` 下对应位置。全部为静态文件——没有模板、
+没有脚本、没有 `.chezmoiignore`，所见即所得。
+
+## ✨ 特性总览
+
+| 领域 | 方案 | 说明 |
+| --- | --- | --- |
+| Shell | Zsh + [Zim](https://zimfw.sh/) + 自有模块 | `aliases.zsh` / `fzf.zsh` / `sdk.zsh` 三模块化加载 |
+| 提示符 | [Starship](https://starship.rs/) | Catppuccin Mocha powerline 风格 |
+| 模糊搜索 | fzf + fzf-tab + fd | Ctrl-R 历史、Ctrl-T 文件、Alt-C 目录、`frg`/`fkill`/`ftm`/`fl*` 交互函数 |
+| 终端 | Ghostty（主力）/ Alacritty（备用） | JetBrainsMono Nerd Font Mono，Catppuccin / Dracula 配色 |
+| 编辑器 | Neovim + [LazyVim](https://www.lazyvim.org/) | 10 个语言 extras，插件版本由 `lazy-lock.json` 锁定 |
+| 运行时管理 | mise | bun / deno / go / node / pnpm 一键切换 |
+| Git 工作流 | git + gh (CLI) | LFS、GitHub 走本地 SOCKS5 代理、`push.default=current` |
+| AI Agent | pi coding agent | 沙箱化文件系统/网络策略 + 细粒度工具权限 |
+
+## 🚀 快速开始
+
+### 前置要求
+
+- macOS（Apple Silicon 优先；Intel 路径在 zsh/fzf 模块中有兼容分支）
+- [Homebrew](https://brew.sh/)
+- chezmoi ≥ 2.x：`brew install chezmoi`
+- 字体：[JetBrainsMono Nerd Font Mono](https://www.nerdfonts.com/)：
+  `brew install --cask font-jetbrains-mono-nerd-font`
+
+完整依赖清单见 [docs/getting-started.md](docs/getting-started.md)。
+
+### 新机器安装
+
+先把本仓库推送到你自己的 Git 远程，然后：
+
+```bash
+chezmoi init --apply <user>/<repo>   # 克隆源目录并立即应用
+exec zsh                             # 重启 shell
+```
+
+首次启动 Zsh 会自动下载 [zimfw](https://github.com/zimfw/zimfw) 并初始化模块；
+首次打开 Neovim 会自动 bootstrap lazy.nvim 并安装全部插件（需要网络）。
+
+### 本机重新应用
+
+源目录已就位时：
+
+```bash
+chezmoi diff     # 先预览将要发生的变更
+chezmoi apply    # 确认无误后应用
+```
+
+日常修改配置请走「编辑源 → diff → apply → commit」流程，
+详见 [docs/maintenance.md](docs/maintenance.md)。
+
+## 📁 仓库结构与目标映射
+
+chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private_` → 权限收紧为 `0600`，
+`symlink_` → 符号链接（文件内容即链接目标）。完整逐文件映射见
+[docs/layout.md](docs/layout.md)。
+
+```
+~/.local/share/chezmoi                    应用到 $HOME
+├── dot_zshrc                          →  ~/.zshrc                     Zsh 入口：Zim 引导 + 工具 eval + 模块加载
+├── dot_zimrc                          →  ~/.zimrc                     Zim 模块清单
+├── dot_gitconfig                      →  ~/.gitconfig                 用户信息 / 代理 / LFS / push 行为
+├── dot_gitignore_global               →  ~/.gitignore_global          全局忽略规则
+├── dot_codex/
+│   └── private_empty_config.toml      →  ~/.codex/empty_config.toml   Codex 占位配置（空文件）
+└── private_dot_config/
+    ├── zsh/                           →  ~/.config/zsh/               ★ 三模块 zsh 配置（含独立 README）
+    ├── starship.toml                  →  ~/.config/starship.toml      Starship 提示符
+    ├── ghostty/config                 →  ~/.config/ghostty/config     Ghostty 终端
+    ├── alacritty/alacritty.toml       →  ~/.config/alacritty/         Alacritty 终端
+    ├── mise/config.toml               →  ~/.config/mise/config.toml   mise 工具链
+    ├── gh/private_config.yml          →  ~/.config/gh/config.yml      GitHub CLI
+    ├── nvim/                          →  ~/.config/nvim/              LazyVim 配置
+    └── private_fish/                  →  ~/.config/fish/              Fish（仅 OrbStack 补全符号链接）
+private_dot_pi/private_agent/           →  ~/.pi/agent/                 pi coding agent 设置与沙箱策略
+```
+
+## 📚 文档索引
+
+| 文档 | 内容 |
+| --- | --- |
+| [docs/getting-started.md](docs/getting-started.md) | 安装步骤、必需/推荐/可选依赖、应用后验证清单 |
+| [docs/layout.md](docs/layout.md) | 全部源文件 → 目标路径映射、chezmoi 命名约定详解 |
+| [docs/shell.md](docs/shell.md) | Zsh 启动链路、Zim 模块、Starship 提示符、Fish 的角色 |
+| [docs/terminals.md](docs/terminals.md) | Ghostty 与 Alacritty 配置详解与键位表 |
+| [docs/neovim.md](docs/neovim.md) | LazyVim 结构、extras、键位、插件锁定与升级 |
+| [docs/dev-tools.md](docs/dev-tools.md) | git / gh / mise / codex / pi agent 配置说明 |
+| [docs/maintenance.md](docs/maintenance.md) | 日常维护流程、常用命令、验收清单、常见问题 |
+| [private_dot_config/zsh/README.md](private_dot_config/zsh/README.md) | zsh 三模块内部契约（加载顺序、依赖、函数速查） |
+| [private_dot_config/nvim/README.md](private_dot_config/nvim/README.md) | Neovim/LazyVim 使用说明 |
+
+## 🔒 安全与隐私
+
+- 敏感度较高的文件使用 `private_` 前缀，应用后权限为 `0600`
+  （如 `~/.config/gh/config.yml`、整个 `~/.pi/agent/`）。
+- `~/.config/gh/hosts.yml` 由 `gh auth login` 在目标机器上生成，凭据不进仓库；
+  仓库内只跟踪不含 token 的 `config.yml`。
+- pi agent 的沙箱与权限策略显式拒绝读取 `*.env`、`~/.ssh/*`、`~/.aws/*` 等，
+  并禁止 `sudo` / `rm` 类命令——细节见 [docs/dev-tools.md](docs/dev-tools.md)。
+- `dot_gitconfig` 中包含本地代理地址（`socks5://127.0.0.1:7890`，仅对 github.com 生效）
+  与个人身份信息，公开 fork 前请先脱敏。
+
+## 🧾 环境
+
+- 目标平台：macOS (Apple Silicon)，Homebrew 前缀 `/opt/homebrew`
+- 已验证版本（2026-08）：chezmoi v2.72 · zsh 5.9 · fzf 0.74.3 · starship 1.26 · Neovim 0.12
+- 维护者：[azwpayne](https://github.com/azwpayne)

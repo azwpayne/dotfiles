@@ -36,7 +36,7 @@ fi
 # export PATH="$PATH:$ANDROID_NDK_HOME"
 
 ########## Python ##########
-# Python 环境由 uv 管理；conda 已卸载，相关 init 已移除（见 git 历史 baseline）
+# Python 环境由 uv 管理；conda 已卸载，相关 init 已移除（见旧配置仓库历史）
 # 如需切换 PyPI 镜像可启用：
 # export UV_DEFAULT_INDEX="https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple"
 
@@ -79,4 +79,4 @@ if command -v kubectl &> /dev/null; then
 fi
 
 ########## 其他 ##########
-# libpq/pgcli 相关路径配置已移除（未使用）；需要时用 `git show baseline:sdk.zsh` 找回。
+# libpq/pgcli 相关路径配置已移除（未使用）；需要时回溯旧配置仓库历史（本仓库无 baseline 标签）。

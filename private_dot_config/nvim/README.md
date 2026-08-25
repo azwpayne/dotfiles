@@ -11,20 +11,27 @@ documentation throughout the codebase.
 
 ## Installation
 
+> This configuration lives in the chezmoi-managed dotfiles repository and is applied
+> to `~/.config/nvim/` by `chezmoi apply`. Manual steps below are only needed when
+> installing without chezmoi.
+
 1. **Backup existing config** (optional but recommended):
 
 ```bash
 mv ~/.config/nvim ~/.config/nvim.bak
 ```
 
-1. **Clone this repository**:
+2. **Install via chezmoi (recommended) or copy manually**:
 
 ```bash
-git clone https://github.com/user/lazyvim-config.git ~/.config/nvim
+chezmoi apply   # applies the whole dotfiles environment, including this config
+# manual alternative:
+# cp -R <dotfiles-repo>/private_dot_config/nvim ~/.config/nvim
 ```
 
-2. **Start Neovim**:
-   The first launch will automatically install plugins and set up the configuration.
+3. **Start Neovim**:
+   The first launch will bootstrap lazy.nvim and install all plugins pinned in
+   `lazy-lock.json` (network required).
 
 ## Features
 
@@ -69,11 +76,14 @@ This configuration now includes:
 
 ### Plugin Highlights
 
-- **nvim-cmp**: Autocompletion with emoji support
-- **trouble.nvim**: Diagnostic visualization
-- **mason.nvim**: LSP/DAP/package installer
-- **nvim-tree**: File explorer (if enabled)
+- **blink.cmp / nvim-cmp**: Autocompletion (emoji source enabled)
+- **trouble.nvim**: Diagnostic visualization (diagnostic signs enabled)
+- **mason.nvim**: LSP/DAP/package installer (pre-installs stylua, shellcheck,
+  shfmt, flake8)
+- **neo-tree**: File explorer
 - **gitsigns**: Git signs in the sign column
+- **flash.nvim / fzf-lua**: Navigation and fuzzy finding
+- **Format on save**: `*.lua`, `*.py`, `*.js` are formatted via LSP before write
 
 ### Customization
 
