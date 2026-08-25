@@ -2,14 +2,15 @@
 
 ## 日常修改流程
 
-本仓库是 chezmoi 的源目录——**永远编辑源文件，不要直接改 `$HOME` 下的目标文件**
-（否则下次 `apply` 会被覆盖，产生漂移）。
+本仓库是 chezmoi 的源目录——**永远编辑源文件，不要直接改 `$HOME` 下的目标文件**（否则下次 `apply` 会被覆盖，产生漂移）。
 
 ```bash
 # 1. 编辑源文件（chezmoi edit 会直接打开源目录中的对应文件）
 chezmoi edit ~/.zshrc
-# 或直接：$EDITOR ~/.local/share/chezmoi/dot_zshrc
-# 其他示例：chezmoi edit ~/.config/nvim/lua/config/options.lua
+# 或直接：
+$EDITOR ~/.local/share/chezmoi/dot_zshrc
+# 其他示例：
+chezmoi edit ~/.config/nvim/lua/config/options.lua
 
 # 2. 预览将要发生的变更（apply 前必看）
 chezmoi diff
@@ -21,38 +22,42 @@ chezmoi apply
 git -C ~/.local/share/chezmoi add -A && git -C ~/.local/share/chezmoi commit -m "..."
 ```
 
-> 小贴士：`chezmoi edit` 等价于用 `$EDITOR` 打开 `~/.local/share/chezmoi/` 下的对应 `dot_`/`private_` 源文件；
-> 直接编辑源文件亦可，效果相同。
+> 小贴士：`chezmoi edit` 等价于用 `$EDITOR` 打开 `~/.local/share/chezmoi/` 下的对应 `dot_` / `private_` 源文件；
+> 直接编辑源文件亦可，效果相同。详见 [layout.md](layout.md) 的命名约定。
 
 ## 常用命令
 
 | 命令 | 用途 |
 | --- | --- |
 | `chezmoi managed` | 列出所有被管理的目标文件 |
-| `chezmoi diff` | 源与目标的差异预览（apply 前必看） |
+| `chezmoi diff` | 源与目标的差异预览（`apply` 前必看） |
 | `chezmoi apply --dry-run` | 试运行，不实际写入 |
-| `chezmoi add <file>` | 把已有文件纳入管理（自动加 `dot_`/`private_` 前缀） |
+| `chezmoi add <file>` | 把已有文件纳入管理（自动加 `dot_` / `private_` 前缀） |
 | `chezmoi add --encrypt` / `--template` | 需要时再启用加密/模板 |
 | `chezmoi forget <file>` | 停止管理（源文件一并删除） |
 | `chezmoi doctor` | 环境体检 |
-| `chezmoi status` | 简要漂移概览 |
-| `zimfw update` | 更新 Zim 插件（zsh，见下方说明） |
-| `zimfw upgrade` | 升级 zimfw 自身（zsh） |
-| `zimfw init` | 重建 `${ZIM_HOME}/init.zsh`（改动 `~/.zimrc` 后需要） |
-| `auto_update` | 串行守卫调用（uv/sdk/rustup/tldr/brew），缺失工具自动跳过，可选触发 `onproxy`；定义于 `private_dot_config/zsh/aliases.zsh` |
-| `update-all [targets...]` | 关联数组驱动，支持参数选择目标（如 `update-all brew mise`）、带失败计数与耗时统计；覆盖 brew/sdk/rustup/tldr/uv/mise，定义于 `aliases.zsh` |
+| `chezmoi status` | 简要漂移概览（等价 `git status` 视角） |
+| `chezmoi ignored` | 查看被 `.chezmoiignore` 排除的文件 |
+| `zimfw update` | 更新 Zim 插件（`zsh`，改动 `dot_zimrc` 后按需执行） |
+| `zimfw upgrade` | 升级 `zimfw` 自身（`zsh`） |
+| `zimfw init` | 重建 `${ZIM_HOME}/init.zsh`（改动 `~/.zimrc` 后需要，`dot_zshrc` 会按 `-nt` 时间戳自动重建） |
+| `zimfw info` | 查看 `zimfw` 版本与模块信息 |
+| `auto_update` | 串行守卫调用（`uv` / `sdk` / `rustup` / `tldr` / `brew` 共 5 项），每步 `command -v` 守卫、缺失跳过，可选先执行 `onproxy`；定义于 `private_dot_config/zsh/aliases.zsh`，详见 [dev-tools.md](dev-tools.md) |
+| `update-all [targets...]` | 关联数组驱动的批量更新，支持参数选择目标（如 `update-all brew mise`）、带失败计数与耗时统计；覆盖 `brew` / `sdk` / `rustup` / `tldr` / `uv` / `mise` 共 6 项（**已覆盖 `mise`**，与 `auto_update` 的核心差异）；定义于 `aliases.zsh`，详见 [dev-tools.md](dev-tools.md) |
+
+> `auto_update` 与 `update-all` 均定义于 `private_dot_config/zsh/aliases.zsh`，前者为兼容旧习惯的固定顺序全量，后者为支持参数过滤与 `mise` 的新入口；`brew` 任务差异（是否含 `brew cu -y -a`）见 [dev-tools.md](dev-tools.md) 对比表。
 
 ## 验收清单
 
-改动不同组件后至少跑过对应检查（覆盖 zsh / zim / starship / ghostty / alacritty / nvim / fish / mise / git / chezmoi）：
+改动不同组件后至少跑过对应检查（覆盖 `zsh` / `zim` / `starship` / `ghostty` / `alacritty` / `nvim` / `fish` / `mise` / `git` / `chezmoi`）：
 
 ```bash
 # zsh 模块（语法 + 干净启动 + 关键定义）
 zsh -n ~/.config/zsh/{aliases,fzf,sdk}.zsh  # 覆盖 aliases.zsh 中的 auto_update / update-all（含关联数组、耗时统计）语法
 zsh -n ~/.zshrc
 zsh -ic 'exit'                              # 干净启动无报错
-zsh -ic 'type ls df du; echo $EDITOR'       # 关键别名/变量
-zsh -ic 'type auto_update update-all'       # 验证更新函数已加载（update-all 支持参数过滤）
+zsh -ic 'type ls df du; echo $EDITOR'       # 关键别名/变量（EDITOR=nvim）
+zsh -ic 'type auto_update update-all'       # 验证更新函数已加载（update-all 支持参数过滤、失败计数与耗时统计）
 # 注意：短别名 k 定义在 sdk.zsh 且仅当 kubectl 可用时才存在，无 kubectl 的机器上属预期缺失
 
 # Zim 插件管理器（改动 ~/.zimrc 后；重启 shell 时 dot_zshrc 会按 -nt 时间戳自动重建 init.zsh）
@@ -72,17 +77,20 @@ ghostty +show-config
 nvim --headless +qa
 nvim --headless -c "lua require('config.lazy')" -c "qa"  # 可选：校验 lazy spec
 
-# git 配置合法（未知键不会报错，但可确认解析）
+# git 配置合法（未知键不会报错，但可确认解析；proxy 与 SSH 统一为 5376）
 git config --list --show-origin | head
 git config --get core.editor
 git config --get safe.directory
 git config --get-regexp proxy               # 应为 socks5://127.0.0.1:5376（与 SSH ProxyCommand 5376 统一）
+# 或校验源文件：
+git config --file ~/.local/share/chezmoi/dot_gitconfig --get-regexp proxy
 
 # fish 配置语法检查
 fish -n ~/.config/fish/config.fish
 
 # mise 环境体检
 mise doctor
+mise ls                                     # 应列出 bun/deno/go/node/pnpm（均为 latest）
 
 # alacritty 配置解析（或直接启动 alacritty 验证）
 alacritty --print-config | head
@@ -91,36 +99,50 @@ alacritty --print-config | head
 chezmoi doctor && chezmoi diff
 ```
 
-提交约定：小步提交、说明动机；涉及行为变化的改动在 commit body 里写明验证命令与结果。
+提交约定：小步提交、说明动机；涉及行为变化的改动在 `commit body` 里写明验证命令与结果。
+更多工具链细节见 [dev-tools.md](dev-tools.md)，完整映射见 [layout.md](layout.md)。
 
 ## 常见问题（FAQ）
 
 ### fzf 找不到 / 快捷键失效
 
-fzf 安装前缀缓存放在 `$ZDOTDIR/.fzf_prefix_cache`（未设置 `ZDOTDIR` 时即
-`~/.fzf_prefix_cache`）。升级/卸载/换机器后若失效，模块会自愈删除并重新探测；
-也可手动删除该缓存文件强制重建。
-详见 `private_dot_config/zsh/fzf.zsh` 的探测逻辑。
+`fzf` 安装前缀缓存放在 `$ZDOTDIR/.fzf_prefix_cache`（未设置 `ZDOTDIR` 时即 `~/.fzf_prefix_cache`）。升级/卸载/换机器后若失效，模块会自愈删除并重新探测；
+也可手动删除该缓存文件强制重建：
 
-### 换了代理端口/地址
+```bash
+rm -f ~/.fzf_prefix_cache && exec zsh
+```
 
-`dot_gitconfig` 中三处引用 `socks5://127.0.0.1:5376`
-（`http "https://github.com"`、`https "https://github.com"`、`ssh "ssh.github.com"`），已与 `private_dot_ssh/config` 的 `ProxyCommand` 探测端口 `5376` 统一（`nc -z 127.0.0.1 5376`），全局替换即可。
-早年注释掉的 `[http]`/`[https]` 全局代理段已清理，无需再提旧注释。
+详见 `private_dot_config/zsh/fzf.zsh` 的探测逻辑与 [shell.md](shell.md)。
+
+### 换了代理端口 / 地址
+
+`dot_gitconfig` 中三处引用 `socks5://127.0.0.1:5376`（`http "https://github.com"` / `https "https://github.com"` / `ssh "ssh.github.com"`），已与 `private_dot_ssh/config` 的 `ProxyCommand` 探测端口 `5376` 统一（`nc -z 127.0.0.1 5376`），全局替换即可。
+早年注释掉的 `[http]` / `[https]` 全局代理段已清理，无需再处理旧注释。详见 [dev-tools.md](dev-tools.md) 与 [getting-started.md](getting-started.md)。
 
 ### auto_update 与 update-all 的区别
 
-- `auto_update`：串行守卫调用，依次执行 `uv_update` / `sdk_update` / `rustup_update` / `tldr_update` / `brew_update`，每步前 `command -v <tool> &>/dev/null` 守卫、缺失自动跳过，可选先执行 `onproxy`；无参数、无失败计数。
-- `update-all`：关联数组驱动（`local -A tasks` 定义 brew/sdk/rustup/tldr/uv/mise），支持参数选择目标（如 `update-all brew mise`），未知目标直接报错并提示可用列表；循环内同样守卫 `command -v`，`eval` 失败则 `failed++`，最后统计耗时（`mins`/`secs`）并按失败数区分成功/警告提示。两者均定义于 `private_dot_config/zsh/aliases.zsh`，`zsh -n` 已覆盖其语法校验。
+| 维度 | `auto_update` | `update-all` |
+| --- | --- | --- |
+| 定义位置 | `aliases.zsh:42` | `aliases.zsh:196` |
+| 覆盖目标 | 5 项：`uv` / `sdk` / `rustup` / `tldr` / `brew`（不含 `mise`） | 6 项：`brew` / `sdk` / `rustup` / `tldr` / `uv` / `mise`（含 `mise upgrade`） |
+| 参数 | 无参数，固定顺序全量 | 支持 `update-all brew mise` 参数过滤，未传参则全量；未知目标报错并提示可用列表 |
+| 守卫与容错 | 每步 `command -v <tool> &>/dev/null &&` 守卫，缺失跳过 | 循环内 `command -v $name` 守卫 + `eval` 失败则 `failed++` |
+| 统计与输出 | 无失败计数、无耗时统计 | 失败计数 `failed`、耗时 `mins` / `secs`、`print -P` 彩色输出（蓝标题/绿成功/黄跳过/红失败） |
+| `brew` 差异 | `brew_update` 别名：`brew update && brew upgrade --greedy-latest && brew cleanup --prune=all` | `brew update -f && brew upgrade -f --greedy-latest -y && brew cu -y -a && brew cleanup --prune=all`（含 `brew cu`，更激进） |
+| 适用场景 | 兼容旧习惯的一键全量 | 需 `mise`、需单目标更新、需查看耗时与失败统计 |
+
+两者均定义于 `private_dot_config/zsh/aliases.zsh`，`zsh -n` 已覆盖其语法校验。详见 [dev-tools.md](dev-tools.md) 与 `aliases.zsh` 源码。
+前者可选先执行 `onproxy`（若定义），后者逐项守卫、失败计数与耗时统计更完备。
 
 ### Go / Python 路径强绑定个人环境
 
-- `GOPATH=~/WorkSpaces/project/go`、`GOPROXY=goproxy.cn`（`private_dot_config/zsh/sdk.zsh`）
-- pip 清华镜像别名（`private_dot_config/zsh/aliases.zsh`）、uv 镜像开关注释（`sdk.zsh`）
+- `GOPATH=~/WorkSpaces/project/go`、`GOPROXY=https://goproxy.cn,direct`（`private_dot_config/zsh/sdk.zsh`）
+- `pip` 清华镜像别名（`private_dot_config/zsh/aliases.zsh` 的 `pip_tsinghua_mirror`）、`uv` 镜像开关注释（`sdk.zsh`）
 
-新机器路径不一致时按需调整源文件后 `chezmoi diff` → `apply`。
+新机器路径不一致时按需调整源文件后 `chezmoi diff` → `apply`。详见 [shell.md](shell.md) 与 `sdk.zsh` 注释。
 
-### `$HOME` 与仓库出现漂移（diff 有输出）
+### `$HOME` 与仓库出现漂移（`diff` 有输出）
 
 说明目标文件在应用后被直接改过（例如工具自动写回配置）。两种处理：
 
@@ -128,27 +150,33 @@ fzf 安装前缀缓存放在 `$ZDOTDIR/.fzf_prefix_cache`（未设置 `ZDOTDIR` 
 2. 是临时产物 → 直接 `chezmoi apply` 覆盖回去。
 
 **不要**让漂移长期存在，否则无法分清哪边是权威版本。
-可用 `chezmoi status` 快速查看漂移文件列表。
+可用 `chezmoi status` / `chezmoi diff` 快速查看漂移文件列表。
 
 ### .chezmoiignore 生效范围
 
-`.chezmoiignore`（仓库根）控制 `chezmoi add`/`apply` 时忽略的源文件模式，当前包括：
+`.chezmoiignore`（仓库根）控制 `chezmoi add` / `apply` 时忽略的源文件模式，当前包括：
 
-- 本地覆盖与备份：`*.local`、`*.local.*`、`*.bak`、`README.md`、`LICENSE`、`docs/`、`docs/**`、`**/REAMDME.md`（含拼写保留）、`dot_gitconfig`、`**/dot_DS_Store`、`**/dot_git`
+- 本地覆盖与备份：`*.local`、`*.local.*`、`*.bak`、`README.md`、`LICENSE`、`docs/`、`docs/**`、`**/dot_DS_Store`、`**/dot_git`
 - 敏感信息：`*token*`、`*secret*`、`*credential*`、`*client_secret*`
 - 构建产物：`node_modules/`、`.pnpm-store/`
+- 显式排除：`dot_gitconfig`（不部署 `~/.gitconfig`，保留本地手工维护）
 
-注意：`docs/` 被忽略意味着文档改动仅在仓库内维护，不会 `apply` 到 `$HOME`。
+> 嵌套 `**/README.md` 曾拼写为 `**/REAMDME.md` 未生效，见 [layout.md](layout.md) 与 Scan 清单；根级 `README.md` / `LICENSE` 不受影响。
+
+注意：`docs/` 被忽略意味着文档改动仅在仓库内维护，不会 `apply` 到 `$HOME`。新增文档请同步更新 [layout.md](layout.md) 的索引。
 
 ### 关于历史上的 `baseline` 标签
 
-部分旧注释提到用 `git show baseline:...` 找回已删除的配置（conda、wezterm 别名等）。
+部分旧注释提到用 `git show baseline:...` 找回已删除的配置（`conda`、wezterm 别名等）。
 本仓库自 `init` 提交起从未打过 `baseline` 标签（`git tag` 为空），旧内容来自更早的独立
-zsh-config 仓库；如确需找回请去旧仓库翻历史。不要在本仓库中创建同名标签造成混淆。
+`zsh-config` 仓库；如确需找回请去旧仓库翻历史。不要在本仓库中创建同名标签造成混淆。
 
 ### 新增文件的命名提醒
 
 `chezmoi add` 会自动推断前缀；手工放文件进源目录时要记得：
-隐藏文件加 `dot_`、要收紧权限的加 `private_`、符号链接用 `symlink_`（内容写目标路径）、
-可执行文件加 `executable_`。详见 [layout.md](layout.md)。
-模板文件追加 `.tmpl` 后缀。
+
+- 隐藏文件加 `dot_`、要收紧权限的加 `private_`、符号链接用 `symlink_`（内容写目标路径）、可执行文件加 `executable_`
+- 模板文件追加 `.tmpl` 后缀
+
+详见 [layout.md](layout.md)。新增配置请同步更新 [layout.md](layout.md) 的映射表与 [getting-started.md](getting-started.md) 的验证清单。
+

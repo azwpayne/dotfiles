@@ -26,7 +26,7 @@
 | --- | --- | --- |
 | `dot_zshrc` | `~/.zshrc` | Zim 引导、PATH、工具 eval（zoxide/mise/starship/fzf/brew）、模块加载入口（aliases→fzf→sdk） |
 | `dot_zimrc` | `~/.zimrc` | Zim 模块清单（仅供 zimfw 读取，非 shell 启动时 source） |
-| `dot_gitconfig` | `~/.gitconfig` | 用户/代理（github.com 走 socks5://127.0.0.1:5376）/LFS/push 行为 |
+| `dot_gitconfig` | `~/.gitconfig` | 用户/代理（github.com 走 socks5://127.0.0.1:5376）/LFS/push 行为 — ⚠️ 当前被 `.chezmoiignore` 排除，不随 `chezmoi apply` 部署，仅作本地参考快照 |
 | `dot_gitignore_global` | `~/.gitignore_global` | 全局忽略（.DS_Store、IDE、日志等） |
 
 ### SSH
@@ -88,24 +88,42 @@
 | `private_dot_pi/private_agent/sandbox.json` | `~/.pi/agent/sandbox.json` (0600) | 文件系统与网络沙箱策略（`denyRead` 含 `/Users` `/etc` 等、`denyWrite` 含 `**/.env` `~/.ssh` 等、`allowNetwork: true`、`allowLocalBinding: false`、`allowedDomains: *.githubusercontent.com`/`*.github.com`/`github.com`） |
 | `private_dot_pi/private_agent/landstrip.json` | `~/.pi/agent/landstrip.json` (0600) | 子代理上限 `maxSubagents: 8`（`toolFilesystemPolicy: sandbox`，任务权限 `*` deny、`review` allow） |
 | `private_dot_pi/private_agent/extensions/pi-permission-system/config.json` | `~/.pi/agent/extensions/pi-permission-system/config.json` (0600) | 工具级权限矩阵（`read/write/edit/bash/path` 细粒度 allow/deny/ask，禁 `sudo`/`rm`/`mv` 等） |
-| `private_dot_pi/workflows/settings.json` | `~/.pi/workflows/settings.json` (0600) | workflow 运行时配置（`progressPanelMaxAgents: 8`） |
+| `private_dot_pi/workflows/settings.json` | `~/.pi/workflows/settings.json` (0600) | workflow 运行时配置：进度面板并发上限 `progressPanelMaxAgents: 8`，与 `landstrip.json` 的 `maxSubagents: 8` 职责分离 |
 
 ## .chezmoiignore —— 源目录有、目标没有的唯一例外
 
 本仓库**唯一**的非静态机制是根目录的 `.chezmoiignore`。它本身**不会**被 `chezmoi apply` 到 `$HOME`
 （chezmoi 始终忽略点文件中的该文件名），作用是在源目录中**排除**部分文件不参与渲染：
 
-```
-README.md / LICENSE / docs/** / *.local / *.local.* / *.bak
-**/dot_git / dot_gitconfig / **/dot_DS_Store
-*token* / *secret* / *credential* / *client_secret*
-node_modules/ / .pnpm-store/
+```gitignore
+# 本地覆盖与备份
+*.local
+*.local.*
+*.bak
+**/REAMDME.md        # ← 拼写错误，预期 **/README.md，未生效
+README.md            # 仅根目录
+LICENSE              # 仅根目录
+docs/
+docs/**
+**/dot_git
+dot_gitconfig
+**/dot_DS_Store
+
+# 敏感信息
+*token*
+*secret*
+*credential*
+*client_secret*
+
+# 构建产物
+node_modules/
+.pnpm-store/
 ```
 
 效果：`chezmoi diff` / `chezmoi apply` 会自动跳过文档、本地覆盖、敏感文件名匹配与构建产物。
-注意：根级模式 `README.md` / `LICENSE` 只匹配根目录本身，不匹配嵌套路径——因此
-`~/.config/nvim/README.md` 与 `~/.config/nvim/LICENSE` 目前仍会随 `nvim/**` 部署到目标机；
-本应用于排除嵌套 README 的规则在文件中拼写为 `**/REAMDME.md`（typo），暂未生效。详见 [getting-started.md](getting-started.md)。
+注意：根级模式 `README.md` / `LICENSE` 仅匹配源目录根，不匹配嵌套路径——因此
+`~/.config/nvim/README.md` 与 `~/.config/nvim/LICENSE` 仍会随 `nvim/**` 部署到目标机；
+本应用于排除嵌套 README/LICENSE 的规则在文件中误写为 `**/REAMDME.md`（typo，正确应为 `**/README.md` 且需追加 `**/LICENSE`），暂未生效。详见 [getting-started.md](getting-started.md)。
 
 ## 仓库特性说明
 

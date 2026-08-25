@@ -8,18 +8,18 @@
 
 | 文件 | 职责 | 主要内容 |
 | --- | --- | --- |
-| `aliases.zsh` | 通用别名与函数 | 目录跳转（dl/dt/doc/wp）、系统信息（ff/fastfetch、时间戳）、进程资源（htop/df/du）、基础命令增强（lsd/bat/rm -i）、包管理更新（brew_update/sdk_update/.../auto_update/update-all；`auto_update` 为守卫式串行（`onproxy`→`uv`/`sdk`/`rustup`/`tldr`/`brew`），`update-all` 为关联数组+参数过滤、失败计数与耗时统计，支持 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise` 六目标）、K8s 别名、编辑器/AI 助手别名、`ruff_auto`/`y`/`jdx`/`scr` 等函数 |
+| `aliases.zsh` | 通用别名与函数 | 目录跳转（dl/dt/doc/wp）、系统信息（ff/fastfetch、时间戳）、进程资源（htop/df/du）、基础命令增强（lsd/bat/rm -i）、包管理更新（brew_update/sdk_update/.../auto_update/update-all；`auto_update` 为守卫式串行（`onproxy`→`uv`/`sdk`/`rustup`/`tldr`/`brew` 5 目标），`update-all` 为关联数组+参数过滤、失败计数与耗时统计，支持 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise` 6 目标）、K8s 别名、编辑器/AI 助手别名、`ruff_auto`/`y`/`jdx`/`scr` 等函数 |
 | `fzf.zsh` | fzf 与 fzf-tab 配置 | 前缀探测与缓存、全局选项（FZF_DEFAULT_OPTS / CTRL_R/T/C_OPTS）、交互式函数 `frg` `fkill` `find_large_files` `ftm` `flf` `flkill` `flnet` `fluser`、fzf-tab zstyle |
-| `sdk.zsh` | SDK 环境与补全 | pnpm 补全、SDKMAN（可选）、Android NDK、Go/Rust 环境、Docker/Kubectl 补全、kubecolor 包装与短别名 `k` |
+| `sdk.zsh` | SDK 环境与补全 | pnpm 补全、SDKMAN（单次加载）、Android NDK、Go/Rust 环境、Docker/Kubectl 补全、kubecolor 包装与短别名 `k` |
 
 ### 加载顺序契约（重要）
 
 `~/.zshrc` 按 **compinit（Zim 框架）→ aliases.zsh → fzf.zsh → sdk.zsh** 的顺序 source 本仓库文件：
 
-```
+```zsh
 source ${ZIM_HOME}/init.zsh          # compinit 在此完成
 for file in ~/.config/zsh/aliases.zsh ~/.config/zsh/fzf.zsh; do source "$file"; done
-source ~/.config/zsh/sdk.zsh         # 无条件加载（注释称"可选"与实际不符，以代码为准）
+source ~/.config/zsh/sdk.zsh         # 无条件加载（注释称“可选/需取消注释”与实际不符，以代码为准）
 ```
 
 > ⚠️ **顺序即语义**：同名定义后加载者生效。典型例子是短别名 `k`：
@@ -40,7 +40,7 @@ export VISUAL='nvim'
 
 `fzf.zsh` 的 `FZF_DEFAULT_OPTS` 中 `ctrl-o:execute($EDITOR {} &> /dev/tty)` 在 source 时展开 `$EDITOR`。因此：
 
-- `aliases.zsh` 必须先于 `fzf.zsh` 加载；
+- `aliases.zsh` **必须**先于 `fzf.zsh` 加载（MUST before）；
 - 不要把 `export EDITOR=...` 改回 `alias EDITOR=...`（alias 不会被子进程/预览绑定读到）；
 - `dot_zshrc` 顶部另有被注释的 `[[ -n $SSH_CONNECTION ]] && export EDITOR='vi' || export EDITOR='nvim'`，当前未生效，以 `aliases.zsh` 为准。
 
@@ -49,6 +49,8 @@ export VISUAL='nvim'
 首次启动探测 fzf 安装前缀（Apple Silicon Homebrew → Intel Homebrew → `~/.fzf` → `/usr`），
 结果写入 `~/.fzf_prefix_cache`（已被 `.gitignore` 忽略）。缓存仅在
 `$FZF_PREFIX/bin/fzf` 可执行时被信任，否则自动删除并重新探测——换机器/卸载重装无需手工清理。
+探测顺序与 `fzf.zsh` 一致：`/opt/homebrew/opt/fzf` → `/usr/local/opt/fzf` → `~/.fzf` → `/usr`，
+缓存文件位于 `$HOME` 下（`~/.fzf_prefix_cache`），不入仓库。
 
 ### 内联注释的兼容性
 
@@ -59,8 +61,8 @@ export VISUAL='nvim'
 
 | 函数 | 所在文件 | 用途 | 关键实现 |
 | --- | --- | --- | --- |
-| `auto_update` | aliases.zsh | 全量更新各包管理器（逐个 `command -v` 守卫，未安装即跳过；若存在 `onproxy` 函数则先切代理） | `uv_update` / `sdk_update` / `rust_update` / `tldr_update` / `brew_update` |
-| `update-all` | aliases.zsh | 选择性批量更新（默认全部，参数过滤） | `tasks` 关联数组（`brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise`）+ `targets` 过滤 + `command -v` 守卫 + 失败/耗时统计 + 彩色输出 |
+| `auto_update` | aliases.zsh | 传统守卫式串行全量更新（逐个 `command -v` 守卫，未安装即跳过；若存在 `onproxy` 函数则先切代理） | `uv_update` / `sdk_update` / `rust_update` / `tldr_update` / `brew_update`（5 目标，无 mise） |
+| `update-all [targets...]` | aliases.zsh | 声明式批量更新（默认全部，支持参数过滤如 `update-all brew uv`） | `local -A tasks=(brew … sdk … rustup … tldr … uv … mise …)` 6 项；`targets=(${(k)tasks})` 全量或过滤；`command -v $name` 守卫（未安装黄色 `⚠️ not found` 跳过）；`eval "${tasks[$name]}" \|\| ((failed++))` 失败计数；`print -P %F{blue/green/red/yellow}` 彩色输出；`start_time/duration` 统计耗时 `${mins}m${secs}s`；未知参数提示 `Available: …` 并返回 1 |
 | `ruff_auto [dir]` | aliases.zsh | ruff 自动修复 lint 并格式化（默认当前目录） | `ruff check --fix --exit-zero && ruff format` |
 | `y [args]` | aliases.zsh | yazi 包装：退出后 cd 到最后浏览的目录 | `yazi --cwd-file` + `mktemp` |
 | `jdx [args]` / `scr [args]` | aliases.zsh | 后台启动 jadx-gui / scrcpy | `nohup ... &` |
@@ -73,6 +75,8 @@ export VISUAL='nvim'
 | `flnet` | fzf.zsh | 仅显示 TCP/UDP 网络连接 | `lsof -i \| fzf` |
 | `fluser [user]` | fzf.zsh | 按用户过滤打开文件（默认 `$USER`） | `lsof -u "$user" \| fzf` |
 
+> `auto_update` 为守卫式串行（逐项 `command -v` 判断），`update-all` 为关联数组驱动（声明式、可过滤、可统计），二者分工对比见 `docs/shell.md`；日常推荐 `update-all`。
+
 破坏性命令不在此表：`uv_resync`（`rm -rf .venv uv.lock && uv sync`）见注意事项。
 
 ## 依赖清单
@@ -81,7 +85,7 @@ export VISUAL='nvim'
 
 | 变量 | 定义位置 | 说明 |
 | --- | --- | --- |
-| `LANG` | `dot_zshrc` | 当前为 `# export LANG=en_US.UTF-8` 注释状态，未生效；取消注释即固定为 `en_US.UTF-8` |
+| `LANG` | `dot_zshrc:6` | `export LANG=en_US.UTF-8` 已生效，统一固定为 `en_US.UTF-8`，与 Ghostty `LANG=zh_CN.UTF-8` 互补（终端侧中文、shell 侧英文，避免远端/脚本 locale 回退） |
 | `EDITOR` / `VISUAL` | `aliases.zsh` | 均为 `nvim`，环境变量（非 alias），供 git/crontab/fzf Ctrl-O 等读取 |
 | `GOPROXY` / `GOPATH` / `GOBIN` | `sdk.zsh` | `GOPROXY=https://goproxy.cn,direct`、`GOPATH=~/WorkSpaces/project/go`、`GOBIN=$GOPATH/bin`（`GOBIN` 存在时才加入 PATH） |
 | `ANDROID_NDK_HOME` | `sdk.zsh` | `/opt/homebrew/share/android-ndk`（目录存在时才导出） |
@@ -96,11 +100,11 @@ export VISUAL='nvim'
 
 ### 有守卫的可选组件（未安装时静默跳过）
 
-`pnpm`（tabtab 补全）、SDKMAN（`~/.sdkman/bin/sdkman-init.sh`）、`docker`（`docker completion zsh`）、`kubectl`+`kubecolor`（补全 + 函数包装 + `k` 别名）、`~/.cargo/env`（rustup）、`onproxy` 函数（仓库外定义，若存在则 `auto_update` 前自动切代理；`update-all` 同样对 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise` 逐项 `command -v` 守卫，未安装时黄色提示跳过）
+`pnpm`（tabtab 补全）、SDKMAN（`~/.sdkman/bin/sdkman-init.sh` 单次加载）、`docker`（`docker completion zsh`）、`kubectl`+`kubecolor`（补全 + 函数包装 + `k` 别名）、`~/.cargo/env`（rustup）、`onproxy` 函数（仓库外定义，若存在则 `auto_update` 前自动切代理）。`update-all` 对 6 目标 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise` 逐项 `command -v` 守卫，未安装时黄色 `⚠️ not found` 提示跳过；未知目标红色 `❌ Unknown target` 并列出 `Available: …`。
 
 ### 运行时工具（对应别名/函数调用时才需要）
 
-`fd`（缺省回退 `rg`）、`bat`、`lsd`、`nvim`、`code`、`htop`、`fastfetch`、`tmux`、
+`fd`（主力，缺省回退 `rg`）、`bat`、`lsd`、`nvim`、`code`、`htop`、`fastfetch`、`tmux`、
 `yazi`、`gh`、`lazygit`、`claude`、`opencode`、`ruff`、`uv`、`rustup`、`tldr`、`mise`、
 `nproc`（coreutils）、`jadx-gui`、`scrcpy`。
 另：`java` 仅在 SDKMAN 存在时经 `sdk_update` 间接使用，本仓库无直接引用。

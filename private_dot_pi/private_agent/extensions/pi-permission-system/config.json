@@ -18,6 +18,9 @@
         "edit": {"*": "allow", "*.env": "deny", "*.env.*": "deny", "~/.ssh/*": "deny", "~/.aws/*": "deny"},
         "bash": {
             "*"           : "ask",
+            "chezmoi *"   : "allow",
+            "xargs *"     : "allow",
+            "which *"     : "allow",
             "tail *"      : "allow",
             "sleep *"     : "allow",
             "ps *"        : "allow",

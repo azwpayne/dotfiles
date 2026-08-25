@@ -93,7 +93,7 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 │   └── config                         →  ~/.ssh/config                ★ GitHub 走 ssh.github.com:443 + 自适应 SOCKS5 ProxyCommand（含 OrbStack Include，0600）
 └── private_dot_pi/
     ├── private_agent/                 →  ~/.pi/agent/                 pi coding agent 主配置（0600）
-    │   ├── settings.json              →  ~/.pi/agent/settings.json     主题 `dark` / 包列表 7 个 npm 包 / `hideThinkingBlock: false` / `defaultProvider: opencode` / `defaultModel: muse-spark-1.2-contributor-free` / `thinkingLevel: xhigh`（`lastChangelogVersion: 0.84.3`）
+    │   ├── settings.json              →  ~/.pi/agent/settings.json     主题 `dark` / 包列表 7 个 npm 包 / `hideThinkingBlock: false` / `defaultProvider: opencode` / `defaultModel: muse-spark-1.2-contributor-free` / `defaultThinkingLevel: xhigh`（`lastChangelogVersion: 0.84.3`）
     │   ├── sandbox.json               →  ~/.pi/agent/sandbox.json     文件系统与网络沙箱策略（`allowNetwork: true` 仅白名单域名可出站）
     │   ├── landstrip.json             →  ~/.pi/agent/landstrip.json   子代理总数上限 `maxSubagents: 8`（`toolFilesystemPolicy: sandbox`，任务权限 `review` allow 其余 deny）
     │   └── extensions/pi-permission-system/config.json → 细粒度工具权限矩阵

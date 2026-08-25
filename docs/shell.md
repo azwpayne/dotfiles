@@ -18,21 +18,25 @@ zsh -l
      │     eval "$(fzf --zsh)"              ← 与 fzf.zsh 内重复一次，冗余但无害
      │     eval "$(brew shellenv)"
      │     export PATH="$(brew --prefix rustup)/bin:$HOME/.cargo/bin:$PATH"
-     │     （rustup/cargo 路径以前缀方式追加到 PATH 最前）
+     │     （rustup/cargo 路径以前缀方式追加到 PATH 最前，需在 brew shellenv 之后）
      ├─ ④ for file in ~/.config/zsh/aliases.zsh ~/.config/zsh/fzf.zsh; do source "$file"; done
      │     ├─ aliases.zsh  ← 导出 $EDITOR/$VISUAL，供下一步使用
      │     └─ fzf.zsh      ← 依赖 $EDITOR 展开 Ctrl-O 绑定
-     └─ ⑤ source ~/.config/zsh/sdk.zsh      ← 无条件加载
-           （文件中注释称“可选/需取消注释”/“excluding sdk.zsh for lazy loading”，与实际的无条件 source 不符，以代码为准）
+     └─ ⑤ source ~/.config/zsh/sdk.zsh      ← 无条件加载（dot_zshrc:63-64）
+           （注释称“# Source external configs (excluding sdk.zsh for lazy loading)”与
+            “# Uncomment to enable Java/Go/Python/Rust SDK management”均声称可选/需取消注释，
+            但下一行即无条件 `source ~/.config/zsh/sdk.zsh`，注释与代码不一致，以代码为准）
 ```
 
 **顺序即语义**：同名定义后加载者生效。典型例子是短别名 `k`——`sdk.zsh`
-在 kubectl 存在时定义 `k='kubectl'`（含 `command -v` 守卫），因此 `aliases.zsh` 有意不定义 `k`。
-`sdk.zsh` 头部对 SDKMAN 初始化的重复 `source`（`[[ -s ... ]]` 与 `[ -f ... ]` 双重）已清理，仅保留单次初始化（由 sdk.zsh 代理项处理）。
+在 kubectl 存在时定义 `k='kubectl'`（含 `command -v kubectl` 守卫 + `compdef k=kubectl`），
+因此 `aliases.zsh` 有意不定义 `k`。
+`sdk.zsh` 头部对 SDKMAN 初始化的重复 `source`（`[[ -s ... ]]` 与 `[ -f ... ]` 双重）已清理，
+仅保留单次初始化（由 sdk.zsh 代理项处理）。
 三个模块的内部契约（依赖、函数速查、破坏性命令警告）详见
 [`private_dot_config/zsh/README.md`](../private_dot_config/zsh/README.md)。
 
-> **环境变量说明**：`dot_zshrc` 顶部 `export LANG=en_US.UTF-8` 已**生效**，
+> **环境变量说明**：`dot_zshrc:6` 顶部 `export LANG=en_US.UTF-8` 已**生效**，
 > 统一将 locale 固定为 `en_US.UTF-8`（与 Ghostty 中 `LANG=zh_CN.UTF-8` 互补：
 > 终端侧中文、shell 侧英文，避免远端/脚本 locale 回退）。`$EDITOR`/`$VISUAL` 等
 > 编辑器变量不在此导出，而由 `aliases.zsh` 统一导出（见下文）。
@@ -93,12 +97,12 @@ zsh -l
 
 ### 前缀探测与缓存
 
-探测顺序（与 `fzf.zsh` 第 1 节一致）：
+探测顺序（与 `fzf.zsh` 第 1 节一致，含具体测试条件）：
 
-1. `/opt/homebrew/opt/fzf`（Apple Silicon）
-2. `/usr/local/opt/fzf`（Intel）
-3. `~/.fzf`（git 安装方式）
-4. `/usr`（Linux 发行版仓库，需 `-x /usr/bin/fzf`）
+1. `/opt/homebrew/opt/fzf`（Apple Silicon，测试 `[[ -d "/opt/homebrew/opt/fzf/bin" ]]`）
+2. `/usr/local/opt/fzf`（Intel，测试 `[[ -d "/usr/local/opt/fzf/bin" ]]`）
+3. `~/.fzf`（git 安装方式，测试 `[[ -d "$HOME/.fzf/bin" ]]`）
+4. `/usr`（Linux 发行版仓库，测试 `[[ -x "/usr/bin/fzf" ]]`）
 
 结果缓存到 `~/.fzf_prefix_cache`（文件名与 `private_dot_config/zsh/dot_gitignore`
 中的忽略项一致；因缓存位于 `$HOME` 下不入仓库，通常无需额外忽略）。下次启动若
@@ -114,6 +118,9 @@ zsh -l
 | `FZF_ALT_C_COMMAND` | `fd --max-depth=5 --type d --follow --exclude=...` | `rg --files --null \| xargs -0 dirname \| sort -u` |
 | `FZF_CTRL_T_COMMAND` | 与 `FZF_DEFAULT_COMMAND` 保持一致（置于 fd 回退判断之后，确保回退值同步） | 同左 |
 
+> `exclude_list` 在 `fzf.zsh` 中定义为 `'{.git,node_modules,.idea,.venv,.cache,dist,build,.pyc,.DS_Store,.gitignore,.gitmodules,.gitkeep,.gitlab,.gitlab-ci.yaml,\*.zip,\*.apk,\*.so,.keep}'`，
+> `FZF_DEFAULT_COMMAND` / `FZF_ALT_C_COMMAND` 均通过 `--exclude=${exclude_list}` 展开。
+
 ### 全局键位与选项
 
 `FZF_DEFAULT_OPTS`（已在 fzf 0.74.3 实测行内 `#` 注释可解析）：
@@ -126,7 +133,7 @@ zsh -l
 专项：
 
 - `FZF_CTRL_R_OPTS`：`--sort --scheme=history --prompt='history>'`（`--scheme=history` 需 fzf 0.35+）
-- `FZF_CTRL_T_OPTS`：`--preview='if [ -d {} ]; then lsd --tree --depth 5 ... | head -50; else bat --color=always --style=header,grid --line-range :100 {}; fi' --prompt='files>' --multi`
+- `FZF_CTRL_T_OPTS`：`--preview='if [ -d {} ]; then lsd --tree --depth 5 --color=always --icon=always {} | head -50; else bat --color=always --style=header,grid --line-range :100 {}; fi' --prompt='files>' --multi`
 - `FZF_ALT_C_OPTS`：`--preview 'lsd --tree --depth 5 --color=always --icon=always {} | head -50' --prompt='dir>'`
 
 ### 交互函数
@@ -150,10 +157,10 @@ zsh -l
 
 | 函数 | 所在 | 用途 | 关键实现 |
 | --- | --- | --- | --- |
-| `auto_update` | aliases.zsh | 传统守卫式串行全量更新：逐个 `command -v` 守卫，未安装即跳过；若存在 `onproxy` 则先切代理 | `uv_update` → `sdk_update` → `rust_update` → `tldr_update` → `brew_update` 依次执行 |
-| `update-all [targets...]` | aliases.zsh | 声明式批量更新：关联数组 `tasks` 声明 6 项（`brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise`），支持参数过滤、彩色输出、失败计数与耗时统计 | `local -A tasks=(brew … sdk … rustup … tldr … uv … mise …)`；无参时 `targets=(${(k)tasks})` 全量，传参则过滤；`command -v` 守卫 + `eval "${tasks[$name]}"` + `failed` 计数；`print -P %F{blue/green/red}` 彩色提示，`start_time/duration` 统计耗时 `${mins}m${secs}s` |
+| `auto_update` | aliases.zsh | 传统守卫式串行全量更新：逐个 `command -v` 守卫，未安装即跳过；若存在 `onproxy` 则先切代理 | `uv_update` → `sdk_update` → `rust_update` → `tldr_update` → `brew_update` 依次执行（5 目标，无 mise） |
+| `update-all [targets...]` | aliases.zsh | 声明式批量更新：关联数组 `tasks` 声明 6 项（`brew` / `sdk` / `rustup` / `tldr` / `uv` / `mise`），支持参数过滤、彩色输出、失败计数与耗时统计 | `local -A tasks=(brew … sdk … rustup … tldr … uv … mise …)`；无参时 `targets=(${(k)tasks})` 全量，传参则过滤；`command -v $name` 守卫 + `eval "${tasks[$name]}"` + `failed` 计数；`print -P %F{blue/green/red/yellow}` 彩色提示（蓝=开始、绿=完成、黄=跳过、红=未知目标/失败），`start_time/duration` 统计耗时 `${mins}m${secs}s` |
 
-> `update-all` 任务定义（与 `aliases.zsh` 一致）：`brew` 为 `brew update -f && brew upgrade -f --greedy-latest -y && brew cu -y -a && brew cleanup --prune=all`，`sdk` 为 `sdk upgrade && sdk selfupdate && sdk flush`，`rustup` 为 `rustup update && rustup upgrade`，`tldr` 为 `tldr --update`，`uv` 为 `uv tool upgrade --all`，`mise` 为 `mise upgrade`。支持 `update-all brew uv` 仅更新指定目标，未知参数会提示 `Available: …` 并返回 1；`auto_update` 仍为传统串行写法，日常推荐 `update-all`。
+> `update-all` 任务定义（与 `aliases.zsh:196` 一致）：`brew` 为 `brew update -f && brew upgrade -f --greedy-latest -y && brew cu -y -a && brew cleanup --prune=all`，`sdk` 为 `sdk upgrade && sdk selfupdate && sdk flush`，`rustup` 为 `rustup update && rustup upgrade`，`tldr` 为 `tldr --update`，`uv` 为 `uv tool upgrade --all`，`mise` 为 `mise upgrade`。支持 `update-all brew uv` 仅更新指定目标；未知参数会提示 `Available: …` 并返回 1，未安装目标黄色 `⚠️ not found` 跳过。`auto_update` 仍为传统串行写法，日常推荐 `update-all`。
 
 ### fzf-tab
 
