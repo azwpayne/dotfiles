@@ -36,17 +36,26 @@ git -C ~/.local/share/chezmoi add -A && git -C ~/.local/share/chezmoi commit -m 
 | `chezmoi forget <file>` | 停止管理（源文件一并删除） |
 | `chezmoi doctor` | 环境体检 |
 | `chezmoi status` | 简要漂移概览 |
+| `zimfw update` | 更新 Zim 插件（zsh，见下方说明） |
+| `zimfw upgrade` | 升级 zimfw 自身（zsh） |
+| `zimfw init` | 重建 `${ZIM_HOME}/init.zsh`（改动 `~/.zimrc` 后需要） |
 
 ## 验收清单
 
-改动不同组件后至少跑过对应检查（覆盖 zsh / starship / ghostty / nvim / git / chezmoi）：
+改动不同组件后至少跑过对应检查（覆盖 zsh / zim / starship / ghostty / alacritty / nvim / fish / mise / git / chezmoi）：
 
 ```bash
 # zsh 模块（语法 + 干净启动 + 关键定义）
 zsh -n ~/.config/zsh/{aliases,fzf,sdk}.zsh
 zsh -n ~/.zshrc
 zsh -ic 'exit'                          # 干净启动无报错
-zsh -ic 'type k df du; echo $EDITOR'    # 关键别名/变量
+zsh -ic 'type ls df du; echo $EDITOR'   # 关键别名/变量
+# 注意：短别名 k 定义在 sdk.zsh 且仅当 kubectl 可用时才存在，无 kubectl 的机器上属预期缺失
+
+# Zim 插件管理器（改动 ~/.zimrc 后；重启 shell 时 dot_zshrc 会按 -nt 时间戳自动重建 init.zsh）
+zsh -ic 'zimfw info'                    # 查看 zimfw 版本
+zsh -ic 'zimfw update'                  # 更新插件
+zsh -ic 'zimfw init'                    # 手动重建 init.zsh
 
 # starship 渲染
 starship prompt
@@ -65,6 +74,15 @@ git config --list --show-origin | head
 git config --get core.editor
 git config --get safe.directory
 
+# fish 配置语法检查
+fish -n ~/.config/fish/config.fish
+
+# mise 环境体检
+mise doctor
+
+# alacritty 配置解析（或直接启动 alacritty 验证）
+alacritty --print-config | head
+
 # chezmoi 全局状态
 chezmoi doctor && chezmoi diff
 ```
@@ -75,8 +93,9 @@ chezmoi doctor && chezmoi diff
 
 ### fzf 找不到 / 快捷键失效
 
-fzf 安装前缀缓存写在 `~/.fzf_prefix_cache`。升级/卸载/换机器后若失效，
-模块会自愈删除并重新探测；也可手动 `rm ~/.fzf_prefix_cache` 强制重建。
+fzf 安装前缀缓存放在 `$ZDOTDIR/.fzf_prefix_cache`（未设置 `ZDOTDIR` 时即
+`~/.fzf_prefix_cache`）。升级/卸载/换机器后若失效，模块会自愈删除并重新探测；
+也可手动删除该缓存文件强制重建。
 详见 `private_dot_config/zsh/fzf.zsh` 的探测逻辑。
 
 ### 换了代理端口/地址
@@ -106,7 +125,7 @@ fzf 安装前缀缓存写在 `~/.fzf_prefix_cache`。升级/卸载/换机器后�
 
 `.chezmoiignore`（仓库根）控制 `chezmoi add`/`apply` 时忽略的源文件模式，当前包括：
 
-- 本地覆盖与备份：`*.local`、`*.local.*`、`*.bak`、`README.md`、`LICENSE`、`docs/**`、`**/REAMDME.md`（含拼写保留）、`dot_git`、`dot_gitconfig`、`**/dot_DS_Store`、`**/dot_git`
+- 本地覆盖与备份：`*.local`、`*.local.*`、`*.bak`、`README.md`、`LICENSE`、`docs/`、`docs/**`、`**/REAMDME.md`（含拼写保留）、`dot_gitconfig`、`**/dot_DS_Store`、`**/dot_git`
 - 敏感信息：`*token*`、`*secret*`、`*credential*`、`*client_secret*`
 - 构建产物：`node_modules/`、`.pnpm-store/`
 
@@ -115,8 +134,8 @@ fzf 安装前缀缓存写在 `~/.fzf_prefix_cache`。升级/卸载/换机器后�
 ### 关于历史上的 `baseline` 标签
 
 部分旧注释提到用 `git show baseline:...` 找回已删除的配置（conda、wezterm 别名等）。
-本仓库历史只有一条 `init` 提交，**该标签不存在**，旧内容来自更早的独立 zsh-config
-仓库；如确需找回请去旧仓库翻历史。不要在本仓库中创建同名标签造成混淆。
+本仓库自 `init` 提交起从未打过 `baseline` 标签（`git tag` 为空），旧内容来自更早的独立
+zsh-config 仓库；如确需找回请去旧仓库翻历史。不要在本仓库中创建同名标签造成混淆。
 
 ### 新增文件的命名提醒
 
