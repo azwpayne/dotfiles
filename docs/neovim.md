@@ -16,7 +16,7 @@ nvim/
 ├── LICENSE                   LazyVim starter 自带的 MIT 许可证
 └── lua/
     ├── config/
-    │   ├── lazy.lua          lazy.nvim bootstrap 与插件 spec（含 9 个 extras + plugins 导入）
+    │   ├── lazy.lua          lazy.nvim bootstrap 与插件 spec（含 10 个 extras（9 lang + mini-animate）+ plugins 导入）
     │   ├── options.lua       全局选项
     │   ├── keymaps.lua       自定义键位（在 LazyVim 默认之后加载，可直接覆盖）
     │   └── autocmds.lua      自动命令（VeryLazy 时加载）
@@ -41,7 +41,7 @@ nvim/
 { import = "lazyvim.plugins.extras.ui.mini-animate" },
 ```
 
-共 9 个 extras + `{ import = "plugins" }` 自定义目录。LSP/格式化/lint 由 LazyVim 内置的
+共 10 个 extras（9 个 `lang.*` + 1 个 `ui.mini-animate`）+ `{ import = "plugins" }` 自定义目录。LSP/格式化/lint 由 LazyVim 内置的
 mason + nvim-lspconfig + conform + nvim-lint 组合处理；首次打开对应语言文件时 mason
 会提示安装相应 server。`lazyvim.json` 中 `extras` 数组当前为空（LazyVim 运行时写入），
 不代表未启用 extras。
@@ -66,6 +66,7 @@ mason + nvim-lspconfig + conform + nvim-lint 组合处理；首次打开对应�
 - `performance.rtp.disabled_plugins = { "tarPlugin", "tohtml", "tutor", "zipPlugin" }` 四项禁用来加速启动。
 - **复现**：换机器后首次启动按 `lazy-lock.json` 安装同版本插件（当前 44 条，见下）。
 - **升级**：`:Lazy update` 更新并同步 lock 文件；回滚用 `:Lazy restore`。
+- **与 shell `update-all` 无关联**：`private_dot_config/zsh/aliases.zsh` 中的 `update-all` 仅更新 brew/mise/sdk/rustup/tldr/uv，不触及 Neovim 插件；两者更新通道相互独立。
 
 ### lazy-lock.json（44 个）
 
@@ -82,8 +83,8 @@ mason + nvim-lspconfig + conform + nvim-lint 组合处理；首次打开对应�
 ### stylua.toml / example.lua 补充
 
 - `stylua.toml`：`indent_type = "Spaces"`, `indent_width = 2`, `column_width = 120`。
-- `lua/plugins/example.lua` 中 starter 自带的空 spec 守卫（`if true then return {} end`）
-  当前处于注释状态，文件内的示例配置实际生效，包括：默认配色 `catppuccin`、trouble 的
+- `lua/plugins/example.lua` 中 starter 自带的空 spec 守卫（`-- if true then return {} end`）
+  当前为注释状态（即守卫未生效），文件内的示例配置实际生效，包括：默认配色 `catppuccin`、trouble 的
   `use_diagnostic_signs = true`、telescope 的 "Find Plugin File" 快捷键、nvim-cmp 追加
   `cmp-emoji` source、lspconfig 强制 pyright、treesitter/mason `ensure_installed` 列表等。
   如只想把它当模板用，应取消该守卫行的注释。

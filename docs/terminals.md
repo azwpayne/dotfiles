@@ -72,7 +72,7 @@
 | 配置 | 值 | 说明 |
 | --- | --- | --- |
 | `quick-terminal-position` | `top` | 顶部下拉 |
-| `quick-terminal-screen` | `main`（最后生效） | 跟随主屏（文件较早处为 `mouse`，以最后一次为准） |
+| `quick-terminal-screen` | `main`（实际生效） | 跟随主屏；文件靠前处曾设为 `mouse`，后段覆盖为 `main`，以最后一次为准 |
 | `quick-terminal-autohide` | `true` | 失焦自动收起 |
 | `quick-terminal-animation-duration` | `0.15` | 动画 150ms |
 
@@ -84,7 +84,7 @@
 | `image-storage-limit` | `268435456`（256MB） | Kitty Graphics Protocol 图像上限，适配 16GB 机型 |
 | `gtk-single-instance` | `true` | Linux 单实例优化 |
 
-> ⚠️ **重复键提醒：** 文件中存在多处重复定义，Ghostty 以**最后一次出现为准**并可能告警。已知的重复项：`font-thicken` / `font-thicken-strength` / `adjust-cell-height` / `mouse-hide-while-typing` / `macos-option-as-alt` / `quick-terminal-screen` / `quick-terminal-animation-duration` / `resize-overlay` / `macos-window-shadow`。修改时请顺手合并去重，避免歧义。
+> ⚠️ **重复键说明：** `private_dot_config/ghostty/config` 中部分键被重复赋值，Ghostty 按“最后一次出现生效”规则解析并可能在日志中告警。当前已知的重复键有：`font-thicken` / `font-thicken-strength` / `adjust-cell-height` / `mouse-hide-while-typing` / `macos-option-as-alt` / `quick-terminal-screen` / `quick-terminal-animation-duration` / `resize-overlay` / `macos-window-shadow`，取值均以文件中最后一次定义为准（例如 `quick-terminal-screen` 先为 `mouse` 后被覆盖为 `main`，实际生效为 `main`）。后续修改时建议顺手合并去重，保持单一赋值。
 
 ---
 
