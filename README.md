@@ -4,7 +4,8 @@
 
 本仓库是 chezmoi 的**源目录**（source directory，位于 `~/.local/share/chezmoi`），
 通过 `chezmoi apply` 将文件渲染到 `$HOME` 下对应位置。全部为静态文件——没有模板、
-没有脚本、没有 `.chezmoiignore`，所见即所得。
+没有脚本，所见即所得；通过 `.chezmoiignore` 将 `README.md` / `LICENSE` / `docs/` /
+`*.local` / `*.bak` 等仅供仓库查阅或本地覆盖的文件排除在部署之外，避免污染目标家目录。
 
 ## ✨ 特性总览
 
@@ -17,7 +18,8 @@
 | 编辑器 | Neovim + [LazyVim](https://www.lazyvim.org/) | 10 个语言 extras，插件版本由 `lazy-lock.json` 锁定 |
 | 运行时管理 | mise | bun / deno / go / node / pnpm 一键切换 |
 | Git 工作流 | git + gh (CLI) | LFS、GitHub 走本地 SOCKS5 代理、`push.default=current` |
-| AI Agent | pi coding agent | 沙箱化文件系统/网络策略 + 细粒度工具权限 |
+| SSH | OpenSSH `~/.ssh/config` | `ssh.github.com:443` + 自适应 `ProxyCommand`（探活 `127.0.0.1:5376` SOCKS5，失败直连）+ OrbStack `Include` |
+| AI Agent | pi coding agent | 沙箱化文件系统/网络策略 + 细粒度工具权限，`workflows/settings.json` 控制并发 |
 
 ## 🚀 快速开始
 
@@ -63,25 +65,41 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 
 ```text
 ~/.local/share/chezmoi                    应用到 $HOME
+├── .chezmoiignore                     →  (不部署) 过滤 README.md / LICENSE / docs/ / *.local / *.bak / *token* 等，避免污染家目录
+├── .gitignore                         →  (git 侧) 忽略 .vscode / .git / node_modules / .DS_Store 等
 ├── dot_zshrc                          →  ~/.zshrc                     Zsh 入口：Zim 引导 + 工具 eval + 模块加载
 ├── dot_zimrc                          →  ~/.zimrc                     Zim 模块清单
 ├── dot_gitconfig                      →  ~/.gitconfig                 用户信息 / 代理 / LFS / push 行为
-├── .gitignore                         →  null                         避免内容进入 chezmoi 目录
-├── .chezmoiignore                     →  null                         避免 chezmoi 目录应用到目录
 ├── dot_gitignore_global               →  ~/.gitignore_global          全局忽略规则
 ├── dot_codex/
-│   └── private_empty_config.toml      →  ~/.codex/empty_config.toml   Codex 占位配置（空文件）
-└── private_dot_config/
-    ├── zsh/                           →  ~/.config/zsh/               ★ 三模块 zsh 配置（含独立 README）
-    ├── starship.toml                  →  ~/.config/starship.toml      Starship 提示符
-    ├── ghostty/config                 →  ~/.config/ghostty/config     Ghostty 终端
-    ├── alacritty/alacritty.toml       →  ~/.config/alacritty/         Alacritty 终端
-    ├── mise/config.toml               →  ~/.config/mise/config.toml   mise 工具链
-    ├── gh/private_config.yml          →  ~/.config/gh/config.yml      GitHub CLI
-    ├── nvim/                          →  ~/.config/nvim/              LazyVim 配置
-    └── private_fish/                  →  ~/.config/fish/              Fish（仅 OrbStack 补全符号链接）
-private_dot_pi/private_agent/           →  ~/.pi/agent/                 pi coding agent 设置与沙箱策略
+│   └── private_empty_config.toml      →  ~/.codex/empty_config.toml   Codex 占位配置（0600 空文件，保证目录存在）
+├── private_dot_config/
+│   ├── zsh/                           →  ~/.config/zsh/               ★ 三模块 zsh 配置（含独立 README）
+│   │   ├── aliases.zsh                →  ~/.config/zsh/aliases.zsh
+│   │   ├── fzf.zsh                    →  ~/.config/zsh/fzf.zsh
+│   │   ├── sdk.zsh                    →  ~/.config/zsh/sdk.zsh
+│   │   └── README.md                  →  ~/.config/zsh/README.md
+│   ├── starship.toml                  →  ~/.config/starship.toml      Starship 提示符
+│   ├── ghostty/config                 →  ~/.config/ghostty/config     Ghostty 终端
+│   ├── alacritty/alacritty.toml       →  ~/.config/alacritty/alacritty.toml  Alacritty 备用
+│   ├── mise/config.toml               →  ~/.config/mise/config.toml   mise 工具链
+│   ├── gh/private_config.yml          →  ~/.config/gh/config.yml      GitHub CLI (0600)
+│   ├── nvim/                          →  ~/.config/nvim/              LazyVim 配置（含 lazy-lock.json / stylua.toml）
+│   └── private_fish/                  →  ~/.config/fish/              Fish（仅 OrbStack 补全符号链接）
+│       ├── config.fish                →  ~/.config/fish/config.fish
+│       └── private_completions/       →  ~/.config/fish/completions/  symlink_docker/kubectl/orbctl.fish → OrbStack
+├── private_dot_ssh/
+│   └── config                         →  ~/.ssh/config                ★ GitHub 走 ssh.github.com:443 + 自适应 SOCKS5 ProxyCommand（含 OrbStack Include，0600）
+└── private_dot_pi/
+    ├── private_agent/                 →  ~/.pi/agent/                 pi coding agent 主配置（0600）
+    │   ├── settings.json              →  ~/.pi/agent/settings.json     主题 / 包列表 / hideThinkingBlock
+    │   ├── sandbox.json               →  ~/.pi/agent/sandbox.json     文件系统与网络沙箱策略
+    │   ├── landstrip.json             →  ~/.pi/agent/landstrip.json   子代理上限与任务权限
+    │   └── extensions/pi-permission-system/config.json → 细粒度工具权限矩阵
+    └── workflows/settings.json        →  ~/.pi/workflows/settings.json 工作流设置（progressPanelMaxAgents=8）
 ```
+
+> `docs/`、`README.md`、`LICENSE` 等文档仅存在于源仓库，通过 `.chezmoiignore` 排除，不会被部署到 `$HOME`。
 
 ## 📚 文档索引
 
@@ -97,15 +115,17 @@ private_dot_pi/private_agent/           →  ~/.pi/agent/                 pi cod
 | [private_dot_config/zsh/README.md](private_dot_config/zsh/README.md) | zsh 三模块内部契约（加载顺序、依赖、函数速查） |
 | [private_dot_config/nvim/README.md](private_dot_config/nvim/README.md) | Neovim/LazyVim 使用说明 |
 
+> 索引与 `docs/` 目录保持一致（7 篇主文档 + 2 篇子目录 README），新增配置请同步更新 [docs/layout.md](docs/layout.md)。
+
 ## 🔒 安全与隐私
 
 - 敏感度较高的文件使用 `private_` 前缀，应用后权限为 `0600`
-  （如 `~/.config/gh/config.yml`、整个 `~/.pi/agent/`）。
+  （如 `~/.config/gh/config.yml`、`~/.ssh/config`、整个 `~/.pi/agent/`）。
 - `~/.config/gh/hosts.yml` 由 `gh auth login` 在目标机器上生成，凭据不进仓库；
   仓库内只跟踪不含 token 的 `config.yml`。
 - pi agent 的沙箱与权限策略显式拒绝读取 `*.env`、`~/.ssh/*`、`~/.aws/*` 等，
   并禁止 `sudo` / `rm` 类命令——细节见 [docs/dev-tools.md](docs/dev-tools.md)。
-- `dot_gitconfig` 中包含本地代理地址（`socks5://127.0.0.1:7890`，仅对 github.com 生效）
+- `dot_gitconfig` 与 `private_dot_ssh/config` 中包含本地代理地址（`socks5://127.0.0.1:7890` / `127.0.0.1:5376`，仅对 github.com 生效）
   与个人身份信息，公开 fork 前请先脱敏。
 
 ## 🧾 环境
