@@ -26,7 +26,7 @@
 | --- | --- | --- |
 | `dot_zshrc` | `~/.zshrc` | Zim 引导、PATH、工具 eval（zoxide/mise/starship/fzf/brew）、模块加载入口（aliases→fzf→sdk） |
 | `dot_zimrc` | `~/.zimrc` | Zim 模块清单（仅供 zimfw 读取，非 shell 启动时 source） |
-| `dot_gitconfig` | `~/.gitconfig` | 用户/代理（github.com 走 socks5://127.0.0.1:7890）/LFS/push 行为 |
+| `dot_gitconfig` | `~/.gitconfig` | 用户/代理（github.com 走 socks5://127.0.0.1:5376）/LFS/push 行为 |
 | `dot_gitignore_global` | `~/.gitignore_global` | 全局忽略（.DS_Store、IDE、日志等） |
 
 ### SSH
@@ -39,7 +39,7 @@
 
 | 源文件 | 目标路径 | 说明 |
 | --- | --- | --- |
-| `private_dot_config/zsh/aliases.zsh` | `~/.config/zsh/aliases.zsh` | 别名与通用函数（`auto_update`、`y`、`ruff_auto` 等） |
+| `private_dot_config/zsh/aliases.zsh` | `~/.config/zsh/aliases.zsh` | 别名与通用函数（`auto_update`、`update-all`、`y`、`ruff_auto` 等）；`update-all` 支持 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise` 选择性更新（可传参指定目标，未传参则全量；`auto_update` 为旧版全量兼容入口，`update-all` 为新版支持 `mise` 且可单目标更新） |
 | `private_dot_config/zsh/fzf.zsh` | `~/.config/zsh/fzf.zsh` | fzf 前缀探测/缓存、全局选项、Ctrl-R/T/Alt-C 及 `frg`/`fkill`/`ftm`/`fl*` 函数 |
 | `private_dot_config/zsh/sdk.zsh` | `~/.config/zsh/sdk.zsh` | SDK 环境与补全（pnpm/SDKMAN(可选)/Android NDK/Python(uv)/Go/Rust/Docker/kubectl+kubecolor） |
 | `private_dot_config/zsh/dot_gitignore` | `~/.config/zsh/.gitignore` | 忽略运行时产物（`*.zwc`、`.fzf_prefix_cache`、`.DS_Store`） |
@@ -49,9 +49,9 @@
 
 | 源文件 | 目标路径 | 说明 |
 | --- | --- | --- |
-| `private_dot_config/starship.toml` | `~/.config/starship.toml` | Catppuccin Mocha powerline 提示符 |
-| `private_dot_config/ghostty/config` | `~/.config/ghostty/config` | Ghostty 主终端配置（JetBrainsMono Nerd Font Mono） |
-| `private_dot_config/alacritty/alacritty.toml` | `~/.config/alacritty/alacritty.toml` | Alacritty 备用配置 |
+| `private_dot_config/starship.toml` | `~/.config/starship.toml` | Catppuccin Mocha powerline 提示符（已核验：palette 与 format 与实际一致） |
+| `private_dot_config/ghostty/config` | `~/.config/ghostty/config` | Ghostty 主终端配置（JetBrainsMono Nerd Font Mono，`command = /bin/zsh -l`，Catppuccin Mocha 主题） |
+| `private_dot_config/alacritty/alacritty.toml` | `~/.config/alacritty/alacritty.toml` | Alacritty 备用配置（Dracula 配色、`xterm-256color`、JetBrainsMono Nerd Font Mono） |
 
 ### 编辑器与开发工具
 
@@ -84,9 +84,9 @@
 
 | 源文件 | 目标路径 | 说明 |
 | --- | --- | --- |
-| `private_dot_pi/private_agent/settings.json` | `~/.pi/agent/settings.json` (0600) | 主题 `dark`、包列表（`pi-web-access`/`pi-subagents`/`pi-dynamic-workflows`/…共 7 个 npm 包）、`hideThinkingBlock` 等 |
-| `private_dot_pi/private_agent/sandbox.json` | `~/.pi/agent/sandbox.json` (0600) | 文件系统与网络沙箱策略（`denyRead` 含 `/Users` `/etc` 等、`denyWrite` 含 `**/.env` `~/.ssh` 等、`allowNetwork: false`） |
-| `private_dot_pi/private_agent/landstrip.json` | `~/.pi/agent/landstrip.json` (0600) | 子代理上限 `maxSubagents: 16`、任务权限（`*` deny、`review` allow） |
+| `private_dot_pi/private_agent/settings.json` | `~/.pi/agent/settings.json` (0600) | 完整字段：`theme: dark`、`lastChangelogVersion: 0.84.3`、`hideThinkingBlock: false`、`defaultProvider: opencode`、`defaultModel: muse-spark-1.2-contributor-free`、`defaultThinkingLevel: xhigh`、7 个 npm 包（`pi-web-access`/`pi-subagents`/`@quintinshaw/pi-dynamic-workflows`/`@narumitw/pi-btw`/`@narumitw/pi-goal`/`pi-landstrip`/`@gotgenes/pi-permission-system`） |
+| `private_dot_pi/private_agent/sandbox.json` | `~/.pi/agent/sandbox.json` (0600) | 文件系统与网络沙箱策略（`denyRead` 含 `/Users` `/etc` 等、`denyWrite` 含 `**/.env` `~/.ssh` 等、`allowNetwork: true`、`allowLocalBinding: false`、`allowedDomains: *.githubusercontent.com`/`*.github.com`/`github.com`） |
+| `private_dot_pi/private_agent/landstrip.json` | `~/.pi/agent/landstrip.json` (0600) | 子代理上限 `maxSubagents: 8`（`toolFilesystemPolicy: sandbox`，任务权限 `*` deny、`review` allow） |
 | `private_dot_pi/private_agent/extensions/pi-permission-system/config.json` | `~/.pi/agent/extensions/pi-permission-system/config.json` (0600) | 工具级权限矩阵（`read/write/edit/bash/path` 细粒度 allow/deny/ask，禁 `sudo`/`rm`/`mv` 等） |
 | `private_dot_pi/workflows/settings.json` | `~/.pi/workflows/settings.json` (0600) | workflow 运行时配置（`progressPanelMaxAgents: 8`） |
 
