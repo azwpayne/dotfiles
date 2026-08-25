@@ -1,9 +1,9 @@
 {
-  "theme": "dark",
+  "theme": "light/dark",
   "lastChangelogVersion": "0.84.2",
   "defaultProvider": "opencode",
-  "defaultModel": "x-preview-f-free",
-  "defaultThinkingLevel": "max",
+  "defaultModel": "muse-spark-1.2-contributor-free",
+  "defaultThinkingLevel": "xhigh",
   "hideThinkingBlock": true,
   "packages": [
     "npm:pi-web-access",
