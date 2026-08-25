@@ -11,5 +11,10 @@
       "~/.profile",       "~/.gitconfig"
     ]
   },
-  "network"   : {"allowNetwork": false, "allowLocalBinding": false}
+  "network"   : {
+    "allowNetwork"     : false,
+    "allowLocalBinding": false,
+    "allowedDomains"   : ["api.github.com", "github.com", "www.google.com", "goproxy.cn"],
+    "deniedDomains"    : []
+  }
 }
