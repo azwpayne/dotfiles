@@ -71,7 +71,7 @@ zsh -l
 
 | 段 | 配置要点 |
 | --- | --- |
-| `os` | `disabled = false`，`bg:red fg:crust`，含 Windows/Ubuntu/MacOS 等 18 个符号映射 |
+| `os` | `disabled = false`，`bg:red fg:crust`，含 Windows/Ubuntu/Macos 等 20 个符号映射 |
 | `username` | `show_always = true`，`bg:red fg:crust` |
 | `directory` | `bg:peach fg:crust`，`truncation_length = 3`，`truncation_symbol = …/`，`substitutions` 替换 Documents→󰈙、Downloads→、Music→󰝚、Pictures→、Developer→󰲋 |
 | `git_branch` / `git_status` | 均为 `bg:yellow fg:crust`，符号 `` |
@@ -82,6 +82,9 @@ zsh -l
 | `cmd_duration` | `show_milliseconds = true`，`format = " in $duration "`，`bg:lavender`，`show_notifications = true`，`min_time_to_notify = 45000`（45s 触发系统通知） |
 
 已用 starship 1.26 实测渲染正常。
+
+> 另：`[docker_context]` 已配置样式（`bg:sapphire`，符号 ）但未加入 `format`，
+> 因此默认不显示；需要时在 conda 段后追加 `$docker_context` 即可启用。
 
 ## fzf 集成要点（fzf.zsh）
 
@@ -96,7 +99,8 @@ zsh -l
 3. `~/.fzf`（git 安装方式）
 4. `/usr`（Linux 发行版仓库，需 `-x /usr/bin/fzf`）
 
-结果缓存到 `~/.fzf_prefix_cache`（已被 `.gitignore` 忽略）。下次启动若
+结果缓存到 `~/.fzf_prefix_cache`（文件名与 `private_dot_config/zsh/dot_gitignore`
+中的忽略项一致；因缓存位于 `$HOME` 下不入仓库，通常无需额外忽略）。下次启动若
 `$FZF_PREFIX/bin/fzf` 不可执行，则自动删除缓存并重新探测（自愈）。探测成功
 后若 `$PATH` 未包含 `$FZF_PREFIX/bin` 则追加。最后执行 `command -v fzf && eval "$(fzf --zsh)"`
 加载官方按键绑定与补全（fzf 缺失时静默跳过）。
@@ -128,12 +132,12 @@ zsh -l
 
 | 函数 | 用途 | 依赖 |
 | --- | --- | --- |
-| `frg [pattern]` | `rg --line-number --color=always --smart-case` 管道至 fzf，按 `:` 分隔，`bat --highlight-line` 预览，回车 `nvim '{1}' +{2}` 定位行号 | rg, fzf, bat, nvim |
-| `fkill [signal]` | `ps -ef \| fzf -m \| awk '{print $2}' \| xargs kill -9`（默认 -9） | fzf |
+| `frg [pattern]` | `rg --line-number --color=always --smart-case` 管道至 fzf，按 `:` 分隔，`bat --highlight-line` 预览，回车 `nvim '{1}' +{2}` 定位行号；空结果时自动退出（`--exit-0`） | rg, fzf, bat, nvim |
+| `fkill [signal]` | `ps -ef \| sed 1d \| fzf -m \| awk '{print $2}' \| xargs kill -9`（`sed 1d` 去掉表头行避免误选；信号可选，默认 -9） | fzf |
 | `find_large_files [size]` | `fd -t f -S "+$size" -X du -h {} \| sort -k1hr`，默认 `100M` | fd, du |
-| `ftm [session]` | tmux 会话 fzf 选择/创建/切换（`switch-client` vs `attach-session` 自动判断） | tmux, fzf |
+| `ftm [session]` | tmux 会话 fzf 选择/创建/切换（`switch-client` vs `attach-session` 自动判断）；选择列表带 `--height 60% --exit-0`（无会话时自动退出） | tmux, fzf |
 | `flf` | `lsof \| fzf --preview "$LSOF_PREVIEW"` 浏览打开文件 | lsof, fzf |
-| `flkill` | `lsof \| fzf` 选进程提取 PID 后 `kill -9`（安全确认） | lsof, fzf |
+| `flkill` | `lsof \| fzf` 选进程提取 PID 后立即 `kill -9`，无二次确认（如需安全请改用不带 -9 的 `kill` 或自行加确认） | lsof, fzf |
 | `flnet` | `lsof -i \| fzf` 仅显示 TCP/UDP 连接 | lsof, fzf |
 | `fluser [user]` | `lsof -u "$user" \| fzf` 按用户过滤（默认 `$USER`） | lsof, fzf |
 
@@ -151,7 +155,8 @@ zsh -l
 
 ## Fish 的角色
 
-Fish 不是登录 shell（Ghostty/Alacritty 默认启动 `/bin/zsh -l`），仓库中对应
+Fish 不是登录 shell：Ghostty 通过 `command = /bin/zsh -l` 启动登录 zsh；Alacritty 未设置
+`shell`（相关行均已注释），按系统默认启动非登录 shell。仓库中对应
 `private_dot_config/private_fish/`（chezmoi `private_` 前缀，部署后为 `~/.config/fish/`）：
 
 | 路径（仓库） | 部署后 | 内容 |
