@@ -2,6 +2,9 @@
 
 ## Git — `dot_gitconfig` → `~/.gitconfig`
 
+> **注意**：`dot_gitconfig` 当前被 `.chezmoiignore` 排除，chezmoi 不会将其部署到目标机；
+> 下表仅作为本机手工维护的 `~/.gitconfig` 的参考快照。
+
 | 配置 | 值 | 说明 |
 | --- | --- | --- |
 | `core.editor` | `'code'` | 提交信息等用 VS Code 编辑 |
@@ -21,11 +24,11 @@
 > 若希望 `git pull` 一律变基，应改为 `pull.rebase = true` 或 `pull.rebase = false` 显式声明。
 > 当前 `dot_gitconfig` 已不再保留注释掉的 `[http]`/`[https]` 全局代理段，仅保留按域名限定的三条代理。
 
-全局忽略规则（`dot_gitignore_global` → `~/.gitignore_global`）：
-
-`*~`、`.DS_Store`（含 `**/.DS_Store`）、IDE 目录（`.idea`/`*.iml`/`.vscode`）、
-编辑器交换文件（`*.swp`/`*.swo`/`*.bak`）、编译产物（`*.aux`/`*.log*`/`.tox`/`dist/`/`build/`/`target/`/`bin/`）、
-Python 缓存（`__pycache__/`/`*.venv`/`*.cache`/`*.git`）、`node_modules/` 等。
+全局忽略规则（`dot_gitignore_global` → `~/.gitignore_global`），以下为概要归类，完整清单以源文件为准：
+编辑器临时文件与交换文件（`*~`、`.DS_Store`、`*.swp`/`*.swo`/`*.bak`）、IDE 目录（`.idea`/`*.iml`/`.vscode`）、
+编译产物与构建目录（`*.aux`/`*.log*`/`.tox`/`dist/`/`build/`/`target/`/`bin/`）、
+Python 相关（`__pycache__/`、`*.venv`、`*.cache`）、版本控制（`*.git`，排除嵌套仓库）、
+Node 依赖（`node_modules/`）。
 
 ## GitHub CLI — `gh`
 
@@ -65,8 +68,9 @@ mise use -g node@lts     # 固定某工具全局版本（会改写 config.toml�
 
 ## pi coding agent — `private_dot_pi/private_agent/`
 
-为 [pi](https://github.com/earendil-works/pi-coding-agent) 编码代理准备的受限运行环境，
-四个文件各司其职（整体 0600 权限）：
+为 [pi](https://github.com/earendil-works/pi-coding-agent) 编码代理准备的受限运行环境。
+四个文件各司其职：由于 chezmoi 目标名均无 `private_` 前缀，文件应用后为默认权限（0644），
+仅父目录因 `private_dot_pi/private_agent` 命名为 0700。
 
 ### settings.json — 主题与扩展包
 
@@ -107,14 +111,22 @@ mise use -g node@lts     # 固定某工具全局版本（会改写 config.toml�
     "allowWrite": [".", "/dev/null", "/tmp", "~/.npm", "~/.cargo/registry", "~/.cache"],
     "denyWrite": ["**/.env", "**/*.pem", "**/.env.*", "**/*.key", "~/.ssh", ".pi/sandbox.json", "~/.bashrc", "~/.zshrc", "~/.profile", "~/.gitconfig"]
   },
-  "network": { "allowNetwork": false, "allowLocalBinding": false }
+  "network": {
+    "allowNetwork": false,
+    "allowLocalBinding": false,
+    "allowedDomains": ["api.github.com", "github.com", "www.google.com", "goproxy.cn"],
+    "deniedDomains": []
+  }
 }
 ```
 
 - shell 可读宿主文件系统（`readAccess: host`），但显式 deny 读 `/Users`、`/home`、`/root`、`/etc`、`/var`、`/tmp`、`/private/var`、`/private/tmp` 等大范围路径（工作依赖 cwd 白名单放行）；`allowRead` 为空数组。
 - 写白名单仅限项目目录（`.`）、`/dev/null`、`/tmp` 及 `~/.npm`、`~/.cargo/registry`、`~/.cache`。
 - 写黑名单保护 `**/.env`、`**/.env.*`、`**/*.pem`、`**/*.key`、`~/.ssh`、shell rc 文件（`~/.bashrc`/`~/.zshrc`/`~/.profile`）、`~/.gitconfig` 与本沙箱配置自身（`.pi/sandbox.json`）。
-- **网络默认关闭**（`allowNetwork: false`，`allowLocalBinding: false`），需要联网的工具须显式放行。
+- **网络默认关闭**（`allowNetwork: false`，`allowLocalBinding: false`），但已通过域名白名单放行
+  `api.github.com` / `github.com` / `www.google.com` / `goproxy.cn` 四个域名的出站访问
+  （`deniedDomains` 为空）。
+- 另注：源文件的 `denyWrite` 数组中 `**/.env` 与 `**/*.pem` 各重复出现了两次，功能不受影响，建议清理。
 
 ### landstrip.json — 子代理与任务权限
 
@@ -131,6 +143,18 @@ mise use -g node@lts     # 固定某工具全局版本（会改写 config.toml�
 - 子代理上限 16；`toolFilesystemPolicy: sandbox` 复用上节沙箱。
 - 任务级权限除 `review` 外一律 `deny`——防止 agent 自行派生执行类子代理。
 
+### workflows/settings.json — 动态工作流设置
+
+位于 `private_dot_pi/workflows/settings.json`（部署到 `~/.pi/workflows/settings.json`），内容仅一项：
+
+```json
+{ "progressPanelMaxAgents": 8 }
+```
+
+用于 pi-dynamic-workflows 的进度面板最大并发代理数（8）。它与上节 pi-subagents 的
+`maxSubagents: 16` 相互独立：前者限制工作流进度面板的并发/展示代理数上限，
+后者限制子代理工具可派生的子代理总数上限。
+
 ### extensions/pi-permission-system/config.json — 工具级权限矩阵
 
 > 注释已由旧版 `// project management` 更名为 `// script`，对应 `node -e` / `npm` / `pnpm` / `cargo` 等脚本类命令分组。
@@ -144,7 +168,7 @@ mise use -g node@lts     # 固定某工具全局版本（会改写 config.toml�
 | `write` / `edit` | 默认 `allow`；deny `*.env`、`*.env.*`、`~/.ssh/*`、`~/.aws/*`（注意：`*.env.example` 在 write/edit 段未单独放行） |
 | `path` | 默认 `allow`；deny `*.env`、`*.env.*`、`*.pem`、`*.key`、`~/.ssh/*`、`/etc/*`、`/var/*`（`*.env.example` 放行） |
 | `external_directory` | 默认 `ask`；`~/.cargo/registry/*`、`~/.npm/*`、`~/.cache/*` 例外 `allow` |
-| `bash` | 默认 `ask`；只读命令 `pwd`/`ls *`/`cat *`/`echo *`/`mkdir *`/`touch *`/`cd *`/`find *`/`grep *`/`head *`/`awk *`/`sed *`/`wc *`/`for *`/`ps *`/`sleep *` 例外 `allow`；`sudo *`/`mv *`/`rm *`/`unlink *`/`dd if=* of=*`/`mkfs.*` deny；`git *` 默认 `allow` 但 `git rm *` deny；脚本类 `node -e`/`npm install`/`npm ci`/`pnpm *`/`cargo *` 为 `ask`（归入 `// script` 组） |
+| `bash` | 默认 `ask`；只读命令 `pwd`/`ls *`/`cat *`/`echo *`/`mkdir *`/`touch *`/`cd *`/`find *`/`grep *`/`head *`/`tail *`/`lsof *`/`awk *`/`sed *`/`wc *`/`for *`/`ps *`/`sleep *` 例外 `allow`；`sudo *`/`mv *`/`rm *`/`unlink *`/`dd if=* of=*`/`mkfs.*` deny；`git *` 默认 `allow` 但 `git rm *` 与 `git config *` 均 deny（防止 agent 篡改 git 配置）；脚本类 `node -e`/`npm install`/`npm ci`/`pnpm *`/`cargo *` 为 `ask`（归入 `// script` 组） |
 
 这套策略的目标：让 agent 能完成日常编码、只读检索与受控编辑，同时杜绝误删、密钥外泄、未授权推送与敏感路径写入。
 `promptMaxRows: 32`，`$schema` 指向 `pi-permission-system` 的 JSON Schema。
