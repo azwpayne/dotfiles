@@ -192,3 +192,54 @@ function y() {
 	[ "$cwd" != "$PWD" ] && [ -d "$cwd" ] && builtin cd -- "$cwd"
 	rm -f -- "$tmp"
 }
+
+function update-all() {
+    local -A tasks=(
+        brew  "brew update -f && brew upgrade -f --greedy-latest -y && brew cu -y -a && brew cleanup --prune=all"
+        sdk   "sdk upgrade && sdk selfupdate && sdk flush"
+        rustup  "rustup update && rustup upgrade"
+        tldr  "tldr --update"
+        uv    "uv tool upgrade --all"
+        mise  "mise upgrade"
+    )
+
+    local -a targets
+    if (( $# > 0 )); then
+        targets=("$@")
+    else
+        targets=(${(k)tasks})
+    fi
+
+    local failed=0
+    local start_time=$(date +%s)
+
+    for name in $targets; do
+        if [[ -z "${tasks[$name]}" ]]; then
+            print -P "%F{red}❌ Unknown target: $name%f"
+            print -P "Available: ${(j:, :)tasks}"
+            return 1
+        fi
+
+        print -P "%F{blue}═══ Updating $name ═══%f"
+
+        if command -v $name >/dev/null 2>&1; then
+            eval "${tasks[$name]}" || ((failed++))
+        else
+            print -P "%F{yellow}⚠️  $name not found%f"
+        fi
+
+        print -P "%F{green}✓ $name done%f"
+        echo ""
+    done
+
+    local duration=$(( $(date +%s) - start_time ))
+    local mins=$(( duration / 60 ))
+    local secs=$(( duration % 60 ))
+
+    if (( failed == 0 )); then
+        print -P "%B%F{green}✨ All updates completed in ${mins}m${secs}s%f%b"
+    else
+        print -P "%B%F{red}⚠️  $failed update(s) failed in ${mins}m${secs}s%f%b"
+        return 1
+    fi
+}
