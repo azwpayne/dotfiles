@@ -12,9 +12,11 @@
     ]
   },
   "network"   : {
-    "allowNetwork"     : false,
-    "allowLocalBinding": false,
-    "allowedDomains"   : ["*.githubusercontent.com", "*.github.com", "github.com"],
-    "deniedDomains"    : []
+    "allowNetwork"       : false,
+    "allowLocalBinding"  : false,
+    "allowAllUnixSockets": false,
+    "allowUnixSockets"   : [],
+    "allowedDomains"     : ["*.githubusercontent.com", "*.github.com", "github.com"],
+    "deniedDomains"      : []
   }
 }
