@@ -79,7 +79,7 @@
 | 配置 | 值 | 说明 |
 | --- | --- | --- |
 | `quick-terminal-position` | `top` | 顶部下拉 |
-| `quick-terminal-screen` | `main`（实际生效） | 首次设 `mouse`（L88），被末尾 `main`（L150）覆盖 |
+| `quick-terminal-screen` | `main` | 主屏显示（去重后唯一赋值，即去重前的实际生效值） |
 | `quick-terminal-autohide` | `true` | 失焦自动收起 |
 | `quick-terminal-animation-duration` | `0.15` | 动画 150ms |
 
@@ -91,21 +91,7 @@
 | `image-storage-limit` | `268435456`（256MB） | Kitty Graphics Protocol 图像上限，适配 16GB 机型 |
 | `gtk-single-instance` | `true` | Linux 单实例优化（macOS 下无影响） |
 
-> ⚠️ **重复键说明（待清理，功能不受影响）：** `private_dot_config/ghostty/config` 中 9 个键被重复赋值，Ghostty 按“最后一次出现生效”解析并可能在日志中告警。清单与末次生效值如下：
->
-> | 键 | 出现次数 | 末次生效值 | 备注 |
-> | --- | --- | --- | --- |
-> | `font-thicken` | 2 | `true` | 两次均为 `true`，行为不变 |
-> | `font-thicken-strength` | 2 | `1` | 两次均为 `1` |
-> | `adjust-cell-height` | 2 | `2` | 两次均为 `2` |
-> | `mouse-hide-while-typing` | 2 | `true` | 两次均为 `true` |
-> | `macos-option-as-alt` | 2 | `right` | 两次均为 `right` |
-> | `quick-terminal-screen` | 2 | `main` | 首次 `mouse` → 末次 `main`，**实际为 `main`** |
-> | `quick-terminal-animation-duration` | 2 | `0.15` | 两次均为 `0.15` |
-> | `resize-overlay` | 2 | `never` | 两次均为 `never` |
-> | `macos-window-shadow` | 2 | `false` | 两次均为 `false` |
->
-> 除 `quick-terminal-screen` 外其余 8 项重复值相同，仅冗余告警；建议后续合并去重，保留单一赋值。
+> ✅ **重复键已清理（行为不变）**：历史上 9 个键（`font-thicken`、`font-thicken-strength`、`adjust-cell-height`、`mouse-hide-while-typing`、`macos-option-as-alt`、`macos-window-shadow`、`quick-terminal-screen`、`quick-terminal-animation-duration`、`resize-overlay`）曾有重复赋值，已按 Ghostty「末次赋值生效」语义去重为单次赋值：保留末次值、删除前面的重复行，去重后的实际行为与去重前完全一致（唯一值有分歧的 `quick-terminal-screen` 保留生效值 `main`）。16 条 `keybind` 多绑定属有意设计，未动。
 
 ---
 
