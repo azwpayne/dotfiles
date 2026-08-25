@@ -45,6 +45,7 @@
             // git
             "git *"       : "allow",
             "git rm *"    : "deny",
+            "git config *": "deny",
             // script
             "node -e"     : "ask",
             "npm install" : "ask",
