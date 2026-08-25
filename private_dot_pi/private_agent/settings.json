@@ -1,6 +1,6 @@
 {
   "theme": "dark",
-  "lastChangelogVersion": "0.84.2",
+  "lastChangelogVersion": "0.84.3",
   "hideThinkingBlock": false,
   "packages": [
     "npm:pi-web-access",
@@ -12,6 +12,6 @@
     "npm:@gotgenes/pi-permission-system"
   ],
   "defaultProvider": "opencode",
-  "defaultModel": "x-preview-f-free",
-  "defaultThinkingLevel": "high"
+  "defaultModel": "muse-spark-1.2-contributor-free",
+  "defaultThinkingLevel": "xhigh"
 }
