@@ -35,18 +35,26 @@ exec zsh   # 重启 shell 使全部配置生效（或重新打开终端）
 （见 [layout.md](layout.md)）：
 
 - `README.md` / `LICENSE` / `docs/**` —— 仓库文档仅留在源目录，不污染目标机
+- `dot_gitconfig`（以及 `**/dot_git`）—— 不随 chezmoi 应用（本地差异保留），apply 后**不会生成 `~/.gitconfig`**
 - `*.local` / `*.bak` / `**/dot_DS_Store` / `node_modules/` 等本地覆盖与构建产物
 - `*token*` / `*secret*` / `*credential*` 等敏感文件名匹配
 
 因此 `chezmoi diff` 中不会出现 `docs/` 的新增，`chezmoi doctor` 亦不会告警缺失——属预期行为。
 如需排查可执行 `chezmoi ignored` / `chezmoi status` 查看被忽略列表。
 
+### 网络与代理前提
+
+GitHub 可达性强依赖**本机代理在线**：`dot_gitconfig` 中三处 proxy 均指向 `socks5://127.0.0.1:7890`；`private_dot_ssh/config` 的 `ProxyCommand` 会先探测 `127.0.0.1:5376`，在线时经其代理连接，离线则直连。首次启动 zsh 时 zimfw 拉取模块走 HTTPS 直连，通常不受影响。
+
+若代理未运行，第 5 节的 git/SSH 相关验证会失败（git 卡住或报 `Connection refused`、`ssh -T git@github.com` 超时等）。排查方法：确认代理进程监听 `7890`/`5376` 端口（如 `nc -z 127.0.0.1 7890 && echo ok`），或临时取消代理后重试。
+
 ## 3. 首次启动会发生什么
 
 | 组件 | 行为 | 触发时机 |
 | --- | --- | --- |
+| fish / pi coding agent | `private_dot_config/private_fish/config.fish` 为空模板、`private_dot_pi/**`（pi coding agent 配置）直接生效，均随 apply 写入 `$HOME`；本文档只覆盖 zsh 栈，其余见 [layout.md](layout.md) | 首次启动 fish / pi 时 |
 | Zim 框架 | `~/.zshrc` 检测 `~/.zim/zimfw.zsh` 缺失时经 `curl`/`wget` 自动下载，随后 `zimfw init` 安装 `dot_zimrc` 中声明的全部模块（environment/git/input/termtitle/utility/duration-info/git-info/prompt-pwd/asciiship/homebrew/zsh-completions/completion/fast-syntax-highlighting/history-substring-search/autosuggestions/fzf-tab） | 首次启动 zsh |
-| PATH / brew | `eval "$(brew shellenv)"` 注入 `/opt/homebrew/bin` 等；`export PATH` 追加 `~/bin` `~/.local/bin` `~/.cargo/bin` 等 | 每次启动 zsh |
+| PATH / brew | `eval "$(brew shellenv)"` 注入 `/opt/homebrew/bin` 等；`export PATH` **前置** `~/bin:/opt/homebrew/bin:…` 及 `~/.local/bin`、`~/.cargo/bin` 等到 `$PATH` 前 | 每次启动 zsh |
 | zoxide / mise / starship / fzf | `eval "$(zoxide init zsh)"` / `eval "$(mise activate zsh)"` / `eval "$(starship init zsh)"` / `eval "$(fzf --zsh)"` 接管对应功能 | 每次启动 zsh |
 | zsh 三模块 | 按序 `source ~/.config/zsh/aliases.zsh` → `fzf.zsh`（含 fzf 前缀探测与 `~/.fzf_prefix_cache` 缓存）→ `sdk.zsh`（pnpm/SDKMAN/Go/Rust/Docker/kubectl 均有守卫） | 每次启动 zsh |
 | Neovim | 首次运行 `nvim` 时 lazy.nvim 自动 bootstrap 并按 `lazy-lock.json` 安装 44 个插件（需要网络） | 首次运行 nvim |
@@ -62,14 +70,15 @@ exec zsh   # 重启 shell 使全部配置生效（或重新打开终端）
 | 工具 | 用途 | 安装 |
 | --- | --- | --- |
 | `fzf` | Ctrl-R/Ctrl-T/Alt-C 及所有 `f*` 函数（`frg`/`fkill`/`ftm`/`fl*`） | `brew install fzf` |
-| `fzf-tab` | 补全菜单模糊化（Zim 模块 `Aloxaf/fzf-tab`） | Homebrew formula 方式供给，由 zimfw 加载 |
+| `fzf-tab` | 补全菜单模糊化（Zim 模块 `Aloxaf/fzf-tab`） | 无需手动安装，由 zimfw 按 `dot_zimrc` 的 `zmodule Aloxaf/fzf-tab` 首次启动时自动安装并加载 |
 | `starship` | 提示符（`starship.toml` Catppuccin Mocha） | `brew install starship` |
 | `zoxide` | `z` 目录跳转 | `brew install zoxide` |
 | `mise` | 运行时管理（bun/deno/go/node/pnpm） | `brew install mise` |
-| `fd` | fzf 默认文件列表命令（缺省回退 `rg`） | `brew install fd` |
-| `ripgrep` (`rg`) | `frg` 内容搜索、fd 缺省时的回退 | `brew install ripgrep` |
+| `fd` | fzf 默认文件列表命令 | `brew install fd` |
+| `ripgrep` (`rg`) | `frg` 内容搜索、fd 缺失时的回退 | `brew install ripgrep` |
 
 > `fd` 未安装时 `fzf.zsh` 自动回退到 `rg --files`；`fzf` 本身缺失时按键绑定与 `f*` 函数均不可用但不阻断 shell 启动（有 `command -v` 守卫）。
+> 若另行通过 Homebrew 安装了 fzf-tab，`fzf.zsh` 会额外 source Homebrew 版 `/opt/homebrew/opt/fzf-tab/share/fzf-tab/fzf-tab.zsh`（后加载者生效）。
 
 ### 体验增强（别名/函数指向的目标，未安装时对应别名退化）
 
@@ -80,11 +89,22 @@ brew install bat lsd htop fastfetch neovim tmux yazi gh lazygit tldr coreutils \
 
 - `coreutils` 提供 `nproc`（`makes`/`xargsp` 半核并行依赖它）
 - `bat`/`lsd`/`htop` 分别接管 `cat`/`ls`/`top`；脚本中需要原生行为用 `command cat` 等
-- `gh` 配合 `~/.ssh/config` 的 `Host github.com → ssh.github.com:443` 与 `dot_gitconfig` 的 `socks5://127.0.0.1:7890` 代理共同保证 GitHub 可达
+- `gh` 配合 `~/.ssh/config` 的 `Host github.com → ssh.github.com:443` 与 `dot_gitconfig` 的 `socks5://127.0.0.1:7890` 代理共同保证 GitHub 可达（依赖本机代理在线，见下文「网络与代理前提」）
+
+按需补装（别名/函数指向的目标，未装时对应功能退化）：
+
+```bash
+# Python lint：ruff_auto 函数的目标
+brew install ruff
+# Android 逆向：jdx/scr 别名的目标（jadx-gui/scrcpy）
+brew install jadx scrcpy
+```
+
+另需注意 VS Code 及其 `code` CLI 是 fzf Ctrl+E 绑定、`git config editor = 'code'` 以及 `clp_cfg`/`cla_cfg` 别名的目标，未安装时上述功能退化。
 
 ### 有守卫的可选组件（未安装时静默跳过）
 
-SDKMAN（Java）、Android NDK（`/opt/homebrew/share/android-ndk`）、Docker、kubectl（含 kubecolor 包装 `k`）、pnpm、`~/.cargo/env`、`onproxy` 函数。
+SDKMAN（Java）、Android NDK（`/opt/homebrew/share/android-ndk`）、Docker、kubectl（`k` → `kubectl` 别名；已装 kubecolor 时由 `kubectl()` 函数透明包装彩色输出）、pnpm、`~/.cargo/env`、`onproxy` 函数。
 
 ### 终端模拟器（二选一即可，建议都装）
 
@@ -124,7 +144,9 @@ nvim --headless +qa                  # 无插件加载错误；首次运行会�
 
 # SSH / GitHub 可达性
 cat ~/.ssh/config                    # 顶部含 Include ~/.orbstack/ssh/config，github.com 走 ssh.github.com:443
-git config --get-regexp proxy        # github.com 指向 socks5://127.0.0.1:7890
+git config --get-regexp proxy        # github.com 指向 socks5://127.0.0.1:7890（仅当已手工恢复/合并 ~/.gitconfig 时才有输出，
+                                     # 因 .chezmoiignore 不应用 dot_gitconfig；也可直接校验源文件：
+                                     # git config --file ~/.local/share/chezmoi/dot_gitconfig --get-regexp proxy）
 ```
 
 全部通过后即可进入日常使用；更多维护流程见 [maintenance.md](maintenance.md)，完整映射见 [layout.md](layout.md)。
