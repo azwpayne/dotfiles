@@ -5,8 +5,9 @@
 # Reload: Cmd+Shift+, (macOS)
 # View options: ghostty +show-config --default --docs
 
+env = LANG=zh_CN.UTF-8
 
-# language = zh
+
 command = /bin/zsh -l
 # command = /opt/homebrew/bin/fish -l
 # command = /opt/homebrew/bin/tmux new -As main
