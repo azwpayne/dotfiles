@@ -72,8 +72,7 @@
 `nproc`（coreutils）、`jadx-gui`、`scrcpy`。
 另：`java` 仅在 SDKMAN 存在时经 `sdk_update` 间接使用，本仓库无直接引用。
 
-已移除的死引用（工具未安装/路径不存在；本仓库历史仅一条 init 提交，旧内容需回溯
-更早的独立 zsh-config 仓库历史）：
+已移除的死引用（工具未安装/路径不存在，可从 git 历史 `baseline` 标签找回）：
 conda、wezterm 工作区别名、`pkid`/`jeb`、`brew cu` 段。
 
 ## 注意事项
@@ -91,6 +90,4 @@ conda、wezterm 工作区别名、`pkid`/`jeb`、`brew cu` 段。
 1. 改完后跑语法检查：`zsh -n aliases.zsh fzf.zsh sdk.zsh`
 2. 干净启动验证无报错：`zsh -ic 'exit'`
 3. 抽查关键定义：`zsh -ic 'type k df du; echo $EDITOR'`
-4. 提交：小步提交，说明动机；重大重构前先打标签（如 `git tag pre-refactor`）以便回退。
-   注意：本仓库现有历史中没有 `baseline` 标签，注释中提到的该写法源自旧的独立
-   zsh-config 仓库，仅作历史背景参考。
+4. 提交：小步提交，说明动机；重大重构保留 `baseline` 标签以便回退。

@@ -86,7 +86,7 @@ alias tmux='tmux -2'                             # 强制 256 色
 
 # ~~~ 基础命令 ~~~
 # 注：原 chown/chmod/chgrp --preserve-root 别名已移除——GNU 专属标志在 macOS BSD
-# 工具链上必然报 illegal option（移除前即已损坏），需要时从旧配置仓库历史找回。
+# 工具链上必然报 illegal option（baseline 时即已损坏），需要时从 git 历史找回。
 alias wget='wget -c'                             # 断点续传
 alias rm='rm -i'                                 # 删除前逐个确认
 alias cp='cp -i'                                 # 覆盖前确认
@@ -170,7 +170,7 @@ alias uv_resync='rm -rf .venv uv.lock && uv sync'
 # WezTerm 工作区（已移除）
 # =============================================================================
 # wezterm 未安装，原六个 *Space 工作区别名已删除；
-# 需要时回溯旧配置仓库历史（本仓库无 baseline 标签）。
+# 需要时用 `git show baseline:aliases.zsh` 找回。
 
 # =============================================================================
 # Android 逆向工程
@@ -178,7 +178,7 @@ alias uv_resync='rm -rf .venv uv.lock && uv sync'
 jdx() { nohup jadx-gui "$@" > /dev/null 2>&1 & } # 后台启动 jadx-gui 反编译工具
 scr() { nohup scrcpy "$@" > /dev/null 2>&1 & }   # 后台启动 scrcpy 投屏
 # 注：原 pkid / jeb 别名已移除——其指向的 jar 包与 JEB 目录已不存在，
-# 需要时回溯旧配置仓库历史（本仓库无 baseline 标签）。
+# 需要时用 `git show baseline:aliases.zsh` 找回。
 
 # =============================================================================
 # 文件管理器 (yazi)
