@@ -1,6 +1,6 @@
 # 终端：Ghostty（主力）与 Alacritty（备用）
 
-两套配置共用 `JetBrainsMono Nerd Font Mono` 与 256 色，可独立安装、互不依赖。Ghostty 为日常主力（支持热重载、Quick Terminal），Alacritty 为轻量备用。
+两套配置共用 `JetBrainsMono Nerd Font Mono`（字号均为 15），可独立安装、互不依赖。Ghostty 为日常主力（支持热重载、Quick Terminal），Alacritty 为轻量备用。
 
 > **分工**：本文件只记录终端模拟器自身配置。提示符与配色方案的完整定义（`palette = 'catppuccin_mocha'`、powerline `format`、各段样式与符号）见 [shell.md — Starship 提示符](shell.md#starship-提示符starshiptoml)，本文仅保留 `theme = Catppuccin Mocha` 与之呼应的说明，不重复 Starship 细节。
 
@@ -15,7 +15,7 @@
 | 配置 | 值 | 说明 |
 | --- | --- | --- |
 | `env` | `LANG=zh_CN.UTF-8` | 显式声明中文 UTF-8，避免远端/脚本 locale 回退；与 `dot_zshrc:6` 的 `LANG=en_US.UTF-8` 互补 |
-| `command` | `/bin/zsh -l` | 登录 shell 启动；`fish -l` / `tmux new -As main` 已注释备用，以代码为准 |
+| `command` | `/bin/zsh -l` | 登录 shell 启动；`fish -l` / `tmux new -As main` 已注释备用 |
 | `window-inherit-working-directory` | `true` | 新标签页/分屏继承当前目录，保持上下文 |
 | `window-inherit-font-size` | `true` | 新 surface 继承字号 |
 
@@ -27,17 +27,17 @@
 | `font-family` | `JetBrainsMono Nerd Font Mono` | Nerd Font 变体，提供 powerline/OS/目录图标字形 |
 | `font-size` | `15` | 与 Alacritty `size = 15` 一致 |
 | `font-feature` | `+calt` | 上下文连字 |
-| `font-thicken` / `font-thicken-strength` | `true` / `1` | macOS 加粗渲染（文件中重复定义两次，值一致，以最后一次为准） |
+| `font-thicken` / `font-thicken-strength` | `true` / `1` | macOS 加粗渲染 |
 | `alpha-blending` | `linear` | 线性透明度混合，配合毛玻璃更平滑 |
-| `adjust-cell-height` / `adjust-cell-width` | `2` / `-1` | 微调行高/字间距，适配 Nerd Font 字形（`adjust-cell-height` 重复两次均为 `2`） |
+| `adjust-cell-height` / `adjust-cell-width` | `2` / `-1` | 微调行高/字间距，适配 Nerd Font 字形 |
 | `background-opacity` / `background-blur-radius` | `0.92` / `20` | 轻毛玻璃效果 |
 | `window-padding-x` / `window-padding-y` | `12` / `12` + `window-padding-balance = true` | 文字不贴边，四边均衡 |
 | `window-theme` | `auto` | 跟随系统明暗 |
-| `window-decoration` / `macos-window-shadow` / `macos-titlebar-proxy-icon` | `true` / `false` / `hidden` | 保留原生装饰但去阴影、隐藏标题栏代理图标（`macos-window-shadow` 重复两次均为 `false`） |
+| `window-decoration` / `macos-window-shadow` / `macos-titlebar-proxy-icon` | `true` / `false` / `hidden` | 保留原生装饰但去阴影、隐藏标题栏代理图标 |
 | `cursor-style` / `cursor-style-blink` / `cursor-opacity` / `cursor-color` | `block` / `true` / `0.8` / `#ff0000` | 块状闪烁光标，红色 |
-| `mouse-hide-while-typing` | `true` | 输入时自动隐藏指针（重复两次均为 `true`） |
+| `mouse-hide-while-typing` | `true` | 输入时自动隐藏指针 |
 | `mouse-scroll-multiplier` | `1.0` | 滚轮保持原速 |
-| `resize-overlay` | `never` | 调整窗口时不显示浮层（重复两次均为 `never`） |
+| `resize-overlay` | `never` | 调整窗口时不显示浮层 |
 | `window-save-state` | `always` | 重启恢复窗口布局 |
 | `window-width` / `window-height` | `0` / `0` | 自适应默认尺寸 |
 
@@ -64,7 +64,7 @@
 
 | 配置 | 值 | 说明 |
 | --- | --- | --- |
-| `macos-option-as-alt` | `right` | 仅右 Option 作为 Alt，左 Option 保留用于输入特殊字符（重复两次均为 `right`，第二处后附 `# macos-option-as-alt = true` 注释备用） |
+| `macos-option-as-alt` | `right` | 仅右 Option 作为 Alt，左 Option 保留用于输入特殊字符；另有 `# macos-option-as-alt = true` 注释备用 |
 | `clipboard-read` / `clipboard-write` | `allow` | 允许读写系统剪贴板 |
 | `clipboard-paste-protection` | `true` | 粘贴保护（多行粘贴前确认） |
 | `clipboard-paste-bracketed-safe` | `true` | bracketed paste 安全校验 |
@@ -79,9 +79,9 @@
 | 配置 | 值 | 说明 |
 | --- | --- | --- |
 | `quick-terminal-position` | `top` | 顶部下拉 |
-| `quick-terminal-screen` | `main`（实际生效） | 文件靠前处曾设为 `mouse`（L88），末尾覆盖为 `main`（L150），以最后一次为准 |
+| `quick-terminal-screen` | `main`（实际生效） | 首次设 `mouse`（L88），被末尾 `main`（L150）覆盖 |
 | `quick-terminal-autohide` | `true` | 失焦自动收起 |
-| `quick-terminal-animation-duration` | `0.15` | 动画 150ms（重复两次均为 `0.15`） |
+| `quick-terminal-animation-duration` | `0.15` | 动画 150ms |
 
 ### 性能与存储
 
@@ -91,7 +91,7 @@
 | `image-storage-limit` | `268435456`（256MB） | Kitty Graphics Protocol 图像上限，适配 16GB 机型 |
 | `gtk-single-instance` | `true` | Linux 单实例优化（macOS 下无影响） |
 
-> ⚠️ **重复键说明（待清理，功能不受影响）：** `private_dot_config/ghostty/config` 中 9 个键被重复赋值，Ghostty 按“最后一次出现生效”解析并可能在日志中告警。清单与末次生效值如下（已与 `grep -n` 逐行核对）：
+> ⚠️ **重复键说明（待清理，功能不受影响）：** `private_dot_config/ghostty/config` 中 9 个键被重复赋值，Ghostty 按“最后一次出现生效”解析并可能在日志中告警。清单与末次生效值如下：
 >
 > | 键 | 出现次数 | 末次生效值 | 备注 |
 > | --- | --- | --- | --- |

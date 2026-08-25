@@ -8,15 +8,16 @@
 | 前缀 | 含义 | 本仓库示例 |
 | --- | --- | --- |
 | `dot_` | 目标名以 `.` 开头（隐藏目录/文件） | `dot_zshrc` → `~/.zshrc` |
-| `private_` | 目标权限设为 `0600`（仅所有者可读写） | `private_dot_ssh/config` → `~/.ssh/config` (0600) |
+| `private_` | 目标仅所有者可访问：文件 0600、目录 0700 | `private_dot_ssh/config` → `~/.ssh/config` (0600) |
 | `symlink_` | 目标是符号链接，**文件内容即链接指向的路径** | `symlink_docker.fish` 内容为一行 OrbStack 路径 |
 | `empty_` | 目标为空文件（占位保证目录存在） | `private_empty_config.toml` → `~/.codex/empty_config.toml` |
 | （无前缀） | 原样同名复制 | `starship.toml` → `~/.config/starship.toml` |
 
 前缀可叠加，如 `private_dot_config` = 隐藏目录 + 该目录本身权限 0700，`private_dot_ssh` 同理。
 
-> 注：`private_dot_config` 下未加 `private_` 的子项（如 `zsh/`、`nvim/`、`alacritty/`、`ghostty/`、`mise/`）保持默认 0644；
-> 只有显式带 `private_` 的条目（`private_fish/`、`private_dot_ssh/`、`private_dot_pi/`）才收紧为 0600。
+> 注：`private_` 前缀只作用于它直接修饰的那一级——目录得 0700、文件得 0600，目录内未再带前缀的子项保持默认 0644。
+> 实测（stat）：`~/.config`、`~/.config/fish`、`~/.pi`、`~/.pi/agent` 均为 0700，而其内部文件（`config.fish`、
+> `~/.pi/agent/*.json` 等）均为 0644；仅文件本身带前缀的 `~/.ssh/config` 与 `~/.codex/empty_config.toml` 为 0600。
 
 ## 完整映射表
 
@@ -39,17 +40,17 @@
 
 | 源文件 | 目标路径 | 说明 |
 | --- | --- | --- |
-| `private_dot_config/zsh/aliases.zsh` | `~/.config/zsh/aliases.zsh` | 别名与通用函数（`auto_update`、`update-all`、`y`、`ruff_auto` 等）；`update-all` 支持 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise` 选择性更新（可传参指定目标，未传参则全量；`auto_update` 为旧版全量兼容入口，`update-all` 为新版支持 `mise` 且可单目标更新） |
+| `private_dot_config/zsh/aliases.zsh` | `~/.config/zsh/aliases.zsh` | 别名与通用函数（`update-all`、`auto_update`、`y`、`ruff_auto` 等）；`update-all` 为关联数组 6 目标 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise`，支持传参过滤、失败计数与耗时统计；`auto_update` 为旧版串行入口，仅 5 项目标（无 `mise`） |
 | `private_dot_config/zsh/fzf.zsh` | `~/.config/zsh/fzf.zsh` | fzf 前缀探测/缓存、全局选项、Ctrl-R/T/Alt-C 及 `frg`/`fkill`/`ftm`/`fl*` 函数 |
 | `private_dot_config/zsh/sdk.zsh` | `~/.config/zsh/sdk.zsh` | SDK 环境与补全（pnpm/SDKMAN(可选)/Android NDK/Python(uv)/Go/Rust/Docker/kubectl+kubecolor） |
 | `private_dot_config/zsh/dot_gitignore` | `~/.config/zsh/.gitignore` | 忽略运行时产物（`*.zwc`、`.fzf_prefix_cache`、`.DS_Store`） |
-| `private_dot_config/zsh/README.md` | `~/.config/zsh/README.md` | 模块内部文档（加载顺序契约、函数速查） |
+| `private_dot_config/zsh/README.md` | `~/.config/zsh/README.md` | 模块内部文档（加载顺序契约、函数速查）；未被 `.chezmoiignore` 排除，会随 apply 部署 |
 
 ### 终端与提示符
 
 | 源文件 | 目标路径 | 说明 |
 | --- | --- | --- |
-| `private_dot_config/starship.toml` | `~/.config/starship.toml` | Catppuccin Mocha powerline 提示符（已核验：palette 与 format 与实际一致） |
+| `private_dot_config/starship.toml` | `~/.config/starship.toml` | Catppuccin Mocha powerline 提示符（`palette = 'catppuccin_mocha'` + 自定义 format） |
 | `private_dot_config/ghostty/config` | `~/.config/ghostty/config` | Ghostty 主终端配置（JetBrainsMono Nerd Font Mono，`command = /bin/zsh -l`，Catppuccin Mocha 主题） |
 | `private_dot_config/alacritty/alacritty.toml` | `~/.config/alacritty/alacritty.toml` | Alacritty 备用配置（Dracula 配色、`xterm-256color`、JetBrainsMono Nerd Font Mono） |
 
@@ -58,7 +59,7 @@
 | 源文件 | 目标路径 | 说明 |
 | --- | --- | --- |
 | `private_dot_config/nvim/**` | `~/.config/nvim/**` | LazyVim 配置（`init.lua` + `lua/config/*` + `lua/plugins/*`，含 `lazy-lock.json` 锁定 44 个插件、`lazyvim.json`（extras 清单当前为空）、`stylua.toml`） |
-| `private_dot_config/nvim/README.md` | `~/.config/nvim/README.md` | LazyVim 上游模板自带，随 `nvim/**` 部署（当前因 `.chezmoiignore` 中 `**/README.md` 拼写错误未被排除） |
+| `private_dot_config/nvim/README.md` | `~/.config/nvim/README.md` | LazyVim 上游模板自带，随 `nvim/**` 部署（`.chezmoiignore` 的排除模式误写为 `**/REAMDME.md`，未生效） |
 | `private_dot_config/nvim/LICENSE` | `~/.config/nvim/LICENSE` | LazyVim 上游模板自带，随 `nvim/**` 部署 |
 | `private_dot_config/nvim/dot_gitignore` | `~/.config/nvim/.gitignore` | 忽略插件数据等运行时目录 |
 | `private_dot_config/nvim/dot_neoconf.json` | `~/.config/nvim/.neoconf.json` | neoconf 本地配置 |
@@ -71,7 +72,7 @@
 
 | 源文件 | 目标路径 | 说明 |
 | --- | --- | --- |
-| `private_dot_config/private_fish/config.fish` | `~/.config/fish/config.fish` (0600) | 最小交互配置（空壳） |
+| `private_dot_config/private_fish/config.fish` | `~/.config/fish/config.fish` (0644) | 最小交互配置（空壳；所在目录 `private_fish/` 本身为 0700） |
 | `.../private_completions/symlink_docker.fish` | `~/.config/fish/completions/docker.fish` | 符号链接 → OrbStack 内置补全 |
 | `.../private_completions/symlink_kubectl.fish` | `~/.config/fish/completions/kubectl.fish` | 同上 |
 | `.../private_completions/symlink_orbctl.fish` | `~/.config/fish/completions/orbctl.fish` | 同上 |
@@ -84,25 +85,28 @@
 
 | 源文件 | 目标路径 | 说明 |
 | --- | --- | --- |
-| `private_dot_pi/private_agent/settings.json` | `~/.pi/agent/settings.json` (0600) | 完整字段：`theme: dark`、`lastChangelogVersion: 0.84.3`、`hideThinkingBlock: false`、`defaultProvider: opencode`、`defaultModel: muse-spark-1.2-contributor-free`、`defaultThinkingLevel: xhigh`、7 个 npm 包（`pi-web-access`/`pi-subagents`/`@quintinshaw/pi-dynamic-workflows`/`@narumitw/pi-btw`/`@narumitw/pi-goal`/`pi-landstrip`/`@gotgenes/pi-permission-system`） |
-| `private_dot_pi/private_agent/sandbox.json` | `~/.pi/agent/sandbox.json` (0600) | 文件系统与网络沙箱策略（`denyRead` 含 `/Users` `/etc` 等、`denyWrite` 含 `**/.env` `~/.ssh` 等、`allowNetwork: true`、`allowLocalBinding: false`、`allowedDomains: *.githubusercontent.com`/`*.github.com`/`github.com`） |
-| `private_dot_pi/private_agent/landstrip.json` | `~/.pi/agent/landstrip.json` (0600) | 子代理上限 `maxSubagents: 8`（`toolFilesystemPolicy: sandbox`，任务权限 `*` deny、`review` allow） |
-| `private_dot_pi/private_agent/extensions/pi-permission-system/config.json` | `~/.pi/agent/extensions/pi-permission-system/config.json` (0600) | 工具级权限矩阵（`read/write/edit/bash/path` 细粒度 allow/deny/ask，禁 `sudo`/`rm`/`mv` 等） |
-| `private_dot_pi/workflows/settings.json` | `~/.pi/workflows/settings.json` (0600) | workflow 运行时配置：进度面板并发上限 `progressPanelMaxAgents: 8`，与 `landstrip.json` 的 `maxSubagents: 8` 职责分离 |
+| `private_dot_pi/private_agent/settings.json` | `~/.pi/agent/settings.json` (0644) | 完整字段：`theme: dark`、`lastChangelogVersion: 0.84.3`、`hideThinkingBlock: true`、`defaultProvider: zai-coding-cn`、`defaultModel: glm-5.2`、`defaultThinkingLevel: xhigh`、7 个 npm 包（`pi-web-access`/`pi-subagents`/`@quintinshaw/pi-dynamic-workflows`/`@narumitw/pi-btw`/`@narumitw/pi-goal`/`pi-landstrip`/`@gotgenes/pi-permission-system`） |
+| `private_dot_pi/private_agent/sandbox.json` | `~/.pi/agent/sandbox.json` (0644) | 文件系统与网络沙箱策略（`denyRead` 含 `/Users` `/etc` 等、`denyWrite` 含 `**/.env` `~/.ssh` 等、`allowNetwork: false`、`allowLocalBinding: false`、`allowedDomains: *.githubusercontent.com`/`*.github.com`/`github.com`） |
+| `private_dot_pi/private_agent/landstrip.json` | `~/.pi/agent/landstrip.json` (0644) | 子代理上限 `maxSubagents: 8`（`toolFilesystemPolicy: sandbox`，任务权限 `*` deny、`review` allow） |
+| `private_dot_pi/private_agent/extensions/pi-permission-system/config.json` | `~/.pi/agent/extensions/pi-permission-system/config.json` (0644) | 工具级权限矩阵（`read/write/edit/bash/path` 细粒度 allow/deny/ask，禁 `sudo`/`rm`/`mv` 等） |
+| `private_dot_pi/workflows/settings.json` | `~/.pi/workflows/settings.json` (0644) | workflow 运行时配置：进度面板并发上限 `progressPanelMaxAgents: 8`，与 `landstrip.json` 的 `maxSubagents: 8` 职责不同、相互独立 |
 
-## .chezmoiignore —— 源目录有、目标没有的唯一例外
+> 权限实测（stat）：`private_dot_pi`/`private_agent` 目录前缀使 `~/.pi`、`~/.pi/agent` 为 0700，其内文件（含 `extensions/**`）均为 0644；
+> `workflows/` 目录无 `private_` 前缀，`~/.pi/workflows` 为 0755。
 
-本仓库**唯一**的非静态机制是根目录的 `.chezmoiignore`。它本身**不会**被 `chezmoi apply` 到 `$HOME`
-（chezmoi 始终忽略点文件中的该文件名），作用是在源目录中**排除**部分文件不参与渲染：
+## .chezmoiignore —— 排除部分源文件不参与部署
+
+根目录的 `.chezmoiignore` 本身**不会**被 `chezmoi apply` 到 `$HOME`
+（chezmoi 对该文件名特殊处理），作用是在源目录中**排除**部分文件不参与渲染。实文如下：
 
 ```gitignore
 # 本地覆盖与备份
 *.local
 *.local.*
 *.bak
-**/README.md        # ← 预期 **/README.md，已生效
-README.md            # 仅根目录
-LICENSE              # 仅根目录
+**/REAMDME.md
+README.md
+LICENSE
 docs/
 docs/**
 **/dot_git
@@ -120,10 +124,14 @@ node_modules/
 .pnpm-store/
 ```
 
-效果：`chezmoi diff` / `chezmoi apply` 会自动跳过文档、本地覆盖、敏感文件名匹配与构建产物。
-注意：根级模式 `README.md` / `LICENSE` 仅匹配源目录根，不匹配嵌套路径——因此
-`~/.config/nvim/README.md` 与 `~/.config/nvim/LICENSE` 仍会随 `nvim/**` 部署到目标机；
-本应用于排除嵌套 README/LICENSE 的规则在文件中误写为 `**/README.md`（需追加 `**/LICENSE`），暂未生效。详见 [getting-started.md](getting-started.md)。
+效果：`chezmoi diff` / `chezmoi apply` 自动跳过根级 `README.md`、`LICENSE`、`docs/**`、`dot_gitconfig`、
+任意 `dot_git`（`.git` 目录），以及匹配 `*.local`/`*.bak`/`*token*` 等敏感与构建产物模式的文件。
+
+⚠️ `**/REAMDME.md` 是拼写错误（REAMDME ≠ README），不匹配任何文件、**未生效**——因此嵌套的
+`~/.config/nvim/README.md`、`~/.config/zsh/README.md` 与 `~/.config/nvim/LICENSE` 并未被排除，
+会随 `apply` 部署到目标机（根级 `README.md`/`LICENSE` 模式只匹配源目录根，不匹配嵌套路径）。
+如需排除嵌套 README/LICENSE，应将其改为 `**/README.md` 并追加 `**/LICENSE`。
+详见 [getting-started.md](getting-started.md)。
 
 ## 仓库特性说明
 
@@ -132,8 +140,9 @@ node_modules/
   如需按机器差异化，再引入模板即可。
 - **运行时产物不入库**：`~/.config/zsh/.gitignore` 和 `~/.config/nvim/.gitignore`
   分别忽略 `*.zwc`、`.fzf_prefix_cache` 及插件数据目录。
+- **仅服务于仓库管理、不部署的文件**：根目录的 `.gitignore` 与 `.chezmoiignore` 被 chezmoi 默认忽略（源目录中点开头文件不参与 apply）；根级 `README.md`、`LICENSE`、`docs/`（本文档所在）被 `.chezmoiignore` 排除。
 - **不在仓库内的重要文件**：
   - `~/.config/gh/hosts.yml` / `config.yml`——由 `gh auth login` 生成，含凭据，切勿加入仓库；
   - `~/.zim/`——由 zimfw 自动管理（`dot_zimrc` 仅为其配置）；
-  - `~/.ssh/` 除 `config` 外的密钥——均被 `private_dot_ssh` 的 0600 与 `.chezmoiignore` 的 `*secret*` 等规则双重保护；
+  - `~/.ssh/` 除 `config` 外的密钥——不在仓库内，`.chezmoiignore` 的 `*secret*`/`*token*` 等模式可防止误入库；
   - Neovim 插件本体（`~/.local/share/nvim/`）——由 lazy.nvim 按 `lazy-lock.json` 安装。

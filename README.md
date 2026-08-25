@@ -4,14 +4,14 @@
 
 本仓库是 chezmoi 的**源目录**（source directory，位于 `~/.local/share/chezmoi`），
 通过 `chezmoi apply` 将文件渲染到 `$HOME` 下对应位置。全部为静态文件——没有模板、
-没有脚本，所见即所得；通过 `.chezmoiignore` 将 `README.md` / `LICENSE` / `docs/` /
-`*.local` / `*.bak` 等仅供仓库查阅或本地覆盖的文件排除在部署之外，避免污染目标HOME目录。
+没有脚本，所见即所得；通过 `.chezmoiignore` 将根级 `README.md` / `LICENSE`、`docs/`、
+`*.local` / `*.bak` 等仅供仓库查阅或本地覆盖的文件排除在部署之外，避免污染目标 HOME 目录。
 
 ## ✨ 特性总览
 
 | 领域 | 方案 | 说明 |
 | --- | --- | --- |
-| Shell | Zsh + [Zim](https://zimfw.sh/) + 自有模块 | `aliases.zsh` / `fzf.zsh` / `sdk.zsh` 三模块化加载；`aliases.zsh` 新增 `update-all` 支持选择性批量更新（`brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise`） |
+| Shell | Zsh + [Zim](https://zimfw.sh/) + 自有模块 | `aliases.zsh` / `fzf.zsh` / `sdk.zsh` 三模块化加载；`update-all` 批量更新（`brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise`，支持参数过滤与失败计数） |
 | 提示符 | [Starship](https://starship.rs/) | Catppuccin Mocha powerline 风格 |
 | 模糊搜索 | fzf + fzf-tab + fd | Ctrl-R 历史、Ctrl-T 文件、Alt-C 目录、`frg`/`fkill`/`ftm`/`fl*` 交互函数 |
 | 终端 | Ghostty（主力）/ Alacritty（备用） | JetBrainsMono Nerd Font Mono，Catppuccin / Dracula 配色 |
@@ -19,7 +19,7 @@
 | 运行时管理 | mise | bun / deno / go / node / pnpm 一键切换 |
 | Git 工作流 | git + gh (CLI) | LFS、GitHub 走本地 SOCKS5 代理、`push.default=current` + `autoSetupRemote` |
 | SSH | OpenSSH `~/.ssh/config` | `ssh.github.com:443` + 自适应 `ProxyCommand`（探活 `127.0.0.1:5376` SOCKS5，失败直连）+ OrbStack `Include` |
-| AI Agent | pi coding agent | 沙箱化文件系统/网络策略（`allowNetwork: true`）+ 细粒度工具权限；`workflows/settings.json` 控制进度面板并发/展示上限（8，`progressPanelMaxAgents`），子代理总数由 `landstrip.json` 限定（8，`maxSubagents`） |
+| AI Agent | pi coding agent | 默认 `zai-coding-cn` / `glm-5.2`（`xhigh`）；文件系统沙箱 + 禁网策略（`allowNetwork: false`）+ 允许优先的工具权限矩阵（敏感路径与高危命令 deny）；`workflows/settings.json` 控制进度面板并发/展示上限（8，`progressPanelMaxAgents`），子代理总数由 `landstrip.json` 限定（8，`maxSubagents`） |
 
 ## 🚀 快速开始
 
@@ -59,13 +59,13 @@ chezmoi apply    # 确认无误后应用
 
 ## 📁 仓库结构与目标映射
 
-chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private_` → 权限收紧为 `0600`，
+chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private_` → 权限收紧（目录 `0700` / 文件 `0600`），
 `symlink_` → 符号链接（文件内容即链接目标）。完整逐文件映射见
 [docs/layout.md](docs/layout.md)。
 
 ```text
 ~/.local/share/chezmoi                    应用到 $HOME
-├── .chezmoiignore                     →  (不部署) 过滤 README.md / LICENSE / docs/ / *.local / *.bak / *token* 等，避免污染家目录
+├── .chezmoiignore                     →  (不部署) 过滤根级 README.md / LICENSE / docs/ 与 *.local / *.bak / *token* 等，避免污染家目录
 ├── .gitignore                         →  (git 侧) 忽略 .vscode / .git / node_modules / .DS_Store 等
 ├── dot_zshrc                          →  ~/.zshrc                     Zsh 入口：Zim 引导 + 工具 eval + 模块加载
 ├── dot_zimrc                          →  ~/.zimrc                     Zim 模块清单
@@ -90,17 +90,17 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 │       ├── private_completions/       →  ~/.config/fish/completions/  symlink_docker/kubectl/orbctl.fish → OrbStack
 │       └── private_conf.d/, private_functions/ → 空目录占位（内含 .keep）
 ├── private_dot_ssh/
-│   └── config                         →  ~/.ssh/config                ★ GitHub 走 ssh.github.com:443 + 自适应 SOCKS5 ProxyCommand（含 OrbStack Include，0600）
+│   └── config                         →  ~/.ssh/config                ★ GitHub 走 ssh.github.com:443 + 自适应 SOCKS5 ProxyCommand（含 OrbStack Include；~/.ssh 目录 0700）
 └── private_dot_pi/
-    ├── private_agent/                 →  ~/.pi/agent/                 pi coding agent 主配置（0600）
-    │   ├── settings.json              →  ~/.pi/agent/settings.json     主题 `dark` / 包列表 7 个 npm 包 / `hideThinkingBlock: false` / `defaultProvider: opencode` / `defaultModel: muse-spark-1.2-contributor-free` / `defaultThinkingLevel: xhigh`（`lastChangelogVersion: 0.84.3`）
-    │   ├── sandbox.json               →  ~/.pi/agent/sandbox.json     文件系统与网络沙箱策略（`allowNetwork: true` 仅白名单域名可出站）
+    ├── private_agent/                 →  ~/.pi/agent/                 pi coding agent 主配置（目录 0700）
+    │   ├── settings.json              →  ~/.pi/agent/settings.json     主题 `dark` / 7 个 npm 包 / `hideThinkingBlock: true` / `defaultProvider: zai-coding-cn` / `defaultModel: glm-5.2` / `defaultThinkingLevel: xhigh`（`lastChangelogVersion: 0.84.3`）
+    │   ├── sandbox.json               →  ~/.pi/agent/sandbox.json     文件系统与网络沙箱策略（`allowNetwork: false` 禁网、`allowLocalBinding: false`，域名白名单 3 项）
     │   ├── landstrip.json             →  ~/.pi/agent/landstrip.json   子代理总数上限 `maxSubagents: 8`（`toolFilesystemPolicy: sandbox`，任务权限 `review` allow 其余 deny）
-    │   └── extensions/pi-permission-system/config.json → 细粒度工具权限矩阵
+    │   └── extensions/pi-permission-system/config.json → 细粒度工具权限矩阵（允许优先：默认 allow，敏感路径/高危命令 deny）
     └── workflows/settings.json        →  ~/.pi/workflows/settings.json 工作流设置（progressPanelMaxAgents=8）
 ```
 
-> `docs/`、`README.md`、`LICENSE` 等文档仅存在于源仓库，通过 `.chezmoiignore` 排除，不会被部署到 `$HOME`。
+> 仅根级 `README.md` / `LICENSE` / `docs/` 由 `.chezmoiignore` 排除、不部署；子目录内的 `zsh/README.md`、`nvim/README.md`、`nvim/LICENSE` 仍会随 `apply` 部署（排除规则 `**/REAMDME.md` 为拼写笔误，未生效）。
 
 ## 📚 文档索引
 
@@ -120,8 +120,8 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 
 ## 🔒 安全与隐私
 
-- 敏感度较高的文件使用 `private_` 前缀，应用后权限为 `0600`
-  （如 `~/.ssh/config`、整个 `~/.pi/agent/`）。
+- 敏感度较高的路径使用 `private_` 前缀收紧权限：目录 `0700`（如 `~/.ssh/`、
+  `~/.pi/agent/`、`~/.config/fish/`），文件 `0600`（如 `private_empty_` 前缀的 `~/.codex/empty_config.toml`）。
 - `~/.config/gh/` 下的 `config.yml` 与 `hosts.yml` 均由 `gh auth login`
   在目标机器上生成，含凭据，不入仓库。
 - pi agent 的沙箱与权限策略显式拒绝读取 `*.env`、`~/.ssh/*`、`~/.aws/*` 等，

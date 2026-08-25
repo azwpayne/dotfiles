@@ -22,17 +22,14 @@ zsh -l
      ├─ ④ for file in ~/.config/zsh/aliases.zsh ~/.config/zsh/fzf.zsh; do source "$file"; done
      │     ├─ aliases.zsh  ← 导出 $EDITOR/$VISUAL，供下一步使用
      │     └─ fzf.zsh      ← 依赖 $EDITOR 展开 Ctrl-O 绑定
-     └─ ⑤ source ~/.config/zsh/sdk.zsh      ← 无条件加载（dot_zshrc:63-64）
-           （注释称“# Source external configs (excluding sdk.zsh for lazy loading)”与
-            “# Uncomment to enable Java/Go/Python/Rust SDK management”均声称可选/需取消注释，
-            但下一行即无条件 `source ~/.config/zsh/sdk.zsh`，注释与代码不一致，以代码为准）
+     └─ ⑤ source ~/.config/zsh/sdk.zsh      ← 无条件加载（dot_zshrc:133）
+           （注释称 “excluding sdk.zsh for lazy loading”、“Uncomment to enable …” 均暗示可选，
+            但代码紧随其后即无条件 `source ~/.config/zsh/sdk.zsh`，注释与代码不一致，以代码为准）
 ```
 
 **顺序即语义**：同名定义后加载者生效。典型例子是短别名 `k`——`sdk.zsh`
 在 kubectl 存在时定义 `k='kubectl'`（含 `command -v kubectl` 守卫 + `compdef k=kubectl`），
 因此 `aliases.zsh` 有意不定义 `k`。
-`sdk.zsh` 头部对 SDKMAN 初始化的重复 `source`（`[[ -s ... ]]` 与 `[ -f ... ]` 双重）已清理，
-仅保留单次初始化（由 sdk.zsh 代理项处理）。
 三个模块的内部契约（依赖、函数速查、破坏性命令警告）详见
 [`private_dot_config/zsh/README.md`](../private_dot_config/zsh/README.md)。
 
@@ -55,7 +52,7 @@ zsh -l
 补充说明：
 
 - `ZSH_AUTOSUGGEST_MANUAL_REBIND=1` 在 `dot_zshrc` 中已设置，因 `zsh-autosuggestions` 为末尾模块之一，可提升性能。
-- `ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)` 配置 `fast-syntax-highlighting`。
+- `ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)` 是 zsh-users 版 zsh-syntax-highlighting 的开关；该模块（连同 `zfm` / `fzf`）在 zimrc 中已被注释、未加载，实际生效的 `fast-syntax-highlighting` 并不读取此变量，属 Zim 模板遗留设置。
 
 > ⚠️ **asciiship 实际被覆盖**：`.zshrc` 中 `eval "$(starship init zsh)"` 发生在
 > Zim 初始化之后，实际生效的提示符是 Starship。`.zimrc` 里的 `asciiship` 及其信息
@@ -65,11 +62,11 @@ zsh -l
 ## Starship 提示符（starship.toml）
 
 - **主题**：Catppuccin Mocha（`palette = 'catppuccin_mocha'`），另内置 `catppuccin_frappe` / `catppuccin_latte` / `catppuccin_macchiato` 三套备用调色板，改顶部 `palette` 一行即可切换。
-- **单行 powerline 布局**：`format` 首行空字符串产生一个空行分隔，`[line_break] disabled = true` 因此实际为单行渲染，段间用 `` / `` / `` 电源线符号衔接：
+- **单行 powerline 布局**：`[line_break] disabled = true` 使 `$line_break` 不换行，整条提示符渲染为单行，段间用 `` / `` / `` 电源线符号衔接：
 
 ```
- OS → 用户名 → 目录 → git 分支/状态 → 语言版本(c/rust/golang/nodejs/bun/php/java/kotlin/haskell/python) → conda → 时间
- ❯        （绿色=上条命令成功，红色=失败；vim 模式下显示 ❮）
+ OS → 用户名 → 目录 → git 分支/状态 → 语言版本(c/rust/golang/nodejs/bun/php/java/kotlin/haskell/python) → conda → 时间 → 耗时 → ❯
+（❯ 绿色=上条命令成功，红色=失败；vim 模式下显示 ❮；耗时段仅在命令超过 starship 默认 2s 阈值时出现）
 ```
 
 各段细节（与 `starship.toml` 一一对应）：
@@ -104,8 +101,8 @@ zsh -l
 3. `~/.fzf`（git 安装方式，测试 `[[ -d "$HOME/.fzf/bin" ]]`）
 4. `/usr`（Linux 发行版仓库，测试 `[[ -x "/usr/bin/fzf" ]]`）
 
-结果缓存到 `~/.fzf_prefix_cache`（文件名与 `private_dot_config/zsh/dot_gitignore`
-中的忽略项一致；因缓存位于 `$HOME` 下不入仓库，通常无需额外忽略）。下次启动若
+结果缓存到 `${ZDOTDIR:-$HOME}/.fzf_prefix_cache`（默认即 `~/.fzf_prefix_cache`，
+文件名与 `private_dot_config/zsh/dot_gitignore` 中的忽略项一致）。下次启动若
 `$FZF_PREFIX/bin/fzf` 不可执行，则自动删除缓存并重新探测（自愈）。探测成功
 后若 `$PATH` 未包含 `$FZF_PREFIX/bin` 则追加。最后执行 `command -v fzf && eval "$(fzf --zsh)"`
 加载官方按键绑定与补全（fzf 缺失时静默跳过）。
@@ -140,7 +137,7 @@ zsh -l
 
 | 函数 | 用途 | 依赖 |
 | --- | --- | --- |
-| `frg [pattern]` | `rg --line-number --color=always --smart-case` 管道至 fzf，按 `:` 分隔，`bat --highlight-line` 预览，回车 `nvim '{1}' +{2}` 定位行号；空结果时自动退出（`--exit-0`） | rg, fzf, bat, nvim |
+| `frg [pattern]` | `rg --line-number --color=always --smart-case` 管道至 fzf，按 `:` 分隔，`bat --style=full --color=always --highlight-line` 预览，回车 `nvim '{1}' +{2}` 定位行号；空结果时自动退出（`--exit-0`） | rg, fzf, bat, nvim |
 | `fkill [signal]` | `ps -ef \| sed 1d \| fzf -m \| awk '{print $2}' \| xargs kill -9`（`sed 1d` 去掉表头行避免误选；信号可选，默认 -9） | fzf |
 | `find_large_files [size]` | `fd -t f -S "+$size" -X du -h {} \| sort -k1hr`，默认 `100M` | fd, du |
 | `ftm [session]` | tmux 会话 fzf 选择/创建/切换（`switch-client` vs `attach-session` 自动判断）；选择列表带 `--height 60% --exit-0`（无会话时自动退出） | tmux, fzf |
@@ -149,7 +146,7 @@ zsh -l
 | `flnet` | `lsof -i \| fzf` 仅显示 TCP/UDP 连接 | lsof, fzf |
 | `fluser [user]` | `lsof -u "$user" \| fzf` 按用户过滤（默认 `$USER`） | lsof, fzf |
 
-其中 `LSOF_PREVIEW='pid=$(echo {} \| awk "{print \$2}"); [ -n "$pid" ] && ps -fp "$pid" || echo "No PID"'` 为共享预览片段。
+其中 `LSOF_PREVIEW='pid=$(echo {} \| awk "{print \$2}"); [ -n "$pid" ] && ps -fp "$pid" 2>/dev/null || echo "No PID"'` 为共享预览片段。
 
 ### 包管理更新函数（aliases.zsh）
 
@@ -158,9 +155,9 @@ zsh -l
 | 函数 | 所在 | 用途 | 关键实现 |
 | --- | --- | --- | --- |
 | `auto_update` | aliases.zsh | 传统守卫式串行全量更新：逐个 `command -v` 守卫，未安装即跳过；若存在 `onproxy` 则先切代理 | `uv_update` → `sdk_update` → `rust_update` → `tldr_update` → `brew_update` 依次执行（5 目标，无 mise） |
-| `update-all [targets...]` | aliases.zsh | 声明式批量更新：关联数组 `tasks` 声明 6 项（`brew` / `sdk` / `rustup` / `tldr` / `uv` / `mise`），支持参数过滤、彩色输出、失败计数与耗时统计 | `local -A tasks=(brew … sdk … rustup … tldr … uv … mise …)`；无参时 `targets=(${(k)tasks})` 全量，传参则过滤；`command -v $name` 守卫 + `eval "${tasks[$name]}"` + `failed` 计数；`print -P %F{blue/green/red/yellow}` 彩色提示（蓝=开始、绿=完成、黄=跳过、红=未知目标/失败），`start_time/duration` 统计耗时 `${mins}m${secs}s` |
+| `update-all [targets...]` | aliases.zsh | 声明式批量更新：关联数组 `tasks` 声明 6 项（`brew` / `sdk` / `rustup` / `tldr` / `uv` / `mise`），支持参数过滤、彩色输出、失败计数与耗时统计 | `local -A tasks=(brew … sdk … rustup … tldr … uv … mise …)`；无参时 `targets=(${(k)tasks})` 全量，传参则只运行指定目标；`command -v $name` 守卫 + `eval "${tasks[$name]}"` + `failed` 计数；`print -P %F{blue/green/red/yellow}` 彩色提示（蓝=开始、绿=完成、黄=跳过、红=未知目标/失败），`start_time/duration` 统计耗时 `${mins}m${secs}s` |
 
-> `update-all` 任务定义（与 `aliases.zsh:196` 一致）：`brew` 为 `brew update -f && brew upgrade -f --greedy-latest -y && brew cu -y -a && brew cleanup --prune=all`，`sdk` 为 `sdk upgrade && sdk selfupdate && sdk flush`，`rustup` 为 `rustup update && rustup upgrade`，`tldr` 为 `tldr --update`，`uv` 为 `uv tool upgrade --all`，`mise` 为 `mise upgrade`。支持 `update-all brew uv` 仅更新指定目标；未知参数会提示 `Available: …` 并返回 1，未安装目标黄色 `⚠️ not found` 跳过。`auto_update` 仍为传统串行写法，日常推荐 `update-all`。
+> `update-all` 任务定义（与 `aliases.zsh:197` 的 `local -A tasks=(…)` 一致）：`brew` 为 `brew update -f && brew upgrade -f --greedy-latest -y && brew cu -y -a && brew cleanup --prune=all`，`sdk` 为 `sdk upgrade && sdk selfupdate && sdk flush`，`rustup` 为 `rustup update && rustup upgrade`，`tldr` 为 `tldr --update`，`uv` 为 `uv tool upgrade --all`，`mise` 为 `mise upgrade`。支持 `update-all brew uv` 仅更新指定目标；未知参数会提示 `Available: …` 并返回 1，未安装目标黄色 `⚠️ not found` 跳过。`auto_update` 仍为传统串行写法，日常推荐 `update-all`。
 
 ### fzf-tab
 

@@ -7,8 +7,7 @@ Neovim 配置，目标 Neovim ≥ 0.9（本机验证 0.12）。源目录通过 `
 
 > **文档分工**：本文档是 chezmoi 仓库视角（结构 / extras / 选项 / 键位 / autocmds 与仓库实值逐行一致）；
 > 编辑器面向用户的安装与功能概览见应用后的 [`~/.config/nvim/README.md`](../private_dot_config/nvim/README.md)
-> （即源文件 `private_dot_config/nvim/README.md`），二者互补不重复。改动配置时以
-> `lua/config/*.lua` 与 `lazy-lock.json` 为权威来源。
+> （即源文件 `private_dot_config/nvim/README.md`），二者互补不重复，详细分工见文末。
 
 ## 目录结构
 
@@ -83,7 +82,8 @@ LSP / 格式化 / lint 由 LazyVim 内置的 mason + nvim-lspconfig + conform + 
 ## 插件管理策略（lua/config/lazy.lua）
 
 - **bootstrap**：`vim.fn.stdpath("data") .. "/lazy/lazy.nvim"` 不存在时执行
-  `git clone --filter=blob:none --branch=stable https://github.com/folke/lazy.nvim.git`，失败时 `nvim_echo` 并 `os.exit(1)`，成功后 `vim.opt.rtp:prepend(lazypath)`；幂等，可重复启动。
+  `git clone --filter=blob:none --branch=stable https://github.com/folke/lazy.nvim.git`，失败时 `nvim_echo` 报错并 `os.exit(1)`；
+  无论是否新克隆，随后均 `vim.opt.rtp:prepend(lazypath)`，幂等可重复启动。
 - `defaults.lazy = false`：自定义插件默认启动时加载；`version = false` 跟随最新 commit（不锁 semver，`version = "*"` 为注释备选）。
 - `install.colorscheme = { "tokyonight", "habamax" }`：首次安装时自动尝试这两套配色。
 - `checker.enabled = true, notify = false`：后台静默检查更新，不弹通知。
@@ -94,7 +94,7 @@ LSP / 格式化 / lint 由 LazyVim 内置的 mason + nvim-lspconfig + conform + 
 
 ### lazy-lock.json（44 个）
 
-验证：`python -c "import json; print(len(json.load(open('private_dot_config/nvim/lazy-lock.json'))))"` → `44`。
+验证：`python3 -c "import json; print(len(json.load(open('private_dot_config/nvim/lazy-lock.json'))))"` → `44`。
 当前锁定（按字母序，均为 `branch: main/master` + commit）：
 
 `LazyVim`、`SchemaStore.nvim`、`blink.cmp`、`bufferline.nvim`、`catppuccin`、`cmake-tools.nvim`、
@@ -122,7 +122,7 @@ LSP / 格式化 / lint 由 LazyVim 内置的 mason + nvim-lspconfig + conform + 
 
 ## 自定义键位速查（lua/config/keymaps.lua）
 
-Leader 为空格（LazyVim 默认），以下为本仓库在 LazyVim 默认之后叠加的自定义项（与 `keymaps.lua` 实值一致，`desc` 字段保留）：
+Leader 为空格（LazyVim 默认），以下为本仓库在 LazyVim 默认之后叠加的自定义项（与 `keymaps.lua` 实值一致；`desc` 如实保留，仅 `jk` 一项源文件未设 `desc`）：
 
 | 键位 | 模式 | 动作 | 说明（`desc`） |
 | --- | --- | --- | --- |

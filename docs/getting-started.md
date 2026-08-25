@@ -14,7 +14,7 @@ brew install --cask font-jetbrains-mono-nerd-font   # Ghostty / Alacritty / Neov
 ```
 
 > `chezmoi` ≥ 2.x、`brew`、`font-jetbrains-mono-nerd-font` 是唯三需要在 `chezmoi apply` **之前**就绪的前置；
-> 其余工具均可在 `apply` 之后按需补装（有 `command -v` 守卫，未安装时静默跳过，不阻断启动）。
+> 其余工具均可在 `apply` 之后按需补装：`zoxide` / `mise` / `starship` / `fzf` / `brew` 的 `eval` 在 `~/.zshrc` 中无守卫，缺失时启动会报一行 `command not found`（不阻断）；其余加载点（`sdk.zsh`、`fzf.zsh` 按键绑定等）均有 `command -v` / 目录存在守卫，未安装时静默跳过。
 
 ## 2. 应用配置
 
@@ -38,16 +38,20 @@ exec zsh   # 重启 shell 使全部配置生效（或重新打开终端）
 - `*.local` / `*.local.*` / `*.bak` / `**/dot_DS_Store` / `node_modules/` / `.pnpm-store/` 等本地覆盖与构建产物
 - `*token*` / `*secret*` / `*credential*` / `*client_secret*` 等敏感文件名匹配
 
-> 嵌套排除 `**/README.md` 在源文件中曾拼写为 `**/REAMDME.md`（typo），详见 [layout.md](layout.md) 与 Scan 清单；根级 `README.md` / `LICENSE` 的排除不受影响。
+> 源文件中嵌套 README 的排除模式实际写作 `**/REAMDME.md`（REAMDME 为拼写错误，不匹配任何文件、未生效），因此嵌套的 `README.md` / `LICENSE` **并未被排除**：`private_dot_config/nvim/README.md`、`nvim/LICENSE`、`private_dot_config/zsh/README.md` 会随 `apply` 部署到 `~/.config/` 下；根级 `README.md` / `LICENSE` 的排除不受影响。详见 [layout.md](layout.md)。
 
 因此 `chezmoi diff` 中不会出现 `docs/` 的新增，`chezmoi doctor` 亦不会告警缺失——属预期行为。
 如需排查可执行 `chezmoi ignored` / `chezmoi status` 查看被忽略列表。
 
 ### 网络与代理前提
 
-GitHub 可达性强依赖**本机代理在线**。`dot_gitconfig` 中三处 `proxy` 均已统一为 `socks5://127.0.0.1:5376`（历史版本中 `7890` 已失效），该端口也与 `private_dot_ssh/config` 的 `ProxyCommand` 探测保持一致。代理在线时，GitHub 通过 `socks5` 代理连接；离线时则直连。SSH 侧同样先探测 `127.0.0.1:5376`，在线时经 `socks5` 代理连接，离线则直连。首次启动 `zsh` 时 `zimfw` 拉取模块走 HTTPS 直连，通常不受影响。
+GitHub 可达性依赖**本机代理在线**。`dot_gitconfig` 中三处 `proxy`（`[http "https://github.com"]` / `[https "https://github.com"]` / `[ssh "ssh.github.com"]`）均为 `socks5://127.0.0.1:5376`，`private_dot_ssh/config` 的 `ProxyCommand` 探测端口同为 `5376`。两侧行为不同：
 
-若代理未运行，第 5 节的 git / SSH 相关验证会失败（`git` 卡住或报 `Connection refused`、`ssh -T git@github.com` 超时等）。排查方法：确认代理进程监听 `5376` 端口：
+- **git（HTTPS）**：代理为固定配置、无直连回退——代理离线时对 GitHub 的操作会卡住或报 `Connection refused`；
+- **SSH**：`ProxyCommand` 先探测 `127.0.0.1:5376`，在线时经 SOCKS5 代理连接，离线自动退回直连；
+- 首次启动 `zsh` 时 `zimfw` 拉取模块走 HTTPS（新机默认无 `~/.gitconfig`，即直连），通常不受影响。
+
+排查代理是否监听 `5376` 端口：
 
 ```bash
 nc -z 127.0.0.1 5376 && echo ok || echo "proxy not listening on 5376"
