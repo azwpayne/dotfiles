@@ -13,16 +13,16 @@
 | `core.excludesfile` | `/Users/payne/.gitignore_global` | 全局忽略规则（见下） |
 | `filter.lfs` | `smudge`/`clean`/`process`+`required true` | git-lfs 四件套 |
 | `[user]` | `azwpayne` / `paynewu0719@gmail.com` | 个人身份（fork 公开后注意脱敏） |
-| `http "https://github.com"` | `socks5://127.0.0.1:7890` | 仅 github.com 走本地 SOCKS5 代理 |
-| `https "https://github.com"` | `socks5://127.0.0.1:7890` | 同上，https 协议 |
-| `ssh "ssh.github.com"` | `socks5://127.0.0.1:7890` | SSH over HTTPS 端口（443）同样走代理 |
+| `http "https://github.com"` | `socks5://127.0.0.1:5376` | 仅 github.com 走本地 SOCKS5 代理（与 SSH 保持一致的 5376 端口） |
+| `https "https://github.com"` | `socks5://127.0.0.1:5376` | 同上，https 协议，三处统一为 5376 |
+| `ssh "ssh.github.com"` | `socks5://127.0.0.1:5376` | SSH over HTTPS 端口（443）同样走 socks5://127.0.0.1:5376，三处代理已统一 |
 | `push.default` | `current` | push 当前分支 |
 | `push.autoSetupRemote` | `true` | 首次 push 自动建立上游追踪 |
 | `safe.directory` | `*` | 信任所有目录（容器/挂载盘场景避免 dubious ownership） |
 
 > **注意**：`[push]` 段下的 `rebase = true` 并非标准 git 配置键，会被 git 静默忽略；
 > 若希望 `git pull` 一律变基，应改为 `pull.rebase = true` 或 `pull.rebase = false` 显式声明。
-> 当前 `dot_gitconfig` 已不再保留注释掉的 `[http]`/`[https]` 全局代理段，仅保留按域名限定的三条代理。
+> 当前 `dot_gitconfig` 已不再保留注释掉的 `[http]`/`[https]` 全局代理段，仅保留按域名限定的三条代理，且三条 `proxy` 已统一为 `socks5://127.0.0.1:5376`（原文档旧端口已失效），与本机 SSH/系统代理的 5376 端口保持一致。
 
 全局忽略规则（`dot_gitignore_global` → `~/.gitignore_global`），以下为概要归类，完整清单以源文件为准：
 编辑器临时文件与交换文件（`*~`、`.DS_Store`、`*.swp`/`*.swo`/`*.bak`）、IDE 目录（`.idea`/`*.iml`/`.vscode`）、
@@ -59,7 +59,20 @@ pnpm = "latest"
 mise ls                  # 查看已安装版本
 mise install             # 安装声明的全部工具
 mise use -g node@lts     # 固定某工具全局版本（会改写 config.toml，记得提交）
+mise upgrade             # 升级全部受管工具（被 aliases.zsh 的 update-all 复用）
 ```
+
+### 包管理器更新：`aliases.zsh` 的 `auto_update` 与 `update-all`
+
+`private_dot_config/zsh/aliases.zsh` 提供了两套更新入口，二者互补：
+
+| 函数 | 位置 | 特点 | 适用场景 |
+| --- | --- | --- | --- |
+| `auto_update` | `aliases.zsh:42` | 顺序守卫调用各 `*_update`：`uv_update` / `sdk_update` / `rust_update` / `tldr_update` / `brew_update`，每步前 `command -v xxx &>/dev/null &&` 守卫，缺失则跳过；固定顺序、无参数 | 日常一键全量、兼容旧习惯 |
+| `update-all` | `aliases.zsh:196` | 基于 `local -A tasks` 关联数组：`brew` / `sdk` / `rustup` / `tldr` / `uv` / `mise` 六项；支持 `update-all brew mise` 选择性更新，未传参则 `targets=(${(k)tasks})` 全量；循环中 `command -v $name` 守卫、未知目标报错并提示 `Available: ...`；失败计数 `failed`、耗时统计 `start_time/duration`、`print -P` 彩色输出（蓝标题/绿成功/黄跳过/红失败） | 需要灵活选择目标、查看耗时与失败统计、覆盖 `mise` 的新场景 |
+
+- `mise` 已纳入 `update-all` 的 `tasks[mise]="mise upgrade"`，而 `auto_update` 尚未覆盖 `mise`，这是两者在工具链覆盖上的核心差异。
+- `update-all` 的 `brew` 任务为 `brew update -f && brew upgrade -f --greedy-latest -y && brew cu -y -a && brew cleanup --prune=all`（含 `brew cu`），与 `brew_update` 别名的 `brew update && brew upgrade --greedy-latest && brew cleanup --prune=all` 略有差异，前者更激进。
 
 ## Codex — `dot_codex/private_empty_config.toml`
 
@@ -74,13 +87,13 @@ mise use -g node@lts     # 固定某工具全局版本（会改写 config.toml�
 
 ### settings.json — 主题与扩展包
 
-当前已简化为最小可用形态，仅保留主题、思考块显隐与扩展包列表：
+与 `private_dot_pi/private_agent/settings.json` 实际内容完全一致（已修正旧文档的过时说明）：
 
 ```json
 {
   "theme": "dark",
-  "lastChangelogVersion": "0.84.2",
-  "hideThinkingBlock": true,
+  "lastChangelogVersion": "0.84.3",
+  "hideThinkingBlock": false,
   "packages": [
     "npm:pi-web-access",
     "npm:pi-subagents",
@@ -89,17 +102,28 @@ mise use -g node@lts     # 固定某工具全局版本（会改写 config.toml�
     "npm:@narumitw/pi-goal",
     "npm:pi-landstrip",
     "npm:@gotgenes/pi-permission-system"
-  ]
+  ],
+  "defaultProvider": "opencode",
+  "defaultModel": "muse-spark-1.2-contributor-free",
+  "defaultThinkingLevel": "xhigh"
 }
 ```
 
-- `theme: dark`，`hideThinkingBlock: true`。
-- **不再包含**旧版的 `defaultProvider` / `defaultModel` / `thinkingLevel` 等字段，
-  provider 与模型选择由运行时或上层编排决定。
-- 启用 7 个包：`pi-web-access`、`pi-subagents`、`@quintinshaw/pi-dynamic-workflows`、
-  `@narumitw/pi-btw`、`@narumitw/pi-goal`、`pi-landstrip`、`@gotgenes/pi-permission-system`。
+| 字段 | 值 | 说明 |
+| --- | --- | --- |
+| `theme` | `dark` | 深色主题 |
+| `lastChangelogVersion` | `0.84.3` | 已同步至最新 pi 版本（原文档 0.84.2 已过时） |
+| `hideThinkingBlock` | `false` | 展示思考块（原文档 `true` 已更正；`false` 为当前实际值） |
+| `packages` | 7 个 `npm:` 包 | `pi-web-access`、`pi-subagents`、`@quintinshaw/pi-dynamic-workflows`、`@narumitw/pi-btw`、`@narumitw/pi-goal`、`pi-landstrip`、`@gotgenes/pi-permission-system` |
+| `defaultProvider` | `opencode` | 默认 provider（旧文档误称“不再包含 provider/model”，现已更正为包含） |
+| `defaultModel` | `muse-spark-1.2-contributor-free` | 默认模型（原文档 `x-preview-f-free` 已更新） |
+| `defaultThinkingLevel` | `xhigh` | 默认思考强度（原文档 `high` 已更新为 `xhigh`） |
+
+> **修正说明**：旧版文档称“不再包含旧版的 `defaultProvider` / `defaultModel` / `thinkingLevel` 等字段”，与实际不符；当前 `settings.json` 完整包含上述三字段，且值为 `opencode` / `muse-spark-1.2-contributor-free` / `xhigh`，已在上表与 JSON 快照中同步。
 
 ### sandbox.json — 文件系统与网络沙箱
+
+与 `private_dot_pi/private_agent/sandbox.json` 实际内容完全一致：
 
 ```json
 {
@@ -112,27 +136,37 @@ mise use -g node@lts     # 固定某工具全局版本（会改写 config.toml�
     "denyWrite": ["**/.env", "**/*.pem", "**/.env.*", "**/*.key", "~/.ssh", ".pi/sandbox.json", "~/.bashrc", "~/.zshrc", "~/.profile", "~/.gitconfig"]
   },
   "network": {
-    "allowNetwork": false,
+    "allowNetwork": true,
     "allowLocalBinding": false,
-    "allowedDomains": ["api.github.com", "github.com", "www.google.com", "goproxy.cn"],
+    "allowedDomains": ["*.githubusercontent.com", "*.github.com", "github.com"],
     "deniedDomains": []
   }
 }
 ```
 
-- shell 可读宿主文件系统（`readAccess: host`），但显式 deny 读 `/Users`、`/home`、`/root`、`/etc`、`/var`、`/tmp`、`/private/var`、`/private/tmp` 等大范围路径（工作依赖 cwd 白名单放行）；`allowRead` 为空数组。
-- 写白名单仅限项目目录（`.`）、`/dev/null`、`/tmp` 及 `~/.npm`、`~/.cargo/registry`、`~/.cache`。
-- 写黑名单保护 `**/.env`、`**/.env.*`、`**/*.pem`、`**/*.key`、`~/.ssh`、shell rc 文件（`~/.bashrc`/`~/.zshrc`/`~/.profile`）、`~/.gitconfig` 与本沙箱配置自身（`.pi/sandbox.json`）。
-- **网络默认关闭**（`allowNetwork: false`，`allowLocalBinding: false`），但已通过域名白名单放行
-  `api.github.com` / `github.com` / `www.google.com` / `goproxy.cn` 四个域名的出站访问
-  （`deniedDomains` 为空）。
+| 维度 | 配置 | 说明 |
+| --- | --- | --- |
+| `enabled` | `true` | 沙箱总开关开启 |
+| `shell.readAccess` | `host` | shell 可读宿主文件系统 |
+| `filesystem.allowRead` | `[]` | 无显式读白名单（依赖 cwd 与默认放行） |
+| `filesystem.denyRead` | 8 项 | `/Users`、`/home`、`/root`、`/etc`、`/var`、`/tmp`、`/private/var`、`/private/tmp`（大范围 deny，工作区由 cwd 白名单放行） |
+| `filesystem.allowWrite` | 6 项 | `.`、`/dev/null`、`/tmp`、`~/.npm`、`~/.cargo/registry`、`~/.cache` |
+| `filesystem.denyWrite` | 12 项（含重复） | `**/.env`、`**/.pem`、`**/.env.*`、`**/*.key`、`~/.ssh`、`.pi/sandbox.json`、`~/.bashrc`、`~/.zshrc`、`~/.profile`、`~/.gitconfig`（`**/.env` 与 `**/*.pem` 各重复一次，功能不受影响） |
+| `network.allowNetwork` | `true` | **网络已开启**（原文档 `false` / “网络默认关闭”已更正） |
+| `network.allowLocalBinding` | `false` | 禁止本地端口绑定 |
+| `network.allowedDomains` | 3 项 | `*.githubusercontent.com`、`*.github.com`、`github.com`（原文档 `api.github.com` / `github.com` / `www.google.com` / `goproxy.cn` 四域已更新，仅白名单域名可出站） |
+| `network.deniedDomains` | `[]` | 无额外黑名单 |
+
+- **网络已开启，仅白名单域名可出站**（`allowNetwork: true` + `allowedDomains` 白名单），非旧文档所述“网络默认关闭”；`deniedDomains` 为空。
 - 另注：源文件的 `denyWrite` 数组中 `**/.env` 与 `**/*.pem` 各重复出现了两次，功能不受影响，建议清理。
 
 ### landstrip.json — 子代理与任务权限
 
+与 `private_dot_pi/private_agent/landstrip.json` 实际内容一致：
+
 ```json
 {
-  "maxSubagents": 16,
+  "maxSubagents": 8,
   "toolFilesystemPolicy": "sandbox",
   "permission": {
     "task": { "*": "deny", "review": "allow" }
@@ -140,19 +174,20 @@ mise use -g node@lts     # 固定某工具全局版本（会改写 config.toml�
 }
 ```
 
-- 子代理上限 16；`toolFilesystemPolicy: sandbox` 复用上节沙箱。
+- 子代理上限 **8**（原文档 16 已更正为 8）；`toolFilesystemPolicy: sandbox` 复用上节沙箱。
 - 任务级权限除 `review` 外一律 `deny`——防止 agent 自行派生执行类子代理。
+- **与 `workflows/settings.json` 的关系**：`landstrip.json` 的 `maxSubagents` 限制 **子代理工具可派生的子代理总数上限**；`workflows/settings.json` 的 `progressPanelMaxAgents` 限制 **工作流进度面板的并发/展示代理数上限**。二者职责不同、相互独立，当前实际值均为 8，数值一致仅为巧合，不代表联动。
 
 ### workflows/settings.json — 动态工作流设置
 
-位于 `private_dot_pi/workflows/settings.json`（部署到 `~/.pi/workflows/settings.json`），内容仅一项：
+位于 `private_dot_pi/workflows/settings.json`（部署到 `~/.pi/workflows/settings.json`），与实际文件一致：
 
 ```json
 { "progressPanelMaxAgents": 8 }
 ```
 
 用于 pi-dynamic-workflows 的进度面板最大并发代理数（8）。它与上节 pi-subagents 的
-`maxSubagents: 16` 相互独立：前者限制工作流进度面板的并发/展示代理数上限，
+`maxSubagents: 8` 相互独立：前者限制工作流进度面板的并发/展示代理数上限，
 后者限制子代理工具可派生的子代理总数上限。
 
 ### extensions/pi-permission-system/config.json — 工具级权限矩阵
