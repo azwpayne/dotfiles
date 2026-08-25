@@ -51,10 +51,8 @@
             // "git rm *"    : "deny",
             // "git config *": "deny",
             // script
-            "python* *"    : "ask",
-            "node *"     : "ask",
-            "pnpm *"      : "ask",
-            "cargo *"     : "ask"
+            "python* *"   : "ask",
+            "node *"      : "ask"
         },
         "path": {
             "*"            : "allow",

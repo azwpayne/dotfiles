@@ -4,7 +4,11 @@
   "filesystem": {
     "allowRead" : ["**"],
     "denyRead"  : ["/Users", "/home", "/root", "/etc", "/var", "/tmp", "/private/var", "/private/tmp"],
-    "allowWrite": [".", "/dev/null", "/tmp", "~/.npm", "~/.cargo/registry", "~/.cache"],
+    "allowWrite": [
+      ".",                    "/dev/null",            "/tmp",                 "~/.npm",
+      "~/.cargo/registry",    "~/.cache",             "~/.gitconfig",         "~/.config/git/config",
+      "/dev/null"
+    ],
     "denyWrite" : [
       "**/.env",          "**/*.pem",         "**/.env",          "**/.env.*",        "~/.ssh",
       "**/*.pem",         "**/*.key",         ".pi/sandbox.json", "~/.bashrc",        "~/.zshrc",
@@ -18,5 +22,6 @@
     "allowUnixSockets"   : [],
     "allowedDomains"     : ["*.githubusercontent.com", "*.github.com", "github.com"],
     "deniedDomains"      : []
-  }
+  },
+  "windows"   : {"appContainerMode": "standard", "allowLoopback": false}
 }
