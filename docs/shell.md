@@ -11,20 +11,22 @@ zsh -l
      │     （compinit、语法高亮、自动建议、fzf-tab 均由 Zim 模块在此完成）
      ├─ ② PATH 追加：~/bin → /opt/homebrew/bin → /opt/homebrew/sbin
      │     → /usr/local/bin → ~/.local/bin
-     ├─ ③ 工具 eval（严格按此顺序）：
-     │     eval "$(zoxide init zsh)"
-     │     eval "$(mise activate zsh)"
-     │     eval "$(starship init zsh)"      ← 提示符最终归 Starship
-     │     eval "$(fzf --zsh)"              ← 与 fzf.zsh 内重复一次，冗余但无害
-     │     eval "$(brew shellenv)"
-     │     export PATH="$(brew --prefix rustup)/bin:$HOME/.cargo/bin:$PATH"
-     │     （rustup/cargo 路径以前缀方式追加到 PATH 最前，需在 brew shellenv 之后）
+     ├─ ③ 工具 eval（逐项 `command -v` 守卫，严格按此顺序，未安装时静默跳过）：
+     │     command -v zoxide   && eval "$(zoxide init zsh)"
+     │     command -v mise     && eval "$(mise activate zsh)"
+     │     command -v starship && eval "$(starship init zsh)"   ← 提示符最终归 Starship
+     │     command -v brew     && eval "$(brew shellenv)"
+     │     command -v brew     && export PATH="$(brew --prefix rustup)/bin:…cargo…:$PATH"
+     │     （fzf 的 eval 已从此处移除——键位绑定/补全统一由 fzf.zsh 内带守卫的
+     │       `command -v fzf && eval "$(fzf --zsh)"` 初始化一次，消除双重初始化；
+     │       rustup/cargo 路径以前缀方式追加到 PATH 最前，需在 brew shellenv 之后）
      ├─ ④ for file in ~/.config/zsh/aliases.zsh ~/.config/zsh/fzf.zsh; do source "$file"; done
      │     ├─ aliases.zsh  ← 导出 $EDITOR/$VISUAL，供下一步使用
-     │     └─ fzf.zsh      ← 依赖 $EDITOR 展开 Ctrl-O 绑定
-     └─ ⑤ source ~/.config/zsh/sdk.zsh      ← 无条件加载（dot_zshrc:133）
-           （注释称 “excluding sdk.zsh for lazy loading”、“Uncomment to enable …” 均暗示可选，
-            但代码紧随其后即无条件 `source ~/.config/zsh/sdk.zsh`，注释与代码不一致，以代码为准）
+     │     └─ fzf.zsh      ← 依赖 $EDITOR 展开 Ctrl-O 绑定；fzf 键位绑定唯一初始化点
+     └─ ⑤ source ~/.config/zsh/sdk.zsh      ← 无条件加载（注释与代码一致，如需禁用需注释 source 行）
+           （内部逐项守卫：SDKMAN 为惰性加载（首次调用 sdk 时才 source init，
+            实测省约 45ms）；kubectl/docker 补全走 ~/.cache/zsh/ 缓存 + zcompile
+            （省约 10ms）；缺装静默跳过）
 ```
 
 **顺序即语义**：同名定义后加载者生效。典型例子是短别名 `k`——`sdk.zsh`
@@ -54,14 +56,14 @@ zsh -l
 - `ZSH_AUTOSUGGEST_MANUAL_REBIND=1` 在 `dot_zshrc` 中已设置，因 `zsh-autosuggestions` 为末尾模块之一，可提升性能。
 - `ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)` 是 zsh-users 版 zsh-syntax-highlighting 的开关；该模块（连同 `zfm` / `fzf`）在 zimrc 中已被注释、未加载，实际生效的 `fast-syntax-highlighting` 并不读取此变量，属 Zim 模板遗留设置。
 
-> ⚠️ **asciiship 实际被覆盖**：`.zshrc` 中 `eval "$(starship init zsh)"` 发生在
-> Zim 初始化之后，实际生效的提示符是 Starship。`.zimrc` 里的 `asciiship` 及其信息
+> ⚠️ **asciiship 实际被覆盖**：`.zshrc` 中 `command -v starship && eval "$(starship init zsh)"`
+> 发生在 Zim 初始化之后，实际生效的提示符是 Starship。`.zimrc` 里的 `asciiship` 及其信息
 > 模块保留着（`duration-info` 等仍可能被其他用途引用），但不会显示为提示符。
 > 如想切回纯 Zim 风格，注释掉 starship 的 eval 即可。
 
 ## Starship 提示符（starship.toml）
 
-- **主题**：Catppuccin Mocha（`palette = 'catppuccin_mocha'`），另内置 `catppuccin_frappe` / `catppuccin_latte` / `catppuccin_macchiato` 三套备用调色板，改顶部 `palette` 一行即可切换。
+- **主题**：Catppuccin Mocha（`palette = 'catppuccin_mocha'`，唯一内置调色板；曾内置的 frappe/latte/macchiato 三套备用调色板因死代码干 111 行已删除）。
 - **单行 powerline 布局**：`[line_break] disabled = true` 使 `$line_break` 不换行，整条提示符渲染为单行，段间用 `` / `` / `` 电源线符号衔接：
 
 ```
@@ -104,8 +106,9 @@ zsh -l
 结果缓存到 `${ZDOTDIR:-$HOME}/.fzf_prefix_cache`（默认即 `~/.fzf_prefix_cache`，
 文件名与 `private_dot_config/zsh/dot_gitignore` 中的忽略项一致）。下次启动若
 `$FZF_PREFIX/bin/fzf` 不可执行，则自动删除缓存并重新探测（自愈）。探测成功
-后若 `$PATH` 未包含 `$FZF_PREFIX/bin` 则追加。最后执行 `command -v fzf && eval "$(fzf --zsh)"`
-加载官方按键绑定与补全（fzf 缺失时静默跳过）。
+后若 `$PATH` 未包含 `$FZF_PREFIX/bin` 则追加。最后执行 `command -v fzf >/dev/null 2>&1 && eval "$(fzf --zsh)"`
+加载官方按键绑定与补全（fzf 缺失时静默跳过）——这是全启动链路中 fzf 键位绑定的
+**唯一初始化点**（`~/.zshrc` 不再重复 eval，改键位只需改 fzf.zsh 一处）。
 
 ### 文件/目录列表命令
 
@@ -154,10 +157,10 @@ zsh -l
 
 | 函数 | 所在 | 用途 | 关键实现 |
 | --- | --- | --- | --- |
-| `auto_update` | aliases.zsh | 传统守卫式串行全量更新：逐个 `command -v` 守卫，未安装即跳过；若存在 `onproxy` 则先切代理 | `uv_update` → `sdk_update` → `rust_update` → `tldr_update` → `brew_update` 依次执行（5 目标，无 mise） |
-| `update-all [targets...]` | aliases.zsh | 声明式批量更新：关联数组 `tasks` 声明 6 项（`brew` / `sdk` / `rustup` / `tldr` / `uv` / `mise`），支持参数过滤、彩色输出、失败计数与耗时统计 | `local -A tasks=(brew … sdk … rustup … tldr … uv … mise …)`；无参时 `targets=(${(k)tasks})` 全量，传参则只运行指定目标；`command -v $name` 守卫 + `eval "${tasks[$name]}"` + `failed` 计数；`print -P %F{blue/green/red/yellow}` 彩色提示（蓝=开始、绿=完成、黄=跳过、红=未知目标/失败），`start_time/duration` 统计耗时 `${mins}m${secs}s` |
+| `auto_update` | aliases.zsh | 传统守卫式串行全量更新：逐个 `command -v` 守卫，未安装即跳过；若存在 `onproxy` 则先切代理 | `uv_update` → `sdk_update` → `rust_update` → `tldr_update` → `brew_update` 依次执行（5 目标，无 mise；不含 `brew cu`，已移至 `update-all`） |
+| `update-all [targets...]` | aliases.zsh | 声明式批量更新（**失败即红**）：关联数组 `tasks` 声明 6 项（`brew` / `sdk` / `rustup` / `tldr` / `uv` / `mise`），支持参数过滤、彩色输出、失败计数与耗时统计 | `local -A tasks=(brew … sdk … rustup … tldr … uv … mise …)`；无参时 `targets=(${(k)tasks})` 全量，传参则只运行指定目标；`command -v $name` 守卫 + `eval "${tasks[$name]}"`（stderr 重定向到临时文件供错误摘要）；目标**成功打印绿色 `✓ done`，失败打印红色 `✗ failed (exit=N)` + stderr 末 5 行错误摘要**；结尾汇总 `N/M target(s) failed`（附失败目标清单与耗时 `${mins}m${secs}s`），任一失败返回非零；未安装目标黄色 `⚠️ not found, skipped` 且不计入 M，全部跳过时提示 `no runnable targets` |
 
-> `update-all` 任务定义（与 `aliases.zsh:197` 的 `local -A tasks=(…)` 一致）：`brew` 为 `brew update -f && brew upgrade -f --greedy-latest -y && brew cu -y -a && brew cleanup --prune=all`，`sdk` 为 `sdk upgrade && sdk selfupdate && sdk flush`，`rustup` 为 `rustup update && rustup upgrade`，`tldr` 为 `tldr --update`，`uv` 为 `uv tool upgrade --all`，`mise` 为 `mise upgrade`。支持 `update-all brew uv` 仅更新指定目标；未知参数会提示 `Available: …` 并返回 1，未安装目标黄色 `⚠️ not found` 跳过。`auto_update` 仍为传统串行写法，日常推荐 `update-all`。
+> `update-all` 任务定义（与 `aliases.zsh` 的 `local -A tasks=(…)` 一致）：`brew` 为 `brew update -f && brew upgrade -f --greedy-latest -y && brew cu -y -a && brew cleanup --prune=all`，`sdk` 为 `sdk upgrade && sdk selfupdate && sdk flush`，`rustup` 为 `rustup update && rustup upgrade`，`tldr` 为 `tldr --update`，`uv` 为 `uv tool upgrade --all`，`mise` 为 `mise upgrade`。支持 `update-all brew uv` 仅更新指定目标；未知参数会提示 `Available: …` 并返回 1，未安装目标黄色 `⚠️ not found` 跳过。`auto_update` 仍为传统串行写法（其注释已说明 `brew cu` 移至 `update-all`，两处不再矛盾），日常推荐 `update-all`。
 
 ### fzf-tab
 

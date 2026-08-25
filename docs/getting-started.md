@@ -2,21 +2,64 @@
 
 本文档说明如何在一台新的 macOS（Apple Silicon）机器上，用本仓库还原完整的开发环境。
 
-## 1. 安装 Homebrew、chezmoi 与字体
+## 1. 安装 Homebrew 与前置依赖（全部在 `chezmoi apply` 之前）
 
 ```bash
 # Homebrew（若未安装，Apple Silicon 默认前缀 /opt/homebrew）
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
+# —— chezmoi 本体与字体 ——
 brew install chezmoi
 brew install --cask font-jetbrains-mono-nerd-font   # Ghostty / Alacritty / Neovim 均依赖该字体
+
+# —— git-lfs（必装）：本仓库 dot_gitconfig 配置了 [filter "lfs"] 且 required = true，
+#    部署后对全机所有仓库生效——未装 git-lfs 时任何 clone/push 都会因 LFS filter
+#    缺失而直接报错失败，必须在首次 git 操作前装好并初始化
+brew install git-lfs && git lfs install
+
+# —— 启动必需工具（首次启动 zsh 即被使用，建议随本节一并装；完整清单与说明见 §4）——
+#    fzf-tab 无需手动安装：由 zimfw 首次启动时按 dot_zimrc 自动拉取
+brew install fzf starship zoxide mise fd ripgrep
 ```
 
-> `chezmoi` ≥ 2.x、`brew`、`font-jetbrains-mono-nerd-font` 是唯三需要在 `chezmoi apply` **之前**就绪的前置；
-> 其余工具均可在 `apply` 之后按需补装：`zoxide` / `mise` / `starship` / `fzf` / `brew` 的 `eval` 在 `~/.zshrc` 中无守卫，缺失时启动会报一行 `command not found`（不阻断）；其余加载点（`sdk.zsh`、`fzf.zsh` 按键绑定等）均有 `command -v` / 目录存在守卫，未安装时静默跳过。
+> **为什么要在 `apply` 之前**：`apply` 后一般会立即 `exec zsh` 首次启动（Zim 拉模块、
+> 各工具初始化、补全加载），上述前置若缺装会导致功能明显退化甚至 git 全局断链。
+> 守卫化说明：`~/.zshrc` 中 `zoxide` / `mise` / `starship` / `brew` 的 `eval` 及
+> rustup PATH 注入均已带 `command -v` 守卫，fzf 初始化统一收敛到 `fzf.zsh`（带守卫），
+> 缺装时全部**静默跳过、不再报 `command not found`**——因此其余体验增强类工具
+> （`bat` / `lsd` / `kubectl` / SDKMAN 等，见 §4）完全可以 `apply` 之后按需补装，
+> 静默退化不报错。
 
 ## 2. 应用配置
+
+### 弱网环境：bootstrap 前先设代理（可选但推荐）
+
+本仓库引导链共有三次直连 GitHub 的网络动作：`chezmoi init` 拉取本仓库（方式 A）、
+首次启动 `zsh` 时 `zimfw` 下载全部 Zim 模块、首次运行 `nvim` 时 `lazy.nvim` 安装 44 个
+插件。弱网/受限网络环境建议在执行下面任何 bootstrap 步骤**之前**先临时设置代理：
+
+```bash
+# 示例：本机代理监听 5376（与 dot_gitconfig / ~/.ssh/config 中的代理端口一致）
+export https_proxy=http://127.0.0.1:5376
+export http_proxy=http://127.0.0.1:5376
+export all_proxy=socks5://127.0.0.1:5376
+
+# 探活：确认代理端口确实在监听，再继续后面的 bootstrap
+nc -z 127.0.0.1 5376 && echo "proxy ok" || echo "proxy not listening on 5376"
+```
+
+- 代理不在监听时先解决代理本身，或改走直连/镜像；探活通过后再执行 `chezmoi init`、
+  首次启动 `zsh`、首次运行 `nvim`。
+- 两通道行为不对称：`dot_gitconfig` 中三处 GitHub 代理（`[http "https://github.com"]` /
+  `[https "https://github.com"]` / `[ssh "ssh.github.com"]`）固定为
+  `socks5://127.0.0.1:5376` 且**无直连回退**——代理离线时对 GitHub 的 git 操作会卡住或报
+  `Connection refused`；`~/.ssh/config` 的 `ProxyCommand` 则先探测 `127.0.0.1:5376`，
+  在线走 SOCKS5、离线自动回退直连。
+- 首次启动 `zsh` 时 `zimfw` 拉模块走 HTTPS（新机默认无 `~/.gitconfig` 即不受 git 代理
+  影响），此时 shell 侧导出的 `https_proxy` 即为其提供代理通道。
+
+### 初始化与执行
 
 ```bash
 # 方式 A：从远程仓库初始化并立即应用（新机器首选）
@@ -30,7 +73,6 @@ exec zsh   # 重启 shell 使全部配置生效（或重新打开终端）
 ```
 
 ### .chezmoiignore 的影响
-
 新机器执行 `chezmoi apply` 时，根目录的 `.chezmoiignore` 会自动**跳过**以下内容不渲染到 `$HOME`（见 [layout.md](layout.md)）：
 
 - `README.md` / `LICENSE` / `docs/` / `docs/**` —— 仓库文档仅留在源目录，不污染目标机
@@ -43,43 +85,30 @@ exec zsh   # 重启 shell 使全部配置生效（或重新打开终端）
 因此 `chezmoi diff` 中不会出现 `docs/` 的新增，`chezmoi doctor` 亦不会告警缺失——属预期行为。
 如需排查可执行 `chezmoi ignored` / `chezmoi status` 查看被忽略列表。
 
-### 网络与代理前提
-
-GitHub 可达性依赖**本机代理在线**。`dot_gitconfig` 中三处 `proxy`（`[http "https://github.com"]` / `[https "https://github.com"]` / `[ssh "ssh.github.com"]`）均为 `socks5://127.0.0.1:5376`，`private_dot_ssh/config` 的 `ProxyCommand` 探测端口同为 `5376`。两侧行为不同：
-
-- **git（HTTPS）**：代理为固定配置、无直连回退——代理离线时对 GitHub 的操作会卡住或报 `Connection refused`；
-- **SSH**：`ProxyCommand` 先探测 `127.0.0.1:5376`，在线时经 SOCKS5 代理连接，离线自动退回直连；
-- 首次启动 `zsh` 时 `zimfw` 拉取模块走 HTTPS（新机默认无 `~/.gitconfig`，即直连），通常不受影响。
-
-排查代理是否监听 `5376` 端口：
-
-```bash
-nc -z 127.0.0.1 5376 && echo ok || echo "proxy not listening on 5376"
-```
-
-或临时取消代理后重试。
-
 ## 3. 首次启动会发生什么
 
 | 组件 | 行为 | 触发时机 |
 | --- | --- | --- |
 | `fish` / `pi` | `private_dot_config/private_fish/config.fish` 为空模板、`private_dot_pi/**`（pi agent 配置）直接生效，均随 `apply` 写入 `$HOME`；本文档只覆盖 `zsh` 栈，其余见 [layout.md](layout.md) | 首次启动 `fish` / `pi` 时 |
 | Zim 框架 | `~/.zshrc` 检测 `~/.zim/zimfw.zsh` 缺失时经 `curl` / `wget` 自动下载，随后 `zimfw init` 安装 `dot_zimrc` 中声明的全部模块（`environment` / `git` / `input` / `termtitle` / `utility` / `duration-info` / `git-info` / `prompt-pwd` / `asciiship` / `homebrew` / `site-functions` / `zsh-completions` / `completion` / `fast-syntax-highlighting` / `history-substring` / `autosuggestions` / `fzf-tab`） | 首次启动 `zsh` |
-| `PATH` / `brew` | `eval "$(brew shellenv)"` 注入 `/opt/homebrew/bin` 等；`export PATH` **前置** `~/bin:/opt/homebrew/bin:…` 及 `~/.local/bin`、`~/.cargo/bin` 等到 `$PATH` 最前 | 每次启动 `zsh` |
-| `zoxide` / `mise` / `starship` / `fzf` | `eval "$(zoxide init zsh)"` / `eval "$(mise activate zsh)"` / `eval "$(starship init zsh)"` / `eval "$(fzf --zsh)"` 接管对应功能 | 每次启动 `zsh` |
-| `zsh` 三模块 | 按序 `source ~/.config/zsh/aliases.zsh` → `fzf.zsh`（含 `fzf` 前缀探测与 `~/.fzf_prefix_cache` 缓存）→ `sdk.zsh`（`pnpm` / `SDKMAN` / `Go` / `Rust` / `Docker` / `kubectl` 均有守卫） | 每次启动 `zsh` |
+| `PATH` / `brew` | `command -v brew` 守卫后的 `eval "$(brew shellenv)"` 注入 `/opt/homebrew/bin` 等；`export PATH` **前置** `~/bin:/opt/homebrew/bin:…` 及 `~/.local/bin`、`~/.cargo/bin` 等到 `$PATH` 最前（rustup/cargo 前缀同样带 brew 守卫） | 每次启动 `zsh` |
+| `zoxide` / `mise` / `starship` / `fzf` | `zoxide` / `mise` / `starship` 逐项 `command -v` 守卫后 `eval` 初始化（未装静默跳过）；`fzf` 的键位绑定/补全只在 `fzf.zsh` 内带守卫地 `eval "$(fzf --zsh)"` **一次**（`~/.zshrc` 不再重复） | 每次启动 `zsh` |
+| `zsh` 三模块 | 按序 `source ~/.config/zsh/aliases.zsh` → `fzf.zsh`（含 `fzf` 前缀探测与 `~/.fzf_prefix_cache` 缓存）→ `sdk.zsh`（`pnpm` / `SDKMAN` **惰性加载** / `Go` / `Rust` / `Docker` / `kubectl`，补全走 `~/.cache/zsh/` 缓存 + `zcompile`，均有守卫） | 每次启动 `zsh` |
 | Neovim | 首次运行 `nvim` 时 `lazy.nvim` 自动 `bootstrap` 并按 `lazy-lock.json` 安装 44 个插件（需网络） | 首次运行 `nvim` |
 | `mise` 工具链 | `mise activate` 已挂接；按需执行 `mise install` 安装 `~/.config/mise/config.toml` 声明的 `bun` / `deno` / `go` / `node` / `pnpm`（均为 `latest`） | 手动执行 |
 
-> `~/.zshrc` 中 `sdk.zsh` 为无条件 `source`（注释称“可选”/“excluding sdk.zsh for lazy loading”与实际不一致，以代码为准）；
-> `fzf.zsh` 内会再次 `eval "$(fzf --zsh)"`，与 `~/.zshrc` 中的一次重复但无害。详见 [shell.md](shell.md)。
+> `~/.zshrc` 中 `sdk.zsh` 为无条件 `source`（注释与代码已一致，如需禁用需注释 source 行）；
+> `SDKMAN` 为惰性加载——首次调用 `sdk` 时才真正 source init 并注入 PATH（Java 等
+> candidate 的可用性随之延迟到首次 `sdk` 调用）；`fzf` 键位绑定只在 `fzf.zsh` 内
+> `eval "$(fzf --zsh)"` 一次，`~/.zshrc` 不再重复。详见 [shell.md](shell.md)。
 
 ## 4. 依赖清单
 
-### 启动必需（缺失会导致功能明显退化或报错）
+### 启动必需（缺失会导致功能明显退化或报错；已随 §1 安装，此处为清单备查）
 
 | 工具 | 用途 | 安装 |
 | --- | --- | --- |
+| `git-lfs` | Git LFS filter——`dot_gitconfig` 配置 `[filter "lfs"] required = true`，缺失时**全机所有仓库**的 clone/push 直接失败（硬性中断，非静默退化） | `brew install git-lfs && git lfs install` |
 | `fzf` | `Ctrl-R` / `Ctrl-T` / `Alt-C` 及所有 `f*` 函数（`frg` / `fkill` / `ftm` / `fl*`） | `brew install fzf` |
 | `fzf-tab` | 补全菜单模糊化（Zim 模块 `Aloxaf/fzf-tab`） | 无需手动安装，由 `zimfw` 按 `dot_zimrc` 的 `zmodule Aloxaf/fzf-tab` 首次启动时自动安装并加载 |
 | `starship` | 提示符（`starship.toml` Catppuccin Mocha） | `brew install starship` |
@@ -139,29 +168,31 @@ chezmoi ignored                      # 确认 docs/、README.md 等在忽略列�
 zsh -n ~/.zshrc ~/.config/zsh/*.zsh # 语法检查无报错
 zsh -ic 'exit'                       # 干净启动无报错
 zsh -ic 'type k; echo $EDITOR'       # k -> kubectl（kubecolor 包装）；EDITOR=nvim
-starship prompt                      # 渲染 powerline 提示符无报错
+                                     # 〔未装 kubectl 则跳过：type k 报 not found 属预期〕
+starship prompt                      # 渲染 powerline 提示符无报错〔未装 starship 则跳过本项〕
 
-# fzf（含前缀缓存）
-zsh -ic 'echo $FZF_DEFAULT_COMMAND'  # 以 fd 开头（fd 缺失则以 rg 开头）
-cat ~/.fzf_prefix_cache              # 应为 /opt/homebrew/opt/fzf（Apple Silicon）
+# fzf（含前缀缓存）〔未装 fzf 则本组全部跳过〕
+zsh -ic 'echo $FZF_DEFAULT_COMMAND'  # 以 fd 开头〔装了 fzf 但未装 fd 则以 rg 开头〕
+cat ~/.fzf_prefix_cache              # 应为 /opt/homebrew/opt/fzf（Apple Silicon）〔未装 fzf 时无此文件，跳过〕
 zsh -ic 'type frg fkill ftm'         # fzf 交互函数已加载
 
-# mise
+# mise〔未装 mise 则跳过本组〕
 mise ls                              # 列出 bun/deno/go/node/pnpm（未 install 时提示安装）
 mise doctor                          # 可选：检查 mise 健康度
 
-# 编辑器
-nvim --headless +qa                  # 无插件加载错误；首次运行会触发 lazy.nvim 安装需联网
+# 编辑器〔首次运行会触发 lazy.nvim 安装需联网，见 §2 代理段〕
+nvim --headless +qa                  # 无插件加载错误
 
 # SSH / GitHub 可达性
 cat ~/.ssh/config                    # 顶部含 Include ~/.orbstack/ssh/config，github.com 走 ssh.github.com:443
+git lfs version                      # 确认 git-lfs 已装（缺失时 clone/push 会因 filter lfs required=true 全局失败）
 git config --get-regexp proxy        # 应为 socks5://127.0.0.1:5376（与 SSH ProxyCommand 5376 统一）
                                      # 仅当已手工恢复/合并 ~/.gitconfig 时才有输出，因 .chezmoiignore 不自动部署 dot_gitconfig；
                                      # 也可直接校验源文件：
                                      # git config --file ~/.local/share/chezmoi/dot_gitconfig --get-regexp proxy
 ```
 
-> **日常更新速览**：`private_dot_config/zsh/aliases.zsh` 提供 `auto_update`（按工具守卫逐项 `brew_update` / `sdk_update` / `rust_update` / `tldr_update` / `uv_update`，5 项，不含 `mise`）与更细粒度的 `update-all [brew|mise|rustup|tldr|uv|sdk]`（关联数组 6 项，支持参数过滤、失败计数与耗时统计，**已覆盖 `mise`**）；验证通过后可按需执行 `zsh -ic 'auto_update'` 或 `zsh -ic 'update-all'`，详见 [maintenance.md](maintenance.md) 与 [dev-tools.md](dev-tools.md) 的对比表及 `aliases.zsh` 源码。
+> **日常更新速览**：`private_dot_config/zsh/aliases.zsh` 提供 `auto_update`（按工具守卫逐项 `brew_update` / `sdk_update` / `rust_update` / `tldr_update` / `uv_update`，5 项，不含 `mise`；不含 `brew cu`，已移至 `update-all`）与更细粒度的 `update-all [brew|mise|rustup|tldr|uv|sdk]`（关联数组 6 项，支持参数过滤、失败计数与耗时统计，**已覆盖 `mise`**；**失败即红**——失败目标打印红色 `✗` 与错误摘要、结尾汇总 `N/M 目标失败` 并返回非零，成功目标保持绿色 `✓`）；验证通过后可按需执行 `zsh -ic 'auto_update'` 或 `zsh -ic 'update-all'`，详见 [maintenance.md](maintenance.md) 与 [dev-tools.md](dev-tools.md) 的对比表及 `aliases.zsh` 源码。
 
 全部通过后即可进入日常使用；更多维护流程见 [maintenance.md](maintenance.md)，完整映射见 [layout.md](layout.md)。
 
