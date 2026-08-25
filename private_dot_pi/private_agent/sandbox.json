@@ -2,7 +2,7 @@
   "enabled"   : true,
   "shell"     : {"readAccess": "host"},
   "filesystem": {
-    "allowRead" : [],
+    "allowRead" : ["**"],
     "denyRead"  : ["/Users", "/home", "/root", "/etc", "/var", "/tmp", "/private/var", "/private/tmp"],
     "allowWrite": [".", "/dev/null", "/tmp", "~/.npm", "~/.cargo/registry", "~/.cache"],
     "denyWrite" : [
@@ -14,11 +14,7 @@
   "network"   : {
     "allowNetwork"     : false,
     "allowLocalBinding": false,
-    "allowedDomains"   : [
-      "*.githubusercontent.com",
-      "*.github.com",
-      "github.com"
-    ],
+    "allowedDomains"   : ["*.githubusercontent.com", "*.github.com", "github.com"],
     "deniedDomains"    : []
   }
 }
