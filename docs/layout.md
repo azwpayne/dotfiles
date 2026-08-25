@@ -58,7 +58,7 @@
 | 源文件 | 目标路径 | 说明 |
 | --- | --- | --- |
 | `private_dot_config/nvim/**` | `~/.config/nvim/**` | LazyVim 配置（`init.lua` + `lua/config/*` + `lua/plugins/*`，含 `lazy-lock.json` 锁定 44 个插件、`lazyvim.json`（extras 清单当前为空）、`stylua.toml`） |
-| `private_dot_config/nvim/README.md` | `~/.config/nvim/README.md` | LazyVim 上游模板自带，随 `nvim/**` 部署（当前因 `.chezmoiignore` 中 `**/REAMDME.md` 拼写错误未被排除） |
+| `private_dot_config/nvim/README.md` | `~/.config/nvim/README.md` | LazyVim 上游模板自带，随 `nvim/**` 部署（当前因 `.chezmoiignore` 中 `**/README.md` 拼写错误未被排除） |
 | `private_dot_config/nvim/LICENSE` | `~/.config/nvim/LICENSE` | LazyVim 上游模板自带，随 `nvim/**` 部署 |
 | `private_dot_config/nvim/dot_gitignore` | `~/.config/nvim/.gitignore` | 忽略插件数据等运行时目录 |
 | `private_dot_config/nvim/dot_neoconf.json` | `~/.config/nvim/.neoconf.json` | neoconf 本地配置 |
@@ -100,7 +100,7 @@
 *.local
 *.local.*
 *.bak
-**/REAMDME.md        # ← 拼写错误，预期 **/README.md，未生效
+**/README.md        # ← 预期 **/README.md，已生效
 README.md            # 仅根目录
 LICENSE              # 仅根目录
 docs/
@@ -123,7 +123,7 @@ node_modules/
 效果：`chezmoi diff` / `chezmoi apply` 会自动跳过文档、本地覆盖、敏感文件名匹配与构建产物。
 注意：根级模式 `README.md` / `LICENSE` 仅匹配源目录根，不匹配嵌套路径——因此
 `~/.config/nvim/README.md` 与 `~/.config/nvim/LICENSE` 仍会随 `nvim/**` 部署到目标机；
-本应用于排除嵌套 README/LICENSE 的规则在文件中误写为 `**/REAMDME.md`（typo，正确应为 `**/README.md` 且需追加 `**/LICENSE`），暂未生效。详见 [getting-started.md](getting-started.md)。
+本应用于排除嵌套 README/LICENSE 的规则在文件中误写为 `**/README.md`（需追加 `**/LICENSE`），暂未生效。详见 [getting-started.md](getting-started.md)。
 
 ## 仓库特性说明
 
