@@ -67,7 +67,7 @@ nvim
 ├── stylua.toml               Spaces 2 / 120 columns
 ├── .gitignore                ignores tag / log / data
 ├── .neoconf.json             neoconf / lua_ls project settings
-├── LICENSE                   MIT (LazyVim starter)
+├── LICENSE                   Apache-2.0 (LazyVim starter, 与根 LICENSE 同源同哈希)
 └── README.md                 this file
 ```
 
@@ -198,4 +198,4 @@ vim.keymap.set("n", "<leader>sv", "<C-w>v", { desc = "Split window vertically" }
 
 ## License
 
-MIT — See the [LICENSE](LICENSE) file for details.
+Apache-2.0 — See the [LICENSE](LICENSE) file for details.
