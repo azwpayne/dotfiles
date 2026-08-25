@@ -2,14 +2,17 @@
 *.local
 *.local.*
 *.bak
-**/REAMDME.md
 README.md
+**/README.md
+REPO-INSIGHT.md
+**.md
 LICENSE
+**/LICENSE
 docs/
 docs/**
-**/dot_git
-dot_gitconfig
-**/dot_DS_Store
+**/.git
+**/.DS_Store
+**.md
 
 # 敏感信息
 *token*
