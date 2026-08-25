@@ -15,11 +15,11 @@
 | 提示符 | [Starship](https://starship.rs/) | Catppuccin Mocha powerline 风格 |
 | 模糊搜索 | fzf + fzf-tab + fd | Ctrl-R 历史、Ctrl-T 文件、Alt-C 目录、`frg`/`fkill`/`ftm`/`fl*` 交互函数 |
 | 终端 | Ghostty（主力）/ Alacritty（备用） | JetBrainsMono Nerd Font Mono，Catppuccin / Dracula 配色 |
-| 编辑器 | Neovim + [LazyVim](https://www.lazyvim.org/) | 10 个语言 extras，插件版本由 `lazy-lock.json` 锁定 |
+| 编辑器 | Neovim + [LazyVim](https://www.lazyvim.org/) | 10 个 extras（9 语言 + 1 UI，见 `lua/config/lazy.lua`），插件版本由 `lazy-lock.json` 锁定 |
 | 运行时管理 | mise | bun / deno / go / node / pnpm 一键切换 |
-| Git 工作流 | git + gh (CLI) | LFS、GitHub 走本地 SOCKS5 代理、`push.default=current` |
+| Git 工作流 | git + gh (CLI) | LFS、GitHub 走本地 SOCKS5 代理、`push.default=current` + `autoSetupRemote` |
 | SSH | OpenSSH `~/.ssh/config` | `ssh.github.com:443` + 自适应 `ProxyCommand`（探活 `127.0.0.1:5376` SOCKS5，失败直连）+ OrbStack `Include` |
-| AI Agent | pi coding agent | 沙箱化文件系统/网络策略 + 细粒度工具权限，`workflows/settings.json` 控制并发 |
+| AI Agent | pi coding agent | 沙箱化文件系统/网络策略 + 细粒度工具权限；`workflows/settings.json` 控制进度面板并发展示上限（8），子代理总数由 `landstrip.json` 限定（16） |
 
 ## 🚀 快速开始
 
@@ -78,16 +78,17 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 │   │   ├── aliases.zsh                →  ~/.config/zsh/aliases.zsh
 │   │   ├── fzf.zsh                    →  ~/.config/zsh/fzf.zsh
 │   │   ├── sdk.zsh                    →  ~/.config/zsh/sdk.zsh
+│   │   ├── dot_gitignore              →  ~/.config/zsh/.gitignore
 │   │   └── README.md                  →  ~/.config/zsh/README.md
 │   ├── starship.toml                  →  ~/.config/starship.toml      Starship 提示符
 │   ├── ghostty/config                 →  ~/.config/ghostty/config     Ghostty 终端
 │   ├── alacritty/alacritty.toml       →  ~/.config/alacritty/alacritty.toml  Alacritty 备用
 │   ├── mise/config.toml               →  ~/.config/mise/config.toml   mise 工具链
-│   ├── gh/private_config.yml          →  ~/.config/gh/config.yml      GitHub CLI (0600)
 │   ├── nvim/                          →  ~/.config/nvim/              LazyVim 配置（含 lazy-lock.json / stylua.toml）
 │   └── private_fish/                  →  ~/.config/fish/              Fish（仅 OrbStack 补全符号链接）
 │       ├── config.fish                →  ~/.config/fish/config.fish
-│       └── private_completions/       →  ~/.config/fish/completions/  symlink_docker/kubectl/orbctl.fish → OrbStack
+│       ├── private_completions/       →  ~/.config/fish/completions/  symlink_docker/kubectl/orbctl.fish → OrbStack
+│       └── private_conf.d/, private_functions/ → 空目录占位（内含 .keep）
 ├── private_dot_ssh/
 │   └── config                         →  ~/.ssh/config                ★ GitHub 走 ssh.github.com:443 + 自适应 SOCKS5 ProxyCommand（含 OrbStack Include，0600）
 └── private_dot_pi/
@@ -120,12 +121,12 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 ## 🔒 安全与隐私
 
 - 敏感度较高的文件使用 `private_` 前缀，应用后权限为 `0600`
-  （如 `~/.config/gh/config.yml`、`~/.ssh/config`、整个 `~/.pi/agent/`）。
-- `~/.config/gh/hosts.yml` 由 `gh auth login` 在目标机器上生成，凭据不进仓库；
-  仓库内只跟踪不含 token 的 `config.yml`。
+  （如 `~/.ssh/config`、整个 `~/.pi/agent/`）。
+- `~/.config/gh/` 下的 `config.yml` 与 `hosts.yml` 均由 `gh auth login`
+  在目标机器上生成，含凭据，不入仓库。
 - pi agent 的沙箱与权限策略显式拒绝读取 `*.env`、`~/.ssh/*`、`~/.aws/*` 等，
   并禁止 `sudo` / `rm` 类命令——细节见 [docs/dev-tools.md](docs/dev-tools.md)。
-- `dot_gitconfig` 与 `private_dot_ssh/config` 中包含本地代理地址（`socks5://127.0.0.1:7890` / `127.0.0.1:5376`，仅对 github.com 生效）
+- `dot_gitconfig` 与 `private_dot_ssh/config` 中包含本地代理地址（`socks5://127.0.0.1:7890` / `127.0.0.1:5376`，git 侧仅对 github.com / ssh.github.com 生效）
   与个人身份信息，公开 fork 前请先脱敏。
 
 ## 🧾 环境
