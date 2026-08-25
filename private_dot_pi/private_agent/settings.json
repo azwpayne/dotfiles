@@ -1,7 +1,7 @@
 {
   "theme": "dark",
   "lastChangelogVersion": "0.84.2",
-  "hideThinkingBlock": true,
+  "hideThinkingBlock": false,
   "packages": [
     "npm:pi-web-access",
     "npm:pi-subagents",
@@ -10,5 +10,8 @@
     "npm:@narumitw/pi-goal",
     "npm:pi-landstrip",
     "npm:@gotgenes/pi-permission-system"
-  ]
+  ],
+  "defaultProvider": "opencode",
+  "defaultModel": "x-preview-f-free",
+  "defaultThinkingLevel": "high"
 }

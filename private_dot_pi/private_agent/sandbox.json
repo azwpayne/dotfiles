@@ -12,9 +12,13 @@
     ]
   },
   "network"   : {
-    "allowNetwork"     : false,
+    "allowNetwork"     : true,
     "allowLocalBinding": false,
-    "allowedDomains"   : ["api.github.com", "github.com", "www.google.com", "goproxy.cn"],
+    "allowedDomains"   : [
+      "*.githubusercontent.com",
+      "*.github.com",
+      "github.com"
+    ],
     "deniedDomains"    : []
   }
 }
