@@ -11,7 +11,7 @@
 
 | 领域 | 方案 | 说明 |
 | --- | --- | --- |
-| Shell | Zsh + [Zim](https://zimfw.sh/) + 自有模块 | `aliases.zsh` / `fzf.zsh` / `sdk.zsh` 三模块化加载 |
+| Shell | Zsh + [Zim](https://zimfw.sh/) + 自有模块 | `aliases.zsh` / `fzf.zsh` / `sdk.zsh` 三模块化加载；`aliases.zsh` 新增 `update-all` 支持选择性批量更新（`brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise`） |
 | 提示符 | [Starship](https://starship.rs/) | Catppuccin Mocha powerline 风格 |
 | 模糊搜索 | fzf + fzf-tab + fd | Ctrl-R 历史、Ctrl-T 文件、Alt-C 目录、`frg`/`fkill`/`ftm`/`fl*` 交互函数 |
 | 终端 | Ghostty（主力）/ Alacritty（备用） | JetBrainsMono Nerd Font Mono，Catppuccin / Dracula 配色 |
@@ -19,7 +19,7 @@
 | 运行时管理 | mise | bun / deno / go / node / pnpm 一键切换 |
 | Git 工作流 | git + gh (CLI) | LFS、GitHub 走本地 SOCKS5 代理、`push.default=current` + `autoSetupRemote` |
 | SSH | OpenSSH `~/.ssh/config` | `ssh.github.com:443` + 自适应 `ProxyCommand`（探活 `127.0.0.1:5376` SOCKS5，失败直连）+ OrbStack `Include` |
-| AI Agent | pi coding agent | 沙箱化文件系统/网络策略 + 细粒度工具权限；`workflows/settings.json` 控制进度面板并发展示上限（8），子代理总数由 `landstrip.json` 限定（16） |
+| AI Agent | pi coding agent | 沙箱化文件系统/网络策略（`allowNetwork: true`）+ 细粒度工具权限；`workflows/settings.json` 控制进度面板并发/展示上限（8，`progressPanelMaxAgents`），子代理总数由 `landstrip.json` 限定（8，`maxSubagents`） |
 
 ## 🚀 快速开始
 
@@ -93,9 +93,9 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 │   └── config                         →  ~/.ssh/config                ★ GitHub 走 ssh.github.com:443 + 自适应 SOCKS5 ProxyCommand（含 OrbStack Include，0600）
 └── private_dot_pi/
     ├── private_agent/                 →  ~/.pi/agent/                 pi coding agent 主配置（0600）
-    │   ├── settings.json              →  ~/.pi/agent/settings.json     主题 / 包列表 / hideThinkingBlock
-    │   ├── sandbox.json               →  ~/.pi/agent/sandbox.json     文件系统与网络沙箱策略
-    │   ├── landstrip.json             →  ~/.pi/agent/landstrip.json   子代理上限与任务权限
+    │   ├── settings.json              →  ~/.pi/agent/settings.json     主题 `dark` / 包列表 7 个 npm 包 / `hideThinkingBlock: false` / `defaultProvider: opencode` / `defaultModel: muse-spark-1.2-contributor-free` / `thinkingLevel: xhigh`（`lastChangelogVersion: 0.84.3`）
+    │   ├── sandbox.json               →  ~/.pi/agent/sandbox.json     文件系统与网络沙箱策略（`allowNetwork: true` 仅白名单域名可出站）
+    │   ├── landstrip.json             →  ~/.pi/agent/landstrip.json   子代理总数上限 `maxSubagents: 8`（`toolFilesystemPolicy: sandbox`，任务权限 `review` allow 其余 deny）
     │   └── extensions/pi-permission-system/config.json → 细粒度工具权限矩阵
     └── workflows/settings.json        →  ~/.pi/workflows/settings.json 工作流设置（progressPanelMaxAgents=8）
 ```
@@ -126,7 +126,7 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
   在目标机器上生成，含凭据，不入仓库。
 - pi agent 的沙箱与权限策略显式拒绝读取 `*.env`、`~/.ssh/*`、`~/.aws/*` 等，
   并禁止 `sudo` / `rm` 类命令——细节见 [docs/dev-tools.md](docs/dev-tools.md)。
-- `dot_gitconfig` 与 `private_dot_ssh/config` 中包含本地代理地址（`socks5://127.0.0.1:7890` / `127.0.0.1:5376`，git 侧仅对 github.com / ssh.github.com 生效）
+- `dot_gitconfig` 与 `private_dot_ssh/config` 中包含本地代理地址（`socks5://127.0.0.1:5376`，git 三处与 SSH 探测均统一为 5376，仅对 `github.com`/`ssh.github.com` 生效）
   与个人身份信息，公开 fork 前请先脱敏。
 
 ## 🧾 环境
