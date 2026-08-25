@@ -13,7 +13,7 @@
 __pycache__/
 node_modules/
 *.cache
-*.git
+# *.git 笔误行已删（原意无注释可考，疑为 *.orig/*.patch 等合并残留；如确需请显式写明）
 dist/
 build/
 target/

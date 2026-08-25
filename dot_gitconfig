@@ -1,7 +1,7 @@
 [core]
 	editor = 'code'
 	autocrlf = input
-	excludesfile = /Users/payne/.gitignore_global
+	excludesfile = ~/.gitignore_global
 [filter "lfs"]
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
