@@ -61,11 +61,13 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 `symlink_` → 符号链接（文件内容即链接目标）。完整逐文件映射见
 [docs/layout.md](docs/layout.md)。
 
-```
+```text
 ~/.local/share/chezmoi                    应用到 $HOME
 ├── dot_zshrc                          →  ~/.zshrc                     Zsh 入口：Zim 引导 + 工具 eval + 模块加载
 ├── dot_zimrc                          →  ~/.zimrc                     Zim 模块清单
 ├── dot_gitconfig                      →  ~/.gitconfig                 用户信息 / 代理 / LFS / push 行为
+├── .gitignore                         →  null                         避免内容进入 chezmoi 目录
+├── .chezmoiignore                     →  null                         避免 chezmoi 目录应用到目录
 ├── dot_gitignore_global               →  ~/.gitignore_global          全局忽略规则
 ├── dot_codex/
 │   └── private_empty_config.toml      →  ~/.codex/empty_config.toml   Codex 占位配置（空文件）
