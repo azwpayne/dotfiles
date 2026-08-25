@@ -23,11 +23,12 @@ zsh -l
      │     ├─ aliases.zsh  ← 导出 $EDITOR/$VISUAL，供下一步使用
      │     └─ fzf.zsh      ← 依赖 $EDITOR 展开 Ctrl-O 绑定
      └─ ⑤ source ~/.config/zsh/sdk.zsh      ← 无条件加载
-           （文件末尾注释称"可选/需取消注释"，与实际代码不符，以代码为准）
+           （文件中注释称“可选/需取消注释”/“excluding sdk.zsh for lazy loading”，与实际的无条件 source 不符，以代码为准）
 ```
 
 **顺序即语义**：同名定义后加载者生效。典型例子是短别名 `k`——`sdk.zsh`
 在 kubectl 存在时定义 `k='kubectl'`（含 `command -v` 守卫），因此 `aliases.zsh` 有意不定义 `k`。
+`sdk.zsh` 头部对 SDKMAN 初始化的重复 `source`（`[[ -s ... ]]` 与 `[ -f ... ]` 双重）已清理，仅保留单次初始化（由 sdk.zsh 代理项处理）。
 三个模块的内部契约（依赖、函数速查、破坏性命令警告）详见
 [`private_dot_config/zsh/README.md`](../private_dot_config/zsh/README.md)。
 
@@ -142,6 +143,17 @@ zsh -l
 | `fluser [user]` | `lsof -u "$user" \| fzf` 按用户过滤（默认 `$USER`） | lsof, fzf |
 
 其中 `LSOF_PREVIEW='pid=$(echo {} \| awk "{print \$2}"); [ -n "$pid" ] && ps -fp "$pid" || echo "No PID"'` 为共享预览片段。
+
+### 包管理更新函数（aliases.zsh）
+
+与 `aliases.zsh` 逐行核对：`auto_update` 与新函数 `update-all` 并存，分工如下。
+
+| 函数 | 所在 | 用途 | 关键实现 |
+| --- | --- | --- | --- |
+| `auto_update` | aliases.zsh | 传统守卫式串行全量更新：逐个 `command -v` 守卫，未安装即跳过；若存在 `onproxy` 则先切代理 | `uv_update` → `sdk_update` → `rust_update` → `tldr_update` → `brew_update` 依次执行 |
+| `update-all [targets...]` | aliases.zsh | 声明式批量更新：关联数组 `tasks` 声明 6 项（`brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise`），支持参数过滤、彩色输出、失败计数与耗时统计 | `local -A tasks=(brew … sdk … rustup … tldr … uv … mise …)`；无参时 `targets=(${(k)tasks})` 全量，传参则过滤；`command -v` 守卫 + `eval "${tasks[$name]}"` + `failed` 计数；`print -P %F{blue/green/red}` 彩色提示，`start_time/duration` 统计耗时 `${mins}m${secs}s` |
+
+> `update-all` 任务定义（与 `aliases.zsh` 一致）：`brew` 为 `brew update -f && brew upgrade -f --greedy-latest -y && brew cu -y -a && brew cleanup --prune=all`，`sdk` 为 `sdk upgrade && sdk selfupdate && sdk flush`，`rustup` 为 `rustup update && rustup upgrade`，`tldr` 为 `tldr --update`，`uv` 为 `uv tool upgrade --all`，`mise` 为 `mise upgrade`。支持 `update-all brew uv` 仅更新指定目标，未知参数会提示 `Available: …` 并返回 1；`auto_update` 仍为传统串行写法，日常推荐 `update-all`。
 
 ### fzf-tab
 
