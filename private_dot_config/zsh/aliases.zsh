@@ -6,7 +6,7 @@
 # Usage       : 由 ~/.zshrc source 加载；加载顺序必须为
 #               aliases.zsh -> fzf.zsh -> sdk.zsh（后加载者覆盖同名定义）
 # Depends     : lsd/bat/htop/fastfetch/yazi/nvim 等，完整清单见 README.md
-# Last Updated: 2026-08-25
+# Last Updated: 2026-08-26（update-all 失败即红；Available 提示修正为键名列表）
 # Author      : Payne
 # =============================================================================
 
@@ -29,8 +29,8 @@ alias zshsource='source ~/.zshrc'                # 重新加载配置
 
 alias brew_update='brew update && brew upgrade --greedy-latest && brew cleanup --prune=all'
                                                  # 更新全部公式与 cask 并清理
-# 注：相对旧版移除了 brew cu 段（tap 不受信任导致整链失败）与 -f 强制标志；
-# --greedy-latest 已覆盖 auto-update 型 cask 的升级。
+# 注：此处不含 brew cu（cask 升级）——已移至 update-all 的 brew 目标统一执行（`brew cu -y -a`，
+# -a 含 auto-update 型 cask）；本函数走 --greedy-latest 覆盖大部分升级场景。
 alias sdk_update='sdk upgrade && sdk selfupdate && sdk flush'
                                                  # SDKMAN 更新（未安装时由 auto_update 守卫跳过）
 alias rust_update='rustup update && rustup upgrade'
@@ -211,24 +211,48 @@ function update-all() {
     fi
 
     local failed=0
+    local attempted=0          # 实际执行的目标数（not found 跳过的不计）
+    local skipped=0
+    local -a failed_names skipped_names
     local start_time=$(date +%s)
 
     for name in $targets; do
         if [[ -z "${tasks[$name]}" ]]; then
             print -P "%F{red}❌ Unknown target: $name%f"
-            print -P "Available: ${(j:, :)tasks}"
+            print -P "Available: ${(kj:, :)tasks}"
             return 1
         fi
 
         print -P "%F{blue}═══ Updating $name ═══%f"
 
         if command -v $name >/dev/null 2>&1; then
-            eval "${tasks[$name]}" || ((failed++))
+            (( attempted++ ))
+            # stderr 重定向到临时文件供失败时提取错误摘要（stdout 正常实时输出）；
+            # 模板结尾 XXXXXX 才能在 macOS/BSD mktemp 下被替换成随机串；
+            # 2>! 强制覆盖——Zim environment 模块 setopt NO_CLOBBER，普通 2> 会对
+            # mktemp 已创建的文件报 "file exists" 而误判目标失败
+            local errfile="$(mktemp "${TMPDIR:-/tmp}/update-all.${name}.XXXXXX")"
+            local rc=0
+            eval "${tasks[$name]}" 2>! "$errfile" || rc=$?
+            if (( rc == 0 )); then
+                # 成功路径保持绿色 ✓；stderr 中残留的非空内容（如警告）不丢弃
+                [[ -s "$errfile" ]] && command cat "$errfile" >&2
+                print -P "%F{green}✓ $name done%f"
+            else
+                (( failed++ ))
+                failed_names+=($name)
+                print -P "%F{red}✗ $name failed (exit=${rc})%f"
+                if [[ -s "$errfile" ]]; then
+                    print -P "%F{red}── $name 错误摘要（stderr 末 5 行）──%f"
+                    command tail -n 5 "$errfile" | command sed 's/^/  /'
+                fi
+            fi
+            command rm -f -- "$errfile"
         else
-            print -P "%F{yellow}⚠️  $name not found%f"
+            (( skipped++ ))
+            skipped_names+=($name)
+            print -P "%F{yellow}⚠️  $name not found, skipped%f"
         fi
-
-        print -P "%F{green}✓ $name done%f"
         echo ""
     done
 
@@ -236,10 +260,18 @@ function update-all() {
     local mins=$(( duration / 60 ))
     local secs=$(( duration % 60 ))
 
+    if (( skipped > 0 )); then
+        print -P "%F{yellow}ℹ️  skipped ${skipped} not-installed target(s): ${(j:, :)skipped_names}%f"
+    fi
+    if (( attempted == 0 )); then
+        print -P "%F{yellow}⚠️  no runnable targets in ${mins}m${secs}s%f"
+        return 0
+    fi
     if (( failed == 0 )); then
-        print -P "%B%F{green}✨ All updates completed in ${mins}m${secs}s%f%b"
+        print -P "%B%F{green}✨ All ${attempted} target(s) updated in ${mins}m${secs}s%f%b"
     else
-        print -P "%B%F{red}⚠️  $failed update(s) failed in ${mins}m${secs}s%f%b"
+        # 失败即红：N/M 汇总 + 失败目标清单，并返回非零退出码
+        print -P "%B%F{red}✗ ${failed}/${attempted} target(s) failed in ${mins}m${secs}s: ${(j:, :)failed_names}%f%b"
         return 1
     fi
 }

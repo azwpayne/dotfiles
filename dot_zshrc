@@ -116,18 +116,19 @@ source ${ZIM_HOME}/init.zsh
 export PATH="${HOME}/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:$HOME/.local/bin:$PATH"
 
 
-# init
+# init（逐项 command -v 守卫：工具未安装时静默跳过，不再打印 command not found）
 # source <(mise activate zsh)
-eval "$(zoxide init zsh)"
-eval "$(mise activate zsh)"
-eval "$(starship init zsh)"
-eval "$(fzf --zsh)"
-eval "$(brew shellenv)"
-export PATH="$(brew --prefix rustup)/bin:$HOME/.cargo/bin:$PATH"
+command -v zoxide   >/dev/null 2>&1 && eval "$(zoxide init zsh)"
+command -v mise     >/dev/null 2>&1 && eval "$(mise activate zsh)"
+command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
+# fzf 的键位绑定/补全不再在此 eval：统一由 fzf.zsh 内带守卫的
+# `command -v fzf && eval "$(fzf --zsh)"` 初始化（唯一初始化点，避免双重加载）
+command -v brew     >/dev/null 2>&1 && eval "$(brew shellenv)"
+command -v brew     >/dev/null 2>&1 && export PATH="$(brew --prefix rustup)/bin:$HOME/.cargo/bin:$PATH"
 
-# Source external configs (excluding sdk.zsh for lazy loading)
-# sdk.zsh is large and contains compdef calls; source separately when needed
+# Source external configs（先 aliases 后 fzf：fzf.zsh 的 Ctrl-O 绑定依赖 aliases.zsh 导出的 $EDITOR）
 for file in ~/.config/zsh/aliases.zsh ~/.config/zsh/fzf.zsh; do source "$file"; done
 
-# sdk.zsh is sourced optionally for full SDK support
-source ~/.config/zsh/sdk.zsh  # Uncomment to enable Java/Go/Python/Rust SDK management
+# sdk.zsh：多语言 SDK 环境与补全（pnpm / SDKMAN 惰性加载 / Go / Rust / Docker / kubectl），
+# 无条件加载，文件内部逐项守卫、缺装静默跳过；如需禁用请注释掉下面 source 行。
+source ~/.config/zsh/sdk.zsh

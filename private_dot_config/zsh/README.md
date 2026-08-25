@@ -10,7 +10,7 @@
 | --- | --- | --- |
 | `aliases.zsh` | 通用别名与函数 | 目录跳转（dl/dt/doc/wp）、系统信息（ff/fastfetch、时间戳）、进程资源（htop/df/du）、基础命令增强（lsd/bat/rm -i）、包管理更新（brew_update/sdk_update/.../auto_update/update-all；`auto_update` 为守卫式串行（`onproxy`→`uv`/`sdk`/`rustup`/`tldr`/`brew` 5 目标），`update-all` 为关联数组+参数过滤、失败计数与耗时统计，支持 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise` 6 目标）、K8s 别名、编辑器/AI 助手别名、`ruff_auto`/`y`/`jdx`/`scr` 等函数 |
 | `fzf.zsh` | fzf 与 fzf-tab 配置 | 前缀探测与缓存、全局选项（FZF_DEFAULT_OPTS / CTRL_R/T/C_OPTS）、交互式函数 `frg` `fkill` `find_large_files` `ftm` `flf` `flkill` `flnet` `fluser`、fzf-tab zstyle |
-| `sdk.zsh` | SDK 环境与补全 | pnpm 补全、SDKMAN（单次加载）、Android NDK、Go/Rust 环境、Docker/Kubectl 补全、kubecolor 包装与短别名 `k` |
+| `sdk.zsh` | SDK 环境与补全 | pnpm 补全、SDKMAN（惰性加载）、Android NDK、Go/Rust 环境、Docker/Kubectl 补全缓存、kubecolor 包装与短别名 `k` |
 
 ### 加载顺序契约（重要）
 
@@ -100,7 +100,7 @@ export VISUAL='nvim'
 
 ### 有守卫的可选组件（未安装时静默跳过）
 
-`pnpm`（tabtab 补全）、SDKMAN（`~/.sdkman/bin/sdkman-init.sh` 单次加载）、`docker`（`docker completion zsh`）、`kubectl`+`kubecolor`（补全 + 函数包装 + `k` 别名）、`~/.cargo/env`（rustup）、`onproxy` 函数（仓库外定义，若存在则 `auto_update` 前自动切代理）。`update-all` 对 6 目标 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise` 逐项 `command -v` 守卫，未安装时黄色 `⚠️ not found` 提示跳过；未知目标红色 `❌ Unknown target` 并列出 `Available: …`。
+`pnpm`（tabtab 补全，compdef 守卫）、SDKMAN（**惰性加载**：首次调用 `sdk` 时才 source `sdkman-init.sh`，未装不定义任何内容）、`docker`/`kubectl`+`kubecolor`（补全缓存于 `~/.cache/zsh/` 并 zcompile，二进制更新时自动重建；`k` 别名带 kubectl 守卫）、`~/.cargo/env`（rustup）、`onproxy` 函数（仓库外定义，若存在则 `auto_update` 前自动切代理）。`update-all` 对 6 目标 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise` 逐项 `command -v` 守卫，未安装时黄色 `⚠️ not found` 提示跳过；目标失败打印红色 `✗ failed` 与 stderr 摘要并使函数返回非零；未知目标红色 `❌ Unknown target` 并列出 `Available: …`。
 
 ### 运行时工具（对应别名/函数调用时才需要）
 
@@ -115,7 +115,7 @@ conda、wezterm 工作区别名、`pkid`/`jeb`、`brew cu` 段、`chown/chmod/ch
 ## 注意事项
 
 1. **破坏性命令**：`uv_resync` 会先删除当前项目的 `.venv` 和 `uv.lock` 再重建，仅在项目根目录使用。
-2. **`~/.zshrc` 在仓库外且未被跟踪**：其中还会 `eval "$(fzf --zsh)"` 一次（与本仓库 `fzf.zsh` 重复初始化，冗余但无害）；其注释称 sdk.zsh「可选/需取消注释」与实际的无条件 `source ~/.config/zsh/sdk.zsh` 不符，以实际代码为准。
+2. **`~/.zshrc`（即仓库内 `dot_zshrc`）已收敛单一初始化点**：fzf 键位/补全仅在 `fzf.zsh` 内初始化一次（带 `command -v fzf` 守卫），`~/.zshrc` 不再重复 eval；其 sdk.zsh 加载为无条件 `source`，注释与代码已保持一致。
 3. **强绑定的个人路径**：`GOPATH=~/WorkSpaces/project/go`、`GOPROXY=goproxy.cn`、清华 pip 镜像（`pip_tsinghua_mirror` 别名）、`ANDROID_NDK_HOME=/opt/homebrew/share/android-ndk`（目录存在才导出）。
 4. **被别名替换的原生命令**：`cat→bat`、`ls→lsd`、`top→htop`、`rm/cp/mv→-i`。脚本中需要原生行为时请用 `command cat` 等形式。
 
