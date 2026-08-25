@@ -39,6 +39,8 @@ git -C ~/.local/share/chezmoi add -A && git -C ~/.local/share/chezmoi commit -m 
 | `zimfw update` | 更新 Zim 插件（zsh，见下方说明） |
 | `zimfw upgrade` | 升级 zimfw 自身（zsh） |
 | `zimfw init` | 重建 `${ZIM_HOME}/init.zsh`（改动 `~/.zimrc` 后需要） |
+| `auto_update` | 串行守卫调用（uv/sdk/rustup/tldr/brew），缺失工具自动跳过，可选触发 `onproxy`；定义于 `private_dot_config/zsh/aliases.zsh` |
+| `update-all [targets...]` | 关联数组驱动，支持参数选择目标（如 `update-all brew mise`）、带失败计数与耗时统计；覆盖 brew/sdk/rustup/tldr/uv/mise，定义于 `aliases.zsh` |
 
 ## 验收清单
 
@@ -46,16 +48,17 @@ git -C ~/.local/share/chezmoi add -A && git -C ~/.local/share/chezmoi commit -m 
 
 ```bash
 # zsh 模块（语法 + 干净启动 + 关键定义）
-zsh -n ~/.config/zsh/{aliases,fzf,sdk}.zsh
+zsh -n ~/.config/zsh/{aliases,fzf,sdk}.zsh  # 覆盖 aliases.zsh 中的 auto_update / update-all（含关联数组、耗时统计）语法
 zsh -n ~/.zshrc
-zsh -ic 'exit'                          # 干净启动无报错
-zsh -ic 'type ls df du; echo $EDITOR'   # 关键别名/变量
+zsh -ic 'exit'                              # 干净启动无报错
+zsh -ic 'type ls df du; echo $EDITOR'       # 关键别名/变量
+zsh -ic 'type auto_update update-all'       # 验证更新函数已加载（update-all 支持参数过滤）
 # 注意：短别名 k 定义在 sdk.zsh 且仅当 kubectl 可用时才存在，无 kubectl 的机器上属预期缺失
 
 # Zim 插件管理器（改动 ~/.zimrc 后；重启 shell 时 dot_zshrc 会按 -nt 时间戳自动重建 init.zsh）
-zsh -ic 'zimfw info'                    # 查看 zimfw 版本
-zsh -ic 'zimfw update'                  # 更新插件
-zsh -ic 'zimfw init'                    # 手动重建 init.zsh
+zsh -ic 'zimfw info'                        # 查看 zimfw 版本
+zsh -ic 'zimfw update'                      # 更新插件
+zsh -ic 'zimfw init'                        # 手动重建 init.zsh
 
 # starship 渲染
 starship prompt
@@ -73,6 +76,7 @@ nvim --headless -c "lua require('config.lazy')" -c "qa"  # 可选：校验 lazy 
 git config --list --show-origin | head
 git config --get core.editor
 git config --get safe.directory
+git config --get-regexp proxy               # 应为 socks5://127.0.0.1:5376（与 SSH ProxyCommand 5376 统一）
 
 # fish 配置语法检查
 fish -n ~/.config/fish/config.fish
@@ -100,9 +104,14 @@ fzf 安装前缀缓存放在 `$ZDOTDIR/.fzf_prefix_cache`（未设置 `ZDOTDIR` 
 
 ### 换了代理端口/地址
 
-`dot_gitconfig` 中三处引用 `socks5://127.0.0.1:7890`
-（`http "https://github.com"`、`https "https://github.com"`、`ssh "ssh.github.com"`），全局替换即可。
-当前已无注释掉的 `[http]`/`[https]` 全局代理段，无需再清理旧注释。
+`dot_gitconfig` 中三处引用 `socks5://127.0.0.1:5376`
+（`http "https://github.com"`、`https "https://github.com"`、`ssh "ssh.github.com"`），已与 `private_dot_ssh/config` 的 `ProxyCommand` 探测端口 `5376` 统一（`nc -z 127.0.0.1 5376`），全局替换即可。
+早年注释掉的 `[http]`/`[https]` 全局代理段已清理，无需再提旧注释。
+
+### auto_update 与 update-all 的区别
+
+- `auto_update`：串行守卫调用，依次执行 `uv_update` / `sdk_update` / `rustup_update` / `tldr_update` / `brew_update`，每步前 `command -v <tool> &>/dev/null` 守卫、缺失自动跳过，可选先执行 `onproxy`；无参数、无失败计数。
+- `update-all`：关联数组驱动（`local -A tasks` 定义 brew/sdk/rustup/tldr/uv/mise），支持参数选择目标（如 `update-all brew mise`），未知目标直接报错并提示可用列表；循环内同样守卫 `command -v`，`eval` 失败则 `failed++`，最后统计耗时（`mins`/`secs`）并按失败数区分成功/警告提示。两者均定义于 `private_dot_config/zsh/aliases.zsh`，`zsh -n` 已覆盖其语法校验。
 
 ### Go / Python 路径强绑定个人环境
 
