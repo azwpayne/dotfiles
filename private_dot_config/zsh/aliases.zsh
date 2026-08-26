@@ -13,30 +13,16 @@
 # =============================================================================
 # 系统与应用
 # =============================================================================
-
-# ~~~ macOS 桌面 ~~~
 alias finder='open .'                            # Finder 打开当前目录
 alias iterm_ghostty='open -a ghostty "$PWD"'     # Ghostty 打开当前目录（单引号保证运行时取 $PWD）
 alias iterm='open -a iTerm "$PWD"'               # iTerm 打开当前目录
 
-# ~~~ Zsh 配置 ~~~
 alias zshconfig='code ~/.zshrc'                  # 编辑 ~/.zshrc
 alias zshsource='source ~/.zshrc'                # 重新加载配置
 
 # =============================================================================
 # 包管理器更新
 # =============================================================================
-
-alias brew_update='brew update && brew upgrade --greedy-latest && brew cleanup --prune=all'
-                                                 # 更新全部公式与 cask 并清理
-# 注：此处不含 brew cu（cask 升级）——已移至 update-all 的 brew 目标统一执行（`brew cu -y -a`，
-# -a 含 auto-update 型 cask）；本函数走 --greedy-latest 覆盖大部分升级场景。
-alias sdk_update='sdk upgrade && sdk selfupdate && sdk flush'
-                                                 # SDKMAN 更新（未安装时由 auto_update 守卫跳过）
-alias rust_update='rustup update && rustup upgrade'
-                                                 # Rust 工具链与 rustup 自身
-alias tldr_update='tldr --update'                # tldr 手册页
-alias uv_update='uv tool upgrade --all'          # uv 安装的全部工具
 
 # 一键全量更新（每步按工具是否可用守卫，缺哪个跳哪个）
 auto_update() {
@@ -61,14 +47,14 @@ auto_update() {
 # =============================================================================
 
 # ~~~ 目录跳转 ~~~
-alias dl='cd ~/Downloads'
-alias dt='cd ~/Desktop'
-alias doc='cd ~/Documents'
-alias wp='cd ~/workspace'
+alias dl='cd ${HOME}/Downloads'
+alias dt='cd ${HOME}/Desktop'
+alias doc='cd ${HOME}/Documents'
+alias wp='cd ${HOME}/WorkSpaces'
+alias ws='cd ${HOME}/WisdomSpaces'
 
 # ~~~ 系统信息 ~~~
 alias ff='fastfetch'
-alias h='history'
 alias nowdatetime='date "+%Y%m%d_%H%M%S"'
 alias timestamp_seconds='date +%s%N | cut -c 1-10'
 alias timestamp_millisecond='date +%s%N | cut -c 1-13'
@@ -97,14 +83,13 @@ alias mkdir='mkdir -p -v'                        # 自动创建父目录并显�
 alias l='lsd --group-directories-first'          # 目录排在前面
 alias ls='l'                                     # ls -> lsd
 alias tree='lsd --tree --depth 3'                # 树状显示 3 层
-
-# ~~~ 文件查看 ~~~
 alias cat='bat --paging=never'                   # bat 替代 cat（脚本中需要原生行为时用 command cat）
 
 # =============================================================================
 # Kubernetes (kubectl)
 # 注意：短别名 k 定义在 sdk.zsh（k -> kubectl，含 kubecolor 包装），此处不再重复定义。
 # =============================================================================
+alias kk='kubectl krew'
 alias kg='kubectl get'
 alias kl='kubectl logs'
 alias kd='kubectl describe'
@@ -120,7 +105,7 @@ alias ksys='kubectl -n kube-system'
 
 alias kctx='kubectl config current-context'
 alias kctxs='kubectl config get-contexts'
-alias krew='kubectl krew'
+
 
 # =============================================================================
 # 编辑器 (Neovim)
@@ -139,8 +124,8 @@ alias nvi='nvim'
 # =============================================================================
 alias cla='claude --dangerously-skip-permissions'
 alias clp='opencode'
-alias clp_cfg='code ~/.config/opencode'
-alias cla_cfg='code ~/.claude'
+alias clp_cfg='code ${HOME}/.config/opencode'
+alias cla_cfg='code ${HOME}/.claude'
 
 # =============================================================================
 # 开发与构建
@@ -161,10 +146,10 @@ ruff_auto() {
     ruff check --fix --exit-zero "$d" && ruff format "$d"
 }
 
+# 使用清华镜像安装 pip 包
 alias pip_tsinghua_mirror='python3 -m pip install -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple'
-                                                 # 使用清华镜像安装 pip 包
-alias uv_resync='rm -rf .venv uv.lock && uv sync'
-                                                 # ⚠️ 破坏性操作：删除 .venv 与 uv.lock 后重建并同步
+# ⚠️ 破坏性操作：删除 .venv 与 uv.lock 后重建并同步
+alias uv_resync='rm -rf ${HOME}/.venv ${HOME}/uv.lock && uv sync'
 
 # =============================================================================
 # WezTerm 工作区（已移除）

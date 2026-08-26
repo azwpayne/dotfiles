@@ -118,5 +118,6 @@ if command -v kubectl &> /dev/null; then
     command -v compdef &>/dev/null && compdef k=kubectl
 fi
 
+export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 ########## 其他 ##########
 # libpq/pgcli 相关路径配置已移除（未使用）；需要时用 `git show baseline:sdk.zsh` 找回。
