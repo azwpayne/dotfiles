@@ -40,15 +40,20 @@ return {
     -- ============================================================================
     -- Example: Add nvim-cmp with emoji source
     -- ============================================================================
-    -- Add cmp-emoji source to nvim-cmp
-    {
-        "hrsh7th/nvim-cmp",
-        dependencies = { "hrsh7th/cmp-emoji" },
-        ---@param opts cmp.ConfigSchema
-        opts = function(_, opts)
-            table.insert(opts.sources, { name = "emoji" })
-        end,
-    },
+    -- Disabled (was inert dead config): LazyVim v14 ships blink.cmp as its
+    -- completion engine and drops nvim-cmp specs unless the
+    -- "lazyvim.plugins.extras.coding.nvim-cmp" extra is imported, so this spec
+    -- never actually loaded (cmp-emoji is consequently absent from
+    -- lazy-lock.json). To enable, import that extra first and run :Lazy sync
+    -- so cmp-emoji gets pinned, then uncomment:
+    -- {
+    --     "hrsh7th/nvim-cmp",
+    --     dependencies = { "hrsh7th/cmp-emoji" },
+    --     ---@param opts cmp.ConfigSchema
+    --     opts = function(_, opts)
+    --         table.insert(opts.sources, { name = "emoji" })
+    --     end,
+    -- },
 
     -- ============================================================================
     -- Example: Telescope plugin file browser
@@ -191,15 +196,19 @@ return {
     },
 
     -- Or specify new options to override all the defaults
-    {
-        "nvim-lualine/lualine.nvim",
-        event = "VeryLazy",
-        opts = function()
-            return {
-                --[[add your custom lualine config here]]
-            }
-        end,
-    },
+    -- Disabled: in lazy.nvim an opts function's return value replaces the
+    -- merged opts, so returning {} here wipes LazyVim's entire lualine config
+    -- (and the emoji component added above). Uncomment only together with a
+    -- real config:
+    -- {
+    --     "nvim-lualine/lualine.nvim",
+    --     event = "VeryLazy",
+    --     opts = function()
+    --         return {
+    --             --[[add your custom lualine config here]]
+    --         }
+    --     end,
+    -- },
 
     -- ============================================================================
     -- Use mini.starter instead of alpha
@@ -224,7 +233,7 @@ return {
                 "stylua",           -- Lua formatter
                 "shellcheck",       -- Shell script checker
                 "shfmt",            -- Shell script formatter
-                "flake8",           -- Python formatter
+                "flake8",           -- Python linter
                 -- "prettier",       -- JS formatter (enable if needed)
             },
         },

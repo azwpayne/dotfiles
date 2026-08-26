@@ -6,12 +6,6 @@
 --
 -- Leader key custom mappings
 
--- Toggle Undotree
--- Opens the undotree toggle which shows a visual history of changes
-vim.keymap.set("n", "<leader>u", vim.cmd.UndotreeToggle, {
-    desc = "Toggle Undotree"
-})
-
 -- Exit insert mode by pressing jk
 -- A convenient alternative to pressing the Escape key, especially for touch typists
 vim.keymap.set("i", "jk", "<ESC>") -- exit insert mode by pressing jk
@@ -41,12 +35,6 @@ vim.keymap.set("n", "<leader>sh", "<C-w>s", {
 -- Closes the current buffer while keeping the window layout intact
 vim.keymap.set("n", "<leader>bd", "<cmd>bdelete<CR>", {
     desc = "Close current buffer"
-})
-
--- Format code with LSP
--- Formats the current file using the language server protocol
-vim.keymap.set("n", "<leader>f", vim.lsp.buf.format, {
-    desc = "Format code with LSP"
 })
 
 -- Toggle relative line numbers

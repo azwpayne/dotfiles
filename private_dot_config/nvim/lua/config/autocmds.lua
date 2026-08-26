@@ -57,19 +57,3 @@ vim.api.nvim_create_autocmd("FileType", {
         vim.opt_local.expandtab = true
     end
 })
-
---
--- Automatically format code on save for specific file types
--- Trigger formatting before buffer write for .lua, .py, and .js files.
--- Uses LSP formatting functionality (async=false means wait for completion).
--- This ensures code is formatted when saving files of these types.
---
-
-vim.api.nvim_create_autocmd("BufWritePre", {
-    group = vim.api.nvim_create_augroup("FormatOnSave", { clear = true }),
-    pattern = { "*.lua", "*.py", "*.js" }, -- Only applies to specific file types
-    callback = function()
-        -- If using LSP formatting functionality
-        vim.lsp.buf.format({ async = false })
-    end
-})
