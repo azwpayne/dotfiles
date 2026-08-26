@@ -5,7 +5,8 @@
 #               Go、Rust(rustup)、Docker/Kubectl 补全缓存与 kubecolor 包装
 # Usage       : 由 ~/.zshrc source 加载；必须在 compinit 之后、aliases.zsh 之后加载
 #               （本文件定义的 k -> kubectl 会覆盖同名定义，顺序即语义）
-# Last Updated: 2026-08-26
+# Last Updated: 2026-08-27（krew bin 的 PATH 追加改为目录存在性 + 去重双守卫，
+#               与 GOBIN 守卫同一惯例）
 # Author      : Payne
 # =============================================================================
 
@@ -49,7 +50,7 @@ fi
 # export PATH="$PATH:$ANDROID_NDK_HOME"
 
 ########## Python ##########
-# Python 环境由 uv 管理；conda 已卸载，相关 init 已移除（见 git 历史 baseline）
+# Python 环境由 uv 管理；conda 已卸载，相关 init 已移除（见 git 历史）
 # 如需切换 PyPI 镜像可启用：
 # export UV_DEFAULT_INDEX="https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple"
 
@@ -118,6 +119,10 @@ if command -v kubectl &> /dev/null; then
     command -v compdef &>/dev/null && compdef k=kubectl
 fi
 
-export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+# 4. krew（kubectl 插件管理器）二进制目录：仅当实际存在且 PATH 尚未包含时才追加，
+#    避免塞入死路径，重复 source（zshsource）时也不会累积重复项（与 GOBIN 守卫同一惯例）
+[[ -d "${KREW_ROOT:-$HOME/.krew}/bin" && "$PATH" != *"${KREW_ROOT:-$HOME/.krew}/bin"* ]] && \
+    export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+
 ########## 其他 ##########
-# libpq/pgcli 相关路径配置已移除（未使用）；需要时用 `git show baseline:sdk.zsh` 找回。
+# libpq/pgcli 相关路径配置已移除（未使用）；需要时从 git 历史找回。

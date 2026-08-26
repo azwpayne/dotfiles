@@ -5,7 +5,8 @@
 #               以及 frg/fkill/ftm/fl* 等交互式函数
 # Usage       : 由 ~/.zshrc source 加载；必须在 aliases.zsh 之后（依赖其导出的 $EDITOR）
 # Depends     : 必需 fzf、fzf-tab；主力 fd（缺失时回退 rg）；预览用 bat/lsd
-# Last Updated: 2026-08-25
+# Last Updated: 2026-08-27（exclude_list 中 .pyc 修正为 \*.pyc：原写法只匹配字面上
+#               名为 .pyc 的文件，字节码 foo.pyc 并未被排除）
 # Author      : Payne
 # =============================================================================
 
@@ -49,7 +50,7 @@ command -v fzf >/dev/null 2>&1 && eval "$(fzf --zsh)"
 # -----------------------------------------------------------------------------
 # 2. 文件/目录列表命令（fd 为主，rg 兜底）
 # -----------------------------------------------------------------------------
-exclude_list='{.git,node_modules,.idea,.venv,.cache,dist,build,.pyc,.DS_Store,.gitignore,.gitmodules,.gitkeep,.gitlab,.gitlab-ci.yaml,\*.zip,\*.apk,\*.so,.keep}'
+exclude_list='{.git,node_modules,.idea,.venv,.cache,dist,build,\*.pyc,.DS_Store,.gitignore,.gitmodules,.gitkeep,.gitlab,.gitlab-ci.yaml,\*.zip,\*.apk,\*.so,.keep}'
 
 export FZF_DEFAULT_COMMAND="fd --max-depth=5 --type f --hidden --follow --exclude=${exclude_list}"
 export FZF_ALT_C_COMMAND="fd --max-depth=5 --type d --follow --exclude=${exclude_list}"

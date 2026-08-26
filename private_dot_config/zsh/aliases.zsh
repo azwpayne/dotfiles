@@ -6,7 +6,8 @@
 # Usage       : 由 ~/.zshrc source 加载；加载顺序必须为
 #               aliases.zsh -> fzf.zsh -> sdk.zsh（后加载者覆盖同名定义）
 # Depends     : lsd/bat/htop/fastfetch/yazi/nvim 等，完整清单见 README.md
-# Last Updated: 2026-08-26（update-all 失败即红；Available 提示修正为键名列表）
+# Last Updated: 2026-08-27（auto_update 改为委托 update-all，修复对已删除的
+#               uv_update 等五个 *_update 辅助函数的调用）
 # Author      : Payne
 # =============================================================================
 
@@ -25,19 +26,15 @@ alias zshsource='source ~/.zshrc'                # 重新加载配置
 # =============================================================================
 
 # 一键全量更新（每步按工具是否可用守卫，缺哪个跳哪个）
+# 注：实际更新逻辑统一委托给本文件下方的 update-all。原先此处直接调用的
+# uv_update / sdk_update / rust_update / tldr_update / brew_update 五个辅助
+# 函数已在 0af1f61 中删除，继续调用只会报 command not found 并误报成功。
 auto_update() {
     echo "🚀 开始更新 ..."
     # 若定义了 onproxy 函数则先切换代理（可选依赖）
     (( $+functions[onproxy] )) && onproxy
 
-    command -v uv     &>/dev/null && uv_update
-    command -v sdk    &>/dev/null && sdk_update
-    command -v rustup &>/dev/null && rust_update
-    command -v tldr   &>/dev/null && tldr_update
-    command -v brew   &>/dev/null && brew_update
-
-    echo ""
-    echo "✅ 所有更新完成！"
+    update-all
 }
 
 # 注：conda 已卸载（sdk.zsh 中对应的 conda init 也已停用），不再纳入更新流程。
@@ -72,7 +69,7 @@ alias tmux='tmux -2'                             # 强制 256 色
 
 # ~~~ 基础命令 ~~~
 # 注：原 chown/chmod/chgrp --preserve-root 别名已移除——GNU 专属标志在 macOS BSD
-# 工具链上必然报 illegal option（baseline 时即已损坏），需要时从 git 历史找回。
+# 工具链上必然报 illegal option（历史版本即已损坏），需要时从 git 历史找回。
 alias wget='wget -c'                             # 断点续传
 alias rm='rm -i'                                 # 删除前逐个确认
 alias cp='cp -i'                                 # 覆盖前确认
@@ -155,7 +152,7 @@ alias uv_resync='rm -rf ${HOME}/.venv ${HOME}/uv.lock && uv sync'
 # WezTerm 工作区（已移除）
 # =============================================================================
 # wezterm 未安装，原六个 *Space 工作区别名已删除；
-# 需要时用 `git show baseline:aliases.zsh` 找回。
+# 需要时从 git 历史找回。
 
 # =============================================================================
 # Android 逆向工程
@@ -163,7 +160,7 @@ alias uv_resync='rm -rf ${HOME}/.venv ${HOME}/uv.lock && uv sync'
 jdx() { nohup jadx-gui "$@" > /dev/null 2>&1 & } # 后台启动 jadx-gui 反编译工具
 scr() { nohup scrcpy "$@" > /dev/null 2>&1 & }   # 后台启动 scrcpy 投屏
 # 注：原 pkid / jeb 别名已移除——其指向的 jar 包与 JEB 目录已不存在，
-# 需要时用 `git show baseline:aliases.zsh` 找回。
+# 需要时从 git 历史找回。
 
 # =============================================================================
 # 文件管理器 (yazi)
