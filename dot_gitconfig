@@ -19,11 +19,11 @@
 [https "https://github.com"]
 	proxy = socks5://127.0.0.1:5376
 [ssh "ssh.github.com"]
-    proxy = socks5://127.0.0.1:5376
+	proxy = socks5://127.0.0.1:5376
 
 [push]
 	default = current
 	autoSetupRemote = true
-    rebase = true
+	rebase = true
 [safe]
 	directory = *

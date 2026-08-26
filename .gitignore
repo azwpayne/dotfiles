@@ -3,5 +3,6 @@
 **/.dockerignore
 **/.idea
 **/node_modules
-.DS_Store
+**/.DS_Store
+*.log
 .pi/

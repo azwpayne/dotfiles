@@ -2,23 +2,15 @@
 *.local
 *.local.*
 *.bak
-README.md
 **/README.md
-REPO-INSIGHT.md
-**.md
-LICENSE
 **/LICENSE
 docs/
-docs/**
-**/.git
 **/.DS_Store
-**.md
 
 # 敏感信息
 *token*
 *secret*
 *credential*
-*client_secret*
 
 # 构建产物
 node_modules/
