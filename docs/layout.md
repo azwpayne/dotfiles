@@ -85,11 +85,11 @@
 
 | 源文件 | 目标路径 | 说明 |
 | --- | --- | --- |
-| `private_dot_pi/private_agent/settings.json` | `~/.pi/agent/settings.json` (0644) | 完整字段：`theme: dark`、`lastChangelogVersion: 0.84.3`、`hideThinkingBlock: true`、`defaultProvider: zai-coding-cn`、`defaultModel: glm-5.2`、`defaultThinkingLevel: xhigh`、7 个 npm 包（`pi-web-access`/`pi-subagents`/`@quintinshaw/pi-dynamic-workflows`/`@narumitw/pi-btw`/`@narumitw/pi-goal`/`pi-landstrip`/`@gotgenes/pi-permission-system`） |
+| `private_dot_pi/private_agent/settings.json` | `~/.pi/agent/settings.json` (0644) | 完整字段：`theme: dark`、`lastChangelogVersion: 0.84.3`、`hideThinkingBlock: true`、`defaultProvider: zai-coding-cn`、`defaultModel: glm-5.3`、`defaultThinkingLevel: max`、7 个 npm 包（`pi-web-access`/`pi-subagents`/`@quintinshaw/pi-dynamic-workflows`/`@narumitw/pi-btw`/`@narumitw/pi-goal`/`pi-landstrip`/`@gotgenes/pi-permission-system`） |
 | `private_dot_pi/private_agent/sandbox.json` | `~/.pi/agent/sandbox.json` (0644) | 文件系统与网络沙箱策略（`denyRead` 含 `/Users` `/etc` 等、`denyWrite` 含 `**/.env` `~/.ssh` 等、`allowNetwork: false`、`allowLocalBinding: false`、`allowedDomains: *.githubusercontent.com`/`*.github.com`/`github.com`） |
-| `private_dot_pi/private_agent/landstrip.json` | `~/.pi/agent/landstrip.json` (0644) | 子代理上限 `maxSubagents: 8`（`toolFilesystemPolicy: sandbox`，任务权限 `*` deny、`review` allow） |
+| `private_dot_pi/private_agent/landstrip.json` | `~/.pi/agent/landstrip.json` (0644) | 子代理上限 `maxSubagents: 5`（`toolFilesystemPolicy: sandbox`，任务权限 `*`: ask、`review`: allow） |
 | `private_dot_pi/private_agent/extensions/pi-permission-system/config.json` | `~/.pi/agent/extensions/pi-permission-system/config.json` (0644) | 工具级权限矩阵（`read/write/edit/bash/path` 细粒度 allow/deny/ask，禁 `sudo`/`rm`/`mv` 等） |
-| `private_dot_pi/workflows/settings.json` | `~/.pi/workflows/settings.json` (0644) | workflow 运行时配置：进度面板并发上限 `progressPanelMaxAgents: 8`，与 `landstrip.json` 的 `maxSubagents: 8` 职责不同、相互独立 |
+| `private_dot_pi/workflows/settings.json` | `~/.pi/workflows/settings.json` (0644) | workflow 运行时配置：默认并发 `defaultConcurrency: 10`、进度面板并发/展示上限 `progressPanelMaxAgents: 8`，与 `landstrip.json` 的 `maxSubagents: 5` 职责不同、相互独立 |
 
 > 权限实测（stat）：`private_dot_pi`/`private_agent` 目录前缀使 `~/.pi`、`~/.pi/agent` 为 0700，其内文件（含 `extensions/**`）均为 0644；
 > `workflows/` 目录无 `private_` 前缀，`~/.pi/workflows` 为 0755。
@@ -105,20 +105,14 @@
 *.local.*
 *.bak
 **/README.md
-README.md
-LICENSE
 **/LICENSE
 docs/
-docs/**
-**/.git
 **/.DS_Store
-REPO-INSIGHT.md
 
 # 敏感信息
 *token*
 *secret*
 *credential*
-*client_secret*
 
 # 构建产物
 node_modules/
@@ -126,14 +120,16 @@ node_modules/
 ```
 
 效果（按目标名匹配）：`chezmoi diff` / `chezmoi apply` 自动跳过根级与任意嵌套的 `README.md`、
-`LICENSE`（含 `zsh/README.md`、`nvim/README.md`、`nvim/LICENSE`）、`docs/**`、`REPO-INSIGHT.md`、
-任意 `.git` / `.DS_Store`，以及匹配 `*.local` / `*.bak` / `*token*` 等敏感与构建产物模式的文件。
+`LICENSE`（含 `zsh/README.md`、`nvim/README.md`、`nvim/LICENSE`）、`docs/`、任意 `.DS_Store`，
+以及匹配 `*.local` / `*.bak` / `*token*` 等敏感与构建产物模式的文件。
 
 ✅ 历史失配已修复（2026-08 收口）：旧版按**源名**书写了 `**/dot_git` / `**/dot_DS_Store` / `dot_gitconfig`
 （模式按目标名匹配，从不命中 `.git` / `.DS_Store` / `.gitconfig`，均未生效），且 `**/README.md`
-误拼为 `**/REAMDME.md`——现全部改写为目标名形式、删除无效行 `dot_gitconfig` 并追加 `**/LICENSE` 与
-`REPO-INSIGHT.md`。`dot_gitconfig` → `~/.gitconfig` 恢复其本来的正常部署语义；`chezmoi managed`
-目标数由 59 降至 55（不再包含嵌套 README×2、`nvim/LICENSE`、`~/REPO-INSIGHT.md`）。
+误拼为 `**/REAMDME.md`——现全部改写为目标名形式、删除无效行 `dot_gitconfig` 并追加 `**/LICENSE`。
+`dot_gitconfig` → `~/.gitconfig` 恢复其本来的正常部署语义；`chezmoi managed`
+目标数由 59 降至 55（不再包含嵌套 README×2、`nvim/LICENSE`）。后续去重又删除了被更宽模式
+覆盖或已无对应文件的冗余行（根级 `README.md` / `LICENSE`、`docs/**`、`**/.git`、`*client_secret*`、
+两条 `**.md` 与已不存在的 `REPO-INSIGHT.md`），`managed` 目标数保持 55 不变。
 
 ## 仓库特性说明
 
@@ -142,7 +138,7 @@ node_modules/
   如需按机器差异化，再引入模板即可。
 - **运行时产物不入库**：`~/.config/zsh/.gitignore` 和 `~/.config/nvim/.gitignore`
   分别忽略 `*.zwc`、`.fzf_prefix_cache` 及插件数据目录。
-- **仅服务于仓库管理、不部署的文件**：根目录的 `.gitignore` 与 `.chezmoiignore` 被 chezmoi 默认忽略（源目录中点开头文件不参与 apply）；根级 `README.md`、`LICENSE`、`docs/`（本文档所在）、`REPO-INSIGHT.md` 以及全部嵌套 `README.md` / `LICENSE`（如 `zsh/README.md`、`nvim/README.md`、`nvim/LICENSE`）被 `.chezmoiignore` 排除。
+- **仅服务于仓库管理、不部署的文件**：根目录的 `.gitignore` 与 `.chezmoiignore` 被 chezmoi 默认忽略（源目录中点开头文件不参与 apply）；根级 `README.md`、`LICENSE`、`docs/`（本文档所在）以及全部嵌套 `README.md` / `LICENSE`（如 `zsh/README.md`、`nvim/README.md`、`nvim/LICENSE`）被 `.chezmoiignore` 排除。
 - **不在仓库内的重要文件**：
   - `~/.config/gh/hosts.yml` / `config.yml`——由 `gh auth login` 生成，含凭据，切勿加入仓库；
   - `~/.zim/`——由 zimfw 自动管理（`dot_zimrc` 仅为其配置）；

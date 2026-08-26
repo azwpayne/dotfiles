@@ -8,7 +8,9 @@
 
 ## Ghostty — `private_dot_config/ghostty/config`
 
-配置文件路径 `~/.config/ghostty/config`，查看最终生效值：`ghostty +show-config`（`--default --docs` 可对照默认值）。文件含较多注释掉的备用方案（`fish -l`、`tmux`、`Dracula+` 等），下表仅列生效值。
+配置文件路径 `~/.config/ghostty/config`，查看最终生效值：`ghostty +show-config`（`--default --docs` 可对照默认值）。
+> 注：`ghostty` CLI 不默认在 PATH 中，需先在 Ghostty 菜单 → "Install CLI tool" 安装；或用全路径 `/Applications/Ghostty.app/Contents/MacOS/ghostty`。
+文件含较多注释掉的备用方案（`fish -l`、`tmux`、`Dracula+` 等），下表仅列生效值。
 
 ### 环境与启动
 
@@ -58,7 +60,7 @@
 | `Cmd+Plus` / `Cmd+Minus` / `Cmd+Zero` | 字号 +1 / −1 / 复位 | `increase_font_size:1` / `decrease_font_size:1` / `reset_font_size` |
 | `Ctrl+\``（全局） | 呼出/收起 Quake 风格下拉快速终端 | `global:ctrl+grave_accent=toggle_quick_terminal` |
 
-> 重新加载配置 `reload_config`（`Cmd+Shift+,`）在文件中已注释（`# keybind = cmd+shift+comma=reload_config`），当前版本需重启或依赖自动热重载。
+> 重新加载配置 `reload_config` 的 `# keybind = cmd+shift+comma=reload_config` 行虽已注释，但它是 Ghostty v1.3.1 的内置默认键位（本配置未执行 `keybind = clear`），`Cmd+Shift+,` 重载依然生效；注释行仅是重复声明默认键位。如需禁用可 `keybind = clear` 后重绑。
 
 ### 安全与 macOS 专项
 
@@ -155,7 +157,8 @@ bold_italic = { family = "JetBrainsMono Nerd Font Mono", style = "Bold Italic" }
 
 ```bash
 brew install --cask font-jetbrains-mono-nerd-font
-ghostty +show-config            # 查看 Ghostty 最终生效值
+ghostty +show-config            # 查看 Ghostty 最终生效值（CLI 需先经 Ghostty 菜单 "Install CLI tool" 安装，
+                                #   或用全路径 /Applications/Ghostty.app/Contents/MacOS/ghostty）
 ghostty +show-config --default --docs | grep -E "font-family|theme|background-opacity"
 alacritty --help | head         # 确认 Alacritty 可执行
 ```

@@ -4,7 +4,7 @@
 
 本仓库是 chezmoi 的**源目录**（source directory，位于 `~/.local/share/chezmoi`），
 通过 `chezmoi apply` 将文件渲染到 `$HOME` 下对应位置。全部为静态文件——没有模板、
-没有脚本，所见即所得；通过 `.chezmoiignore` 将根级与嵌套的 `README.md` / `LICENSE`、`docs/`、`REPO-INSIGHT.md`、
+没有脚本，所见即所得；通过 `.chezmoiignore` 将根级与嵌套的 `README.md` / `LICENSE`、`docs/`、
 `*.local` / `*.bak` 等仅供仓库查阅或本地覆盖的文件排除在部署之外，避免污染目标 HOME 目录。
 
 ## ✨ 特性总览
@@ -19,7 +19,7 @@
 | 运行时管理 | mise | bun / deno / go / node / pnpm 一键切换 |
 | Git 工作流 | git + gh (CLI) | LFS、GitHub 走本地 SOCKS5 代理、`push.default=current` + `autoSetupRemote` |
 | SSH | OpenSSH `~/.ssh/config` | `ssh.github.com:443` + 自适应 `ProxyCommand`（探活 `127.0.0.1:5376` SOCKS5，失败直连）+ OrbStack `Include` |
-| AI Agent | pi coding agent | 默认 `zai-coding-cn` / `glm-5.2`（`xhigh`）；文件系统沙箱 + 禁网策略（`allowNetwork: false`）+ 允许优先的工具权限矩阵（敏感路径与高危命令 deny）；`workflows/settings.json` 控制进度面板并发/展示上限（8，`progressPanelMaxAgents`），`workflows/model-tiers.json` 定义三档模型分层（small/medium/big，与主模型不同代，用于成本分级），子代理总数由 `landstrip.json` 限定（8，`maxSubagents`） |
+| AI Agent | pi coding agent | 默认 `zai-coding-cn` / `glm-5.3`（`max`）；文件系统沙箱 + 禁网策略（`allowNetwork: false`）+ 允许优先的工具权限矩阵（敏感路径与高危命令 deny）；`workflows/settings.json` 控制并发与进度面板（`defaultConcurrency: 10` / `progressPanelMaxAgents: 8`），`workflows/model-tiers.json` 定义三档模型分层（small/medium/big，成本分级），子代理总数由 `landstrip.json` 限定（5，`maxSubagents`；任务权限 `*`: ask、`review`: allow） |
 
 ## 🚀 快速开始
 
@@ -65,8 +65,8 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 
 ```text
 ~/.local/share/chezmoi                    应用到 $HOME
-├── .chezmoiignore                     →  (不部署) 过滤根级与嵌套 README.md / LICENSE、docs/、REPO-INSIGHT.md 与 *.local / *.bak / *token* 等，避免污染家目录
-├── .gitignore                         →  (git 侧) 忽略 .vscode / .git / node_modules / .DS_Store 等
+├── .chezmoiignore                     →  (不部署) 过滤根级与嵌套 README.md / LICENSE、docs/ 与 *.local / *.bak / *token* 等，避免污染家目录
+├── .gitignore                         →  (git 侧) 忽略 .vscode / .git / node_modules / **/.DS_Store / *.log 等
 ├── dot_zshrc                          →  ~/.zshrc                     Zsh 入口：Zim 引导 + 工具 eval + 模块加载
 ├── dot_zimrc                          →  ~/.zimrc                     Zim 模块清单
 ├── dot_gitconfig                      →  ~/.gitconfig                 用户信息 / 代理 / LFS / push 行为
@@ -93,16 +93,16 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 │   └── config                         →  ~/.ssh/config                ★ GitHub 走 ssh.github.com:443 + 自适应 SOCKS5 ProxyCommand（含 OrbStack Include；~/.ssh 目录 0700）
 └── private_dot_pi/
     ├── private_agent/                 →  ~/.pi/agent/                 pi coding agent 主配置（目录 0700）
-    │   ├── settings.json              →  ~/.pi/agent/settings.json     主题 `dark` / 7 个 npm 包 / `hideThinkingBlock: true` / `defaultProvider: zai-coding-cn` / `defaultModel: glm-5.2` / `defaultThinkingLevel: xhigh`（`lastChangelogVersion: 0.84.3`）
-    │   ├── sandbox.json               →  ~/.pi/agent/sandbox.json     文件系统与网络沙箱策略（`allowNetwork: false` 禁网、`allowLocalBinding: false`，域名白名单 3 项）
-    │   ├── landstrip.json             →  ~/.pi/agent/landstrip.json   子代理总数上限 `maxSubagents: 8`（`toolFilesystemPolicy: sandbox`，任务权限 `review` allow 其余 deny）
+    │   ├── settings.json              →  ~/.pi/agent/settings.json     主题 `dark` / 7 个 npm 包 / `hideThinkingBlock: true` / `defaultProvider: zai-coding-cn` / `defaultModel: glm-5.3` / `defaultThinkingLevel: max`（`lastChangelogVersion: 0.84.3`）
+    │   ├── sandbox.json               →  ~/.pi/agent/sandbox.json     文件系统与网络沙箱策略（`allowRead: ["**"]`、`allowNetwork: false` 禁网、`allowLocalBinding: false`，域名白名单 3 项）
+    │   ├── landstrip.json             →  ~/.pi/agent/landstrip.json   子代理总数上限 `maxSubagents: 5`（`toolFilesystemPolicy: sandbox`，任务权限 `*`: ask、`review`: allow）
     │   └── extensions/pi-permission-system/config.json → 细粒度工具权限矩阵（允许优先：默认 allow，敏感路径/高危命令 deny）
     └── workflows/
-        ├── settings.json              →  ~/.pi/workflows/settings.json 工作流设置（defaultConcurrency=5 / progressPanelMaxAgents=8）
-        └── model-tiers.json           →  ~/.pi/workflows/model-tiers.json 三档模型分层（small=glm-5-turbo / medium=glm-5.1 / big=glm-5.3，与主模型 glm-5.2 不同代，用于成本分级）
+        ├── settings.json              →  ~/.pi/workflows/settings.json 工作流设置（defaultConcurrency=10 / progressPanelMaxAgents=8）
+        └── model-tiers.json           →  ~/.pi/workflows/model-tiers.json 三档模型分层（small=glm-5-turbo:minimal / medium=glm-5.2:medium / big=glm-5.2:xhigh，用于成本分级）
 ```
 
-> 根级 `README.md` / `LICENSE` / `docs/` / `REPO-INSIGHT.md` 与全部嵌套 `README.md` / `LICENSE`（含 `zsh/README.md`、`nvim/README.md`、`nvim/LICENSE`）均由 `.chezmoiignore`（`**/README.md`、`**/LICENSE` 等按目标名书写的模式）排除、不部署；历史上的 `**/REAMDME.md` 拼写失配与 `dot_git`/`dot_DS_Store`/`dot_gitconfig` 源名失配已修复，`managed` 目标数 59→55。
+> 根级 `README.md` / `LICENSE` / `docs/` 与全部嵌套 `README.md` / `LICENSE`（含 `zsh/README.md`、`nvim/README.md`、`nvim/LICENSE`）均由 `.chezmoiignore`（`**/README.md`、`**/LICENSE` 等按目标名书写的模式）排除、不部署；历史上的 `**/REAMDME.md` 拼写失配与 `dot_git`/`dot_DS_Store`/`dot_gitconfig` 源名失配已修复，`managed` 目标数 59→55（后续去重又清理了被更宽模式覆盖的冗余行，目标数不变）。
 
 ## 📚 文档索引
 

@@ -16,10 +16,12 @@ zsh -l
      │     command -v mise     && eval "$(mise activate zsh)"
      │     command -v starship && eval "$(starship init zsh)"   ← 提示符最终归 Starship
      │     command -v brew     && eval "$(brew shellenv)"
-     │     command -v brew     && export PATH="$(brew --prefix rustup)/bin:…cargo…:$PATH"
+     │     [[ -d ~/.cargo/bin && "$PATH" != *"$HOME/.cargo/bin"* ]] && export PATH="$HOME/.cargo/bin:$PATH"
+     │     [[ -d "${HOMEBREW_PREFIX:-/opt/homebrew}/opt/rustup/bin" && …未包含… ]] && export PATH="…/opt/rustup/bin:$PATH"
      │     （fzf 的 eval 已从此处移除——键位绑定/补全统一由 fzf.zsh 内带守卫的
      │       `command -v fzf && eval "$(fzf --zsh)"` 初始化一次，消除双重初始化；
-     │       rustup/cargo 路径以前缀方式追加到 PATH 最前，需在 brew shellenv 之后）
+     │       rustup/cargo 为静态路径 + 目录存在性/去重双守卫的前置注入，不再调用
+     │       `brew --prefix` 子进程、重复 source 幂等，需在 brew shellenv 之后）
      ├─ ④ for file in ~/.config/zsh/aliases.zsh ~/.config/zsh/fzf.zsh; do source "$file"; done
      │     ├─ aliases.zsh  ← 导出 $EDITOR/$VISUAL，供下一步使用
      │     └─ fzf.zsh      ← 依赖 $EDITOR 展开 Ctrl-O 绑定；fzf 键位绑定唯一初始化点
@@ -54,7 +56,7 @@ zsh -l
 补充说明：
 
 - `ZSH_AUTOSUGGEST_MANUAL_REBIND=1` 在 `dot_zshrc` 中已设置，因 `zsh-autosuggestions` 为末尾模块之一，可提升性能。
-- `ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)` 是 zsh-users 版 zsh-syntax-highlighting 的开关；该模块（连同 `zfm` / `fzf`）在 zimrc 中已被注释、未加载，实际生效的 `fast-syntax-highlighting` 并不读取此变量，属 Zim 模板遗留设置。
+- 历史上的 `ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)`（zsh-users 版 zsh-syntax-highlighting 的开关）已从 `dot_zshrc` 删除：该模块（连同 `zfm` / `fzf`）在 zimrc 中被注释、未加载，实际生效的 `fast-syntax-highlighting` 并不读取此变量，属无效配置。
 
 > ⚠️ **asciiship 实际被覆盖**：`.zshrc` 中 `command -v starship && eval "$(starship init zsh)"`
 > 发生在 Zim 初始化之后，实际生效的提示符是 Starship。`.zimrc` 里的 `asciiship` 及其信息
@@ -114,12 +116,14 @@ zsh -l
 
 | 变量 | 主力（fd 存在时） | 兜底（fd 缺失时） |
 | --- | --- | --- |
-| `FZF_DEFAULT_COMMAND` | `fd --max-depth=5 --type f --hidden --follow --exclude={.git,node_modules,.idea,.venv,.cache,dist,build,.pyc,.DS_Store,.gitignore,.gitmodules,.gitkeep,.gitlab,.gitlab-ci.yaml,*.zip,*.apk,*.so,.keep}` | `rg --files --hidden --follow --glob '!.git' --glob '!node_modules' --glob '!.venv'` |
+| `FZF_DEFAULT_COMMAND` | `fd --max-depth=5 --type f --hidden --follow --exclude={.git,node_modules,.idea,.venv,.cache,dist,build,*.pyc,.DS_Store,.gitignore,.gitmodules,.gitkeep,.gitlab,.gitlab-ci.yaml,*.zip,*.apk,*.so,.keep}` | `rg --files --hidden --follow --glob '!.git' --glob '!node_modules' --glob '!.venv'` |
 | `FZF_ALT_C_COMMAND` | `fd --max-depth=5 --type d --follow --exclude=...` | `rg --files --null \| xargs -0 dirname \| sort -u` |
 | `FZF_CTRL_T_COMMAND` | 与 `FZF_DEFAULT_COMMAND` 保持一致（置于 fd 回退判断之后，确保回退值同步） | 同左 |
 
-> `exclude_list` 在 `fzf.zsh` 中定义为 `'{.git,node_modules,.idea,.venv,.cache,dist,build,.pyc,.DS_Store,.gitignore,.gitmodules,.gitkeep,.gitlab,.gitlab-ci.yaml,\*.zip,\*.apk,\*.so,.keep}'`，
+> `exclude_list` 在 `fzf.zsh` 中定义为 `'{.git,node_modules,.idea,.venv,.cache,dist,build,\*.pyc,.DS_Store,.gitignore,.gitmodules,.gitkeep,.gitlab,.gitlab-ci.yaml,\*.zip,\*.apk,\*.so,.keep}'`，
 > `FZF_DEFAULT_COMMAND` / `FZF_ALT_C_COMMAND` 均通过 `--exclude=${exclude_list}` 展开。
+> 其中 `\*.pyc` 的反斜杠转义是必要的：经 `$SHELL -c` 展开后成为 `--exclude=*.pyc`，
+> 匹配所有 Python 字节码文件（旧写法 `.pyc` 只匹配字面上名为 `.pyc` 的文件，已修正）。
 
 ### 全局键位与选项
 
@@ -157,10 +161,10 @@ zsh -l
 
 | 函数 | 所在 | 用途 | 关键实现 |
 | --- | --- | --- | --- |
-| `auto_update` | aliases.zsh | 传统守卫式串行全量更新：逐个 `command -v` 守卫，未安装即跳过；若存在 `onproxy` 则先切代理 | `uv_update` → `sdk_update` → `rust_update` → `tldr_update` → `brew_update` 依次执行（5 目标，无 mise；不含 `brew cu`，已移至 `update-all`） |
+| `auto_update` | aliases.zsh | 一键全量更新入口：打印 🚀 横幅，若存在 `onproxy` 函数则先切代理，随后直接委托 `update-all` 执行（覆盖目标与行为一致） | 无参调用 `update-all`（全量 6 目标）；历史上的 `uv_update` 等五个 `*_update` 辅助函数已删除 |
 | `update-all [targets...]` | aliases.zsh | 声明式批量更新（**失败即红**）：关联数组 `tasks` 声明 6 项（`brew` / `sdk` / `rustup` / `tldr` / `uv` / `mise`），支持参数过滤、彩色输出、失败计数与耗时统计 | `local -A tasks=(brew … sdk … rustup … tldr … uv … mise …)`；无参时 `targets=(${(k)tasks})` 全量，传参则只运行指定目标；`command -v $name` 守卫 + `eval "${tasks[$name]}"`（stderr 重定向到临时文件供错误摘要）；目标**成功打印绿色 `✓ done`，失败打印红色 `✗ failed (exit=N)` + stderr 末 5 行错误摘要**；结尾汇总 `N/M target(s) failed`（附失败目标清单与耗时 `${mins}m${secs}s`），任一失败返回非零；未安装目标黄色 `⚠️ not found, skipped` 且不计入 M，全部跳过时提示 `no runnable targets` |
 
-> `update-all` 任务定义（与 `aliases.zsh` 的 `local -A tasks=(…)` 一致）：`brew` 为 `brew update -f && brew upgrade -f --greedy-latest -y && brew cu -y -a && brew cleanup --prune=all`，`sdk` 为 `sdk upgrade && sdk selfupdate && sdk flush`，`rustup` 为 `rustup update && rustup upgrade`，`tldr` 为 `tldr --update`，`uv` 为 `uv tool upgrade --all`，`mise` 为 `mise upgrade`。支持 `update-all brew uv` 仅更新指定目标；未知参数会提示 `Available: …` 并返回 1，未安装目标黄色 `⚠️ not found` 跳过。`auto_update` 仍为传统串行写法（其注释已说明 `brew cu` 移至 `update-all`，两处不再矛盾），日常推荐 `update-all`。
+> `update-all` 任务定义（与 `aliases.zsh` 的 `local -A tasks=(…)` 一致）：`brew` 为 `brew update -f && brew upgrade -f --greedy-latest -y && brew cu -y -a && brew cleanup --prune=all`，`sdk` 为 `sdk upgrade && sdk selfupdate && sdk flush`，`rustup` 为 `rustup update && rustup upgrade`，`tldr` 为 `tldr --update`，`uv` 为 `uv tool upgrade --all`，`mise` 为 `mise upgrade`。支持 `update-all brew uv` 仅更新指定目标；未知参数会提示 `Available: …` 并返回 1，未安装目标黄色 `⚠️ not found` 跳过。日常推荐 `update-all`（`auto_update` 仅多一层横幅与可选代理切换）。
 
 ### fzf-tab
 

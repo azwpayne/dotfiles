@@ -42,10 +42,10 @@ git -C ~/.local/share/chezmoi add -A && git -C ~/.local/share/chezmoi commit -m 
 | `zimfw upgrade` | 升级 `zimfw` 自身（`zsh`） |
 | `zimfw init` | 重建 `${ZIM_HOME}/init.zsh`（改动 `~/.zimrc` 后需要，`dot_zshrc` 会按 `-nt` 时间戳自动重建） |
 | `zimfw info` | 查看 `zimfw` 版本与模块信息 |
-| `auto_update` | 串行守卫调用（`uv` / `sdk` / `rustup` / `tldr` / `brew` 共 5 项），每步 `command -v` 守卫、缺失跳过，可选先执行 `onproxy`；定义于 `private_dot_config/zsh/aliases.zsh`，详见 [dev-tools.md](dev-tools.md) |
+| `auto_update` | 一键全量更新入口：若定义了 `onproxy` 函数则先切代理，随后直接委托 `update-all` 执行（覆盖目标一致）；定义于 `private_dot_config/zsh/aliases.zsh`，详见 [dev-tools.md](dev-tools.md) |
 | `update-all [targets...]` | 关联数组驱动的批量更新，支持参数选择目标（如 `update-all brew mise`）、带失败计数与耗时统计；覆盖 `brew` / `sdk` / `rustup` / `tldr` / `uv` / `mise` 共 6 项（**已覆盖 `mise`**，与 `auto_update` 的核心差异）；定义于 `aliases.zsh`，详见 [dev-tools.md](dev-tools.md) |
 
-> `auto_update` 与 `update-all` 均定义于 `private_dot_config/zsh/aliases.zsh`，前者为兼容旧习惯的固定顺序全量，后者为支持参数过滤与 `mise` 的新入口；`brew` 任务差异（是否含 `brew cu -y -a`）见 [dev-tools.md](dev-tools.md) 对比表。
+> `auto_update` 与 `update-all` 均定义于 `private_dot_config/zsh/aliases.zsh`；`auto_update` 为兼容旧习惯的一键入口（内部委托 `update-all`），`update-all` 为支持参数过滤、失败计数与耗时统计的实际实现，二者覆盖目标一致（均含 `mise`）；详见 [dev-tools.md](dev-tools.md) 对比表。
 
 ## 验收清单
 
@@ -69,7 +69,8 @@ zsh -ic 'zimfw init'                        # 手动重建 init.zsh
 starship prompt
 starship explain  # 可选：查看各模块判定
 
-# ghostty 配置解析（会打印生效值）
+# ghostty 配置解析（会打印生效值；ghostty CLI 需先在 Ghostty 菜单 →
+# "Install CLI tool" 安装，否则用全路径 /Applications/Ghostty.app/Contents/MacOS/ghostty）
 ghostty +show-config
 # 或：ghostty +show-config | head -n 50
 
@@ -92,8 +93,10 @@ fish -n ~/.config/fish/config.fish
 mise doctor
 mise ls                                     # 应列出 bun/deno/go/node/pnpm（均为 latest）
 
-# alacritty 配置解析（或直接启动 alacritty 验证）
-alacritty --print-config | head
+# alacritty：CLI 无 --print-config 子命令（0.17 实测报错），配置解析在启动时进行，
+# 冒烟启动（瞬间退出）即可验证配置可解析
+alacritty --version
+alacritty -e true
 
 # chezmoi 全局状态
 chezmoi doctor && chezmoi diff
@@ -122,18 +125,23 @@ rm -f ~/.fzf_prefix_cache && exec zsh
 
 ### auto_update 与 update-all 的区别
 
+`auto_update` 现为 `update-all` 的薄包装：打印 🚀 横幅、（若定义）先执行 `onproxy` 切代理，
+随后直接调用 `update-all`（无参全量）。二者覆盖目标与失败统计行为完全一致：
+
 | 维度 | `auto_update` | `update-all` |
 | --- | --- | --- |
-| 定义位置 | `aliases.zsh:42` | `aliases.zsh:196` |
-| 覆盖目标 | 5 项：`uv` / `sdk` / `rustup` / `tldr` / `brew`（不含 `mise`） | 6 项：`brew` / `sdk` / `rustup` / `tldr` / `uv` / `mise`（含 `mise upgrade`） |
-| 参数 | 无参数，固定顺序全量 | 支持 `update-all brew mise` 参数过滤，未传参则全量；未知目标报错并提示可用列表 |
-| 守卫与容错 | 每步 `command -v <tool> &>/dev/null &&` 守卫，缺失跳过 | 循环内 `command -v $name` 守卫 + `eval` 失败则 `failed++` |
-| 统计与输出 | 无失败计数、无耗时统计 | 失败计数 `failed`、耗时 `mins` / `secs`、`print -P` 彩色输出（蓝标题/绿成功/黄跳过/红失败） |
-| `brew` 差异 | `brew_update` 别名：`brew update && brew upgrade --greedy-latest && brew cleanup --prune=all` | `brew update -f && brew upgrade -f --greedy-latest -y && brew cu -y -a && brew cleanup --prune=all`（含 `brew cu`，更激进） |
-| 适用场景 | 兼容旧习惯的一键全量 | 需 `mise`、需单目标更新、需查看耗时与失败统计 |
+| 定义位置 | `aliases.zsh:32` | `aliases.zsh:178` |
+| 覆盖目标 | 6 项（同 `update-all`，经委托实现） | 6 项：`brew` / `sdk` / `rustup` / `tldr` / `uv` / `mise`（含 `mise upgrade`） |
+| 参数 | 无参数，固定调用 `update-all` 全量 | 支持 `update-all brew mise` 参数过滤，未传参则全量；未知目标报错并提示可用列表 |
+| 守卫与容错 | 由 `update-all` 实现 | 循环内 `command -v $name` 守卫 + `eval` 失败则 `failed++` |
+| 统计与输出 | 由 `update-all` 提供（另加 🚀 横幅与可选 `onproxy`） | 失败计数 `failed`、耗时 `mins` / `secs`、`print -P` 彩色输出（蓝标题/绿成功/黄跳过/红失败） |
+| 适用场景 | 兼容旧习惯的一键全量（含代理切换） | 需单目标更新、需查看耗时与失败统计、脚本化调用 |
 
-两者均定义于 `private_dot_config/zsh/aliases.zsh`，`zsh -n` 已覆盖其语法校验。详见 [dev-tools.md](dev-tools.md) 与 `aliases.zsh` 源码。
-前者可选先执行 `onproxy`（若定义），后者逐项守卫、失败计数与耗时统计更完备。
+> 历史：旧版 `auto_update` 曾顺序守卫调用五个 `*_update` 辅助函数（不含 `mise`），
+> 这些函数已在提交 `0af1f61` 中删除，`auto_update` 随之改为委托 `update-all`。
+
+两者均定义于 `private_dot_config/zsh/aliases.zsh`，`zsh -n` 已覆盖其语法校验。
+详见 [dev-tools.md](dev-tools.md) 与 `aliases.zsh` 源码。
 
 ### Go / Python 路径强绑定个人环境
 
@@ -156,19 +164,19 @@ rm -f ~/.fzf_prefix_cache && exec zsh
 
 `.chezmoiignore`（仓库根）控制 `chezmoi add` / `apply` 时忽略的**目标名**模式（模式按部署后的目标路径匹配，不是源文件名），当前包括：
 
-- 本地覆盖与备份：`*.local`、`*.local.*`、`*.bak`、`README.md` + `**/README.md`（含嵌套 `zsh/README.md`、`nvim/README.md`）、`LICENSE` + `**/LICENSE`（含 `nvim/LICENSE`）、`docs/`、`docs/**`、`**/.git`、`**/.DS_Store`
-- 仓库文档：`REPO-INSIGHT.md`（仓库根洞察报告，不部署到 `$HOME`）
-- 敏感信息：`*token*`、`*secret*`、`*credential*`、`*client_secret*`
+- 本地覆盖与备份：`*.local`、`*.local.*`、`*.bak`、`**/.DS_Store`
+- 仓库文档：`**/README.md`（根级与嵌套，含 `zsh/README.md`、`nvim/README.md`）、`**/LICENSE`（含 `nvim/LICENSE`）、`docs/`
+- 敏感信息：`*token*`、`*secret*`、`*credential*`
 - 构建产物：`node_modules/`、`.pnpm-store/`
 
-> 历史修正（2026-08 收口）：旧版曾按源名书写 `**/dot_git` / `**/dot_DS_Store` / `dot_gitconfig`（均不匹配目标名 `.git` / `.DS_Store` / `.gitconfig`，从未生效），且 `**/README.md` 误拼为 `**/REAMDME.md`、缺 `**/LICENSE`——现已全部按目标名改写、删除无效行并补齐。因此 `dot_gitconfig` → `~/.gitconfig` 为**正常部署目标**（旧文档称其被排除、"仅作本地参考快照"系对无效行的误读）；修复后 `chezmoi managed` 目标数 59→55。详见 [layout.md](layout.md)。
+> 历史修正（2026-08 收口）：旧版曾按源名书写 `**/dot_git` / `**/dot_DS_Store` / `dot_gitconfig`（均不匹配目标名 `.git` / `.DS_Store` / `.gitconfig`，从未生效），且 `**/README.md` 误拼为 `**/REAMDME.md`、缺 `**/LICENSE`——现已全部按目标名改写、删除无效行并补齐。因此 `dot_gitconfig` → `~/.gitconfig` 为**正常部署目标**（旧文档称其被排除、"仅作本地参考快照"系对无效行的误读）；修复后 `chezmoi managed` 目标数 59→55；后续去重又删除了被更宽模式覆盖或已无对应文件的冗余行（根级 `README.md` / `LICENSE`、`docs/**`、`**/.git`、`*client_secret*`、两条 `**.md` 及已不存在的 `REPO-INSIGHT.md`），目标数保持 55 不变。详见 [layout.md](layout.md)。
 
 注意：`docs/` 被忽略意味着文档改动仅在仓库内维护，不会 `apply` 到 `$HOME`。新增文档请同步更新 [layout.md](layout.md) 的索引。
 
 ### 关于历史上的 `baseline` 标签
 
-部分旧注释提到用 `git show baseline:...` 找回已删除的配置（`conda`、wezterm 别名等）。
-本仓库自 `init` 提交起从未打过 `baseline` 标签（`git tag` 为空），旧内容来自更早的独立
+旧注释曾提到用 `git show baseline:...` 找回已删除的配置（`conda`、wezterm 别名等），现已改为直接指向
+git 历史。本仓库自 `init` 提交起从未打过 `baseline` 标签（`git tag` 为空），旧内容来自更早的独立
 `zsh-config` 仓库；如确需找回请去旧仓库翻历史。不要在本仓库中创建同名标签造成混淆。
 
 ### 新增文件的命名提醒

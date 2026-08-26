@@ -8,9 +8,9 @@
 
 | 文件 | 职责 | 主要内容 |
 | --- | --- | --- |
-| `aliases.zsh` | 通用别名与函数 | 目录跳转（dl/dt/doc/wp）、系统信息（ff/fastfetch、时间戳）、进程资源（htop/df/du）、基础命令增强（lsd/bat/rm -i）、包管理更新（brew_update/sdk_update/.../auto_update/update-all；`auto_update` 为守卫式串行（`onproxy`→`uv`/`sdk`/`rustup`/`tldr`/`brew` 5 目标），`update-all` 为关联数组+参数过滤、失败计数与耗时统计，支持 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise` 6 目标）、K8s 别名、编辑器/AI 助手别名、`ruff_auto`/`y`/`jdx`/`scr` 等函数 |
+| `aliases.zsh` | 通用别名与函数 | 目录跳转（dl/dt/doc/wp/ws）、系统信息（ff/fastfetch、时间戳）、进程资源（htop/df/du）、基础命令增强（lsd/bat/rm -i）、包管理更新（`auto_update`/`update-all`；`auto_update` 为薄包装——可选 `onproxy` 切代理后直接委托 `update-all`，覆盖目标一致；`update-all` 为关联数组+参数过滤、失败计数与耗时统计，支持 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise` 6 目标）、K8s 别名（含 `kk`=kubectl krew）、编辑器/AI 助手别名、`ruff_auto`/`y`/`jdx`/`scr` 等函数 |
 | `fzf.zsh` | fzf 与 fzf-tab 配置 | 前缀探测与缓存、全局选项（FZF_DEFAULT_OPTS / CTRL_R/T/C_OPTS）、交互式函数 `frg` `fkill` `find_large_files` `ftm` `flf` `flkill` `flnet` `fluser`、fzf-tab zstyle |
-| `sdk.zsh` | SDK 环境与补全 | pnpm 补全、SDKMAN（惰性加载）、Android NDK、Go/Rust 环境、Docker/Kubectl 补全缓存、kubecolor 包装与短别名 `k` |
+| `sdk.zsh` | SDK 环境与补全 | pnpm 补全、SDKMAN（惰性加载）、Android NDK、Go/Rust 环境、Docker/Kubectl 补全缓存、kubecolor 包装与短别名 `k`、krew bin 目录守卫注入 |
 
 ### 加载顺序契约（重要）
 
@@ -61,7 +61,7 @@ export VISUAL='nvim'
 
 | 函数 | 所在文件 | 用途 | 关键实现 |
 | --- | --- | --- | --- |
-| `auto_update` | aliases.zsh | 传统守卫式串行全量更新（逐个 `command -v` 守卫，未安装即跳过；若存在 `onproxy` 函数则先切代理） | `uv_update` / `sdk_update` / `rust_update` / `tldr_update` / `brew_update`（5 目标，无 mise） |
+| `auto_update` | aliases.zsh | 一键全量更新入口：若存在 `onproxy` 函数则先切代理，随后直接委托同文件的 `update-all` 执行（无参全量） | 打印 🚀 横幅 → `onproxy`（可选）→ `update-all`；覆盖目标与行为与 `update-all` 完全一致 |
 | `update-all [targets...]` | aliases.zsh | 声明式批量更新（默认全部，支持参数过滤如 `update-all brew uv`） | `local -A tasks=(brew … sdk … rustup … tldr … uv … mise …)` 6 项；`targets=(${(k)tasks})` 全量或过滤；`command -v $name` 守卫（未安装黄色 `⚠️ not found` 跳过）；`eval "${tasks[$name]}" \|\| ((failed++))` 失败计数；`print -P %F{blue/green/red/yellow}` 彩色输出；`start_time/duration` 统计耗时 `${mins}m${secs}s`；未知参数提示 `Available: …` 并返回 1 |
 | `ruff_auto [dir]` | aliases.zsh | ruff 自动修复 lint 并格式化（默认当前目录） | `ruff check --fix --exit-zero && ruff format` |
 | `y [args]` | aliases.zsh | yazi 包装：退出后 cd 到最后浏览的目录 | `yazi --cwd-file` + `mktemp` |
@@ -90,7 +90,7 @@ export VISUAL='nvim'
 | `GOPROXY` / `GOPATH` / `GOBIN` | `sdk.zsh` | `GOPROXY=https://goproxy.cn,direct`、`GOPATH=~/WorkSpaces/project/go`、`GOBIN=$GOPATH/bin`（`GOBIN` 存在时才加入 PATH） |
 | `ANDROID_NDK_HOME` | `sdk.zsh` | `/opt/homebrew/share/android-ndk`（目录存在时才导出） |
 | `FZF_PREFIX` / `FZF_PREFIX_CACHE` | `fzf.zsh` | 前缀探测结果与缓存文件 `~/.fzf_prefix_cache` |
-| `PATH` | `dot_zshrc` + `fzf.zsh` + `sdk.zsh` | `dot_zshrc` 先追加 `~/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:~/.local/bin`，再在 `brew shellenv` 后前缀插入 `$(brew --prefix rustup)/bin:$HOME/.cargo/bin`；`fzf.zsh` 追加 `$FZF_PREFIX/bin`；`sdk.zsh` 条件追加 `$GOBIN` |
+| `PATH` | `dot_zshrc` + `fzf.zsh` + `sdk.zsh` | `dot_zshrc` 先追加 `~/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:~/.local/bin`，再在 `brew shellenv` 之后前缀插入 `~/.cargo/bin` 与 `${HOMEBREW_PREFIX:-/opt/homebrew}/opt/rustup/bin`（仅当目录存在且 PATH 未包含时，静态路径、重复 source 幂等）；`fzf.zsh` 追加 `$FZF_PREFIX/bin`；`sdk.zsh` 条件追加 `$GOBIN` 与 `${KREW_ROOT:-$HOME/.krew}/bin`（同样目录存在 + 去重双守卫） |
 
 ### 启动必需（缺失会导致功能缺失）
 
@@ -100,21 +100,21 @@ export VISUAL='nvim'
 
 ### 有守卫的可选组件（未安装时静默跳过）
 
-`pnpm`（tabtab 补全，compdef 守卫）、SDKMAN（**惰性加载**：首次调用 `sdk` 时才 source `sdkman-init.sh`，未装不定义任何内容）、`docker`/`kubectl`+`kubecolor`（补全缓存于 `~/.cache/zsh/` 并 zcompile，二进制更新时自动重建；`k` 别名带 kubectl 守卫）、`~/.cargo/env`（rustup）、`onproxy` 函数（仓库外定义，若存在则 `auto_update` 前自动切代理）。`update-all` 对 6 目标 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise` 逐项 `command -v` 守卫，未安装时黄色 `⚠️ not found` 提示跳过；目标失败打印红色 `✗ failed` 与 stderr 摘要并使函数返回非零；未知目标红色 `❌ Unknown target` 并列出 `Available: …`。
+`pnpm`（tabtab 补全，compdef 守卫）、SDKMAN（**惰性加载**：首次调用 `sdk` 时才 source `sdkman-init.sh`，未装不定义任何内容）、`docker`/`kubectl`+`kubecolor`（补全缓存于 `~/.cache/zsh/` 并 zcompile，二进制更新时自动重建；`k` 别名带 kubectl 守卫）、krew（`${KREW_ROOT:-$HOME/.krew}/bin` 仅在目录存在且 PATH 未包含时注入）、`~/.cargo/env`（rustup，sdk.zsh 无守卫 source 但缺失时静默）、`onproxy` 函数（仓库外定义，若存在则 `auto_update` 前自动切代理）。`update-all` 对 6 目标 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise` 逐项 `command -v` 守卫，未安装时黄色 `⚠️ not found` 提示跳过；目标失败打印红色 `✗ failed` 与 stderr 摘要并使函数返回非零；未知目标红色 `❌ Unknown target` 并列出 `Available: …`。
 
 ### 运行时工具（对应别名/函数调用时才需要）
 
 `fd`（主力，缺省回退 `rg`）、`bat`、`lsd`、`nvim`、`code`、`htop`、`fastfetch`、`tmux`、
 `yazi`、`gh`、`lazygit`、`claude`、`opencode`、`ruff`、`uv`、`rustup`、`tldr`、`mise`、
 `nproc`（coreutils）、`jadx-gui`、`scrcpy`。
-另：`java` 仅在 SDKMAN 存在时经 `sdk_update` 间接使用，本仓库无直接引用。
+另：`java` 仅在 SDKMAN 存在时经 `update-all` 的 `sdk` 任务（`sdk upgrade` 等）间接使用，本仓库无直接引用。
 
-已移除的死引用（工具未安装/路径不存在，可从 git 历史 `baseline` 标签找回）：
-conda、wezterm 工作区别名、`pkid`/`jeb`、`brew cu` 段、`chown/chmod/chgrp --preserve-root`。
+已移除的死引用（工具未安装/路径不存在，可从更早的独立 `zsh-config` 仓库历史找回；本仓库从未有过 `baseline` 标签，勿凭空创建）：
+conda、wezterm 工作区别名、`pkid`/`jeb`、`chown/chmod/chgrp --preserve-root`、旧版 `auto_update` 依赖的五个 `*_update` 辅助函数（`brew cu` 并未移除，现位于 `update-all` 的 brew 任务内）。
 
 ## 注意事项
 
-1. **破坏性命令**：`uv_resync` 会先删除当前项目的 `.venv` 和 `uv.lock` 再重建，仅在项目根目录使用。
+1. **破坏性命令**：`uv_resync` 会先删除 `~/.venv` 与 `~/uv.lock` 再执行 `uv sync`（注意目标是家目录下的路径而非当前项目），使用前请确认。
 2. **`~/.zshrc`（即仓库内 `dot_zshrc`）已收敛单一初始化点**：fzf 键位/补全仅在 `fzf.zsh` 内初始化一次（带 `command -v fzf` 守卫），`~/.zshrc` 不再重复 eval；其 sdk.zsh 加载为无条件 `source`，注释与代码已保持一致。
 3. **强绑定的个人路径**：`GOPATH=~/WorkSpaces/project/go`、`GOPROXY=goproxy.cn`、清华 pip 镜像（`pip_tsinghua_mirror` 别名）、`ANDROID_NDK_HOME=/opt/homebrew/share/android-ndk`（目录存在才导出）。
 4. **被别名替换的原生命令**：`cat→bat`、`ls→lsd`、`top→htop`、`rm/cp/mv→-i`。脚本中需要原生行为时请用 `command cat` 等形式。
@@ -124,4 +124,4 @@ conda、wezterm 工作区别名、`pkid`/`jeb`、`brew cu` 段、`chown/chmod/ch
 1. 改完后跑语法检查：`zsh -n aliases.zsh fzf.zsh sdk.zsh`
 2. 干净启动验证无报错：`zsh -ic 'exit'`
 3. 抽查关键定义：`zsh -ic 'type k df du; echo $EDITOR; echo $LANG'`
-4. 提交：小步提交，说明动机；重大重构保留 `baseline` 标签以便回退。
+4. 提交：小步提交，说明动机；重大重构前先打 tag 以便回退（本仓库历史上并无 `baseline` 标签，不要创建同名标签造成混淆）。

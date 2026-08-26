@@ -33,10 +33,9 @@ nvim/  (private_dot_config/nvim → ~/.config/nvim)
 └── README.md                 仓库内文档（LazyVim starter 模板）；**/README.md 排除，不部署
 ```
 
-> 完整映射与忽略规则见 [layout.md](layout.md)；`.chezmoiignore` 已修复为按目标名匹配的 `**/README.md` / `**/LICENSE`，
-> 本目录的 `README.md` 与 `LICENSE` 不再随 `nvim/**` 部署（历史上的 `**/REAMDME.md` 拼写失配已修复）。
-> `LICENSE` 为上游 LazyVim starter 原件（Apache-2.0，与根 LICENSE 同哈希；nvim/README.md 中
-> "MIT" 的旧表述与上游实发内容不符，上游与根 LICENSE 均为 Apache-2.0）。
+> 完整映射与忽略规则见 [layout.md](layout.md)；`.chezmoiignore` 按目标名匹配的 `**/README.md` / `**/LICENSE`
+> 将本目录的 `README.md` 与 `LICENSE` 排除、不随 `nvim/**` 部署（历史上的 `**/REAMDME.md` 拼写失配已修复）。
+> `LICENSE` 为上游 LazyVim starter 原件（Apache-2.0，与根 LICENSE 同哈希）。
 
 ## 启用的 Extras（lua/config/lazy.lua）
 
@@ -113,14 +112,18 @@ LSP / 格式化 / lint 由 LazyVim 内置的 mason + nvim-lspconfig + conform + 
 
 ### stylua.toml / example.lua 补充
 
-- `stylua.toml`：`indent_type = "Spaces"`、`indent_width = 2`、`column_width = 120`（与文件实值一致）。
+- `stylua.toml`：`indent_type = "Spaces"`、`indent_width = 2`、`column_width = 120`（与 `stylua.toml` 实值一致；注意 `lua/` 下源文件目前为 4 空格缩进，与 `indent_width = 2` 不一致，跑 stylua 会产生 diff）。
 - `lua/plugins/example.lua`：
   - 顶部守卫 `-- if true then return {} end` 当前为**注释状态**（守卫未生效），故文件内示例配置**实际生效**；如只想当模板用，应取消该行注释。
   - 已生效的示例包括：`LazyVim/LazyVim` 强制 `colorscheme = "catppuccin"`；`trouble.nvim` 的 `use_diagnostic_signs = true`；
     `telescope.nvim` 的 `<leader>fp` "Find Plugin File"（`cwd = require("lazy.core.config").options.root`）及 `horizontal / prompt_position=top / ascending` 布局；
-    `nvim-cmp` 追加 `cmp-emoji` 源；`nvim-lspconfig` 的 `pyright = {}`；`nvim-treesitter` 的 `ensure_installed`（bash/html/javascript/json/lua/markdown/markdown_inline/python/query/regex/tsx/typescript/vim/yaml）及后续 `vim.list_extend` 对 `tsx/typescript` 的重复追加；
-    `mason.nvim` 的 `ensure_installed`（stylua / shellcheck / shfmt / flake8）；`lualine.nvim` 的 `😄` 组件追加与全量覆盖两段示例（后者为空表占位）。
-  - 注释中未生效的示例：`gruvbox.nvim`、`tsserver + typescript.nvim`、`mini.starter`、`dap.python`、`gitsigns` extras、`jsonls/schemastore` 等，仅作模板参考。
+    `nvim-lspconfig` 的 `pyright = {}`；`nvim-treesitter` 的 `ensure_installed`（bash/html/javascript/json/lua/markdown/markdown_inline/python/query/regex/tsx/typescript/vim/yaml）及后续 `vim.list_extend` 对 `tsx/typescript` 的重复追加；
+    `mason.nvim` 的 `ensure_installed`（stylua / shellcheck / shfmt / flake8）；`lualine.nvim` 的 `😄` 组件追加。
+  - 已注释（当前不生效）的示例：`gruvbox.nvim`、`tsserver + typescript.nvim`、`mini.starter`、`dap.python`、`gitsigns` extras、`jsonls/schemastore` 等模板参考，以及两段带说明的禁用块——
+    **nvim-cmp + cmp-emoji**（惰性死配置——LazyVim v14 内置 blink.cmp，未 import `lazyvim.plugins.extras.coding.nvim-cmp` 时该 spec 被直接丢弃、从未生效；如需启用先 import 该 extra 并 `:Lazy sync`）与
+    **lualine 第二段空表覆盖**（opts 函数返回值会整体替换合并后的 opts，抹掉 LazyVim 全部 lualine 配置）。
+
+> lock 中仍钉着 `nvim-cmp` / `fzf-lua`，但当前没有任何 spec 引用它们；将来手动执行 `:Lazy sync` / `:Lazy clean` 时会被移除（lock 提交态仍为 44 条、可复现）。
 
 ## 自定义键位速查（lua/config/keymaps.lua）
 
@@ -128,17 +131,18 @@ Leader 为空格（LazyVim 默认），以下为本仓库在 LazyVim 默认之�
 
 | 键位 | 模式 | 动作 | 说明（`desc`） |
 | --- | --- | --- | --- |
-| `<leader>u` | n | `vim.cmd.UndotreeToggle` | Toggle Undotree（⚠️ 见下方注意） |
 | `jk` | i | `<ESC>` | 替代 Esc 退出插入模式 |
 | `<leader><space>` | n | `<cmd>nohlsearch<CR>` | Clear search highlights |
 | `<leader>sv` | n | `<C-w>v` | Split window vertically |
 | `<leader>sh` | n | `<C-w>s` | Split window horizontally |
 | `<leader>bd` | n | `<cmd>bdelete<CR>` | Close current buffer |
-| `<leader>f` | n | `vim.lsp.buf.format` | Format code with LSP |
 | `<leader>rl` | n | `<cmd>set relativenumber!<CR>` | Toggle relative line numbers |
 
-> **注意 — `<leader>u` 依赖缺失**：`lazy-lock.json` 未锁定 `mbbill/undotree` 且 `lua/plugins/` 下无对应 spec，直接按下会报 `E492: Not an editor command: UndotreeToggle`。
-> 如需使用，请在 `lua/plugins/` 下新增独立 spec，例如 `return { "mbbill/undotree" }`，再 `:Lazy sync`。
+> 历史上的 `<leader>u`（UndotreeToggle）与 `<leader>f`（LSP format）两项已删除：前者对应的
+> undotree 插件不在 `lazy-lock.json` 中（按下报 `E492`），后者会覆盖 LazyVim 的
+> `<leader>f` / `<leader>u` 功能组前缀。如需恢复 Undotree，先在 `lua/plugins/` 下新增
+> 独立 spec（如 `return { "mbbill/undotree" }` 并 `:Lazy sync`），再映射键位；格式化用
+> LazyVim 内置的 `<leader>cf` / `<leader>uf`。
 
 其余键位沿用 LazyVim 默认（flash 跳转、neo-tree、snacks 面板、bufferline、which-key 等），
 可用 `<leader>` 停顿唤出 which-key 查看全部。详尽的 LazyVim 默认键位见 [LazyVim 官网](https://www.lazyvim.org/keymaps)。
@@ -153,14 +157,15 @@ Leader 为空格（LazyVim 默认），以下为本仓库在 LazyVim 默认之�
 | `VimResized` | `ResizeWindows`（`clear = true`） | `*` | `tabdo wincmd =` 均分所有 tab 的分屏 |
 | `InsertEnter` / `InsertLeave` | `HighlightCursorLine` | `*` | 仅普通模式高亮 `cursorline`（`InsertEnter` 关闭，`InsertLeave` 开启） |
 | `FileType` | `FileTypeSettings` | `python` | 局部强制 `tabstop=4` `shiftwidth=4` `expandtab` |
-| `BufWritePre` | `FormatOnSave` | `*.lua,*.py,*.js` | 保存前 `vim.lsp.buf.format({ async = false })` 同步格式化 |
 
+> 保存时格式化已交由 LazyVim 内置 autoformat 接管（默认开启，`<leader>uf` / `<leader>uF` 可切换）；历史上的自定义 `FormatOnSave`（`BufWritePre`，`*.lua/*.py/*.js` 同步格式化）因与内置 autoformat 叠加造成双重格式化、且关闭 autoformat 后仍生效，已删除。
+>
 > `TextYankPost` 目前未建 `augroup`，重复 `source` 时会叠加回调，建议后续补 `nvim_create_augroup("YankHighlight", { clear = true })`。
 
 ## 与 private_dot_config/nvim/README.md 的分工
 
 - 本文档（`docs/neovim.md`）：**chezmoi 仓库视角**，面向维护者，逐行核对源文件与目标路径、extras 清单、选项/键位/autocmds 实值、lock 数量与 checker 策略、与 shell `update-all` 的边界。
-- `private_dot_config/nvim/README.md`（仓库内文档，由 `**/README.md` 排除、不再部署到 `~/.config/nvim/README.md`）：**应用后视角**，面向新机器使用者，基于 LazyVim starter 模板的安装步骤、功能概览、键位与设置速览，术语与本文档保持一致（10 extras / 44 锁定 / 键位 8 项等）。
+- `private_dot_config/nvim/README.md`（仓库内文档，由 `**/README.md` 排除、不部署到 `~/.config/nvim/README.md`）：**仓库内视角**，面向新机器使用者，基于 LazyVim starter 模板的安装步骤、功能概览、键位与设置速览，术语与本文档保持一致（10 extras / 44 锁定 / 键位 6 项等）。
 
 二者互补不矛盾；改动配置时以 `lua/config/*.lua` 与 `lazy-lock.json` 为权威来源。
 术语统一：`extras` 指 `lazyvim.plugins.extras.*` 的 `import`；`lazy-lock.json` 为 commit 级锁定；`checker` 指 `lazy.lua` 的更新检查。

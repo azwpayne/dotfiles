@@ -25,8 +25,9 @@ brew install fzf starship zoxide mise fd ripgrep
 
 > **为什么要在 `apply` 之前**：`apply` 后一般会立即 `exec zsh` 首次启动（Zim 拉模块、
 > 各工具初始化、补全加载），上述前置若缺装会导致功能明显退化甚至 git 全局断链。
-> 守卫化说明：`~/.zshrc` 中 `zoxide` / `mise` / `starship` / `brew` 的 `eval` 及
-> rustup PATH 注入均已带 `command -v` 守卫，fzf 初始化统一收敛到 `fzf.zsh`（带守卫），
+> 守卫化说明：`~/.zshrc` 中 `zoxide` / `mise` / `starship` / `brew` 的 `eval` 均带
+> `command -v` 守卫，rustup/cargo 的 PATH 注入为目录存在性 + 去重双守卫（静态路径，
+> 不再调用 `brew --prefix` 子进程），fzf 初始化统一收敛到 `fzf.zsh`（带守卫），
 > 缺装时全部**静默跳过、不再报 `command not found`**——因此其余体验增强类工具
 > （`bat` / `lsd` / `kubectl` / SDKMAN 等，见 §4）完全可以 `apply` 之后按需补装，
 > 静默退化不报错。
@@ -75,12 +76,14 @@ exec zsh   # 重启 shell 使全部配置生效（或重新打开终端）
 ### .chezmoiignore 的影响
 新机器执行 `chezmoi apply` 时，根目录的 `.chezmoiignore` 会自动**跳过**以下内容不渲染到 `$HOME`（见 [layout.md](layout.md)）：
 
-- `README.md` / `LICENSE` / `docs/` / `docs/**` —— 仓库文档仅留在源目录，不污染目标机
-- `dot_gitconfig`（以及 `**/dot_git`）—— 不随 chezmoi 部署（本地差异保留），`apply` 后**不会生成 `~/.gitconfig`**
-- `*.local` / `*.local.*` / `*.bak` / `**/dot_DS_Store` / `node_modules/` / `.pnpm-store/` 等本地覆盖与构建产物
-- `*token*` / `*secret*` / `*credential*` / `*client_secret*` 等敏感文件名匹配
+- 根级与全部嵌套的 `README.md` / `LICENSE`（模式 `**/README.md` / `**/LICENSE`，含 `zsh/README.md`、`nvim/README.md`、`nvim/LICENSE`）—— 仓库文档仅留在源目录，不污染目标机
+- `docs/` —— 本文档所在目录整体不部署
+- `*.local` / `*.local.*` / `*.bak` / `**/.DS_Store` / `node_modules/` / `.pnpm-store/` 等本地覆盖与构建产物
+- `*token*` / `*secret*` / `*credential*` 等敏感文件名匹配
 
-> 源文件中嵌套 README 的排除模式实际写作 `**/REAMDME.md`（REAMDME 为拼写错误，不匹配任何文件、未生效），因此嵌套的 `README.md` / `LICENSE` **并未被排除**：`private_dot_config/nvim/README.md`、`nvim/LICENSE`、`private_dot_config/zsh/README.md` 会随 `apply` 部署到 `~/.config/` 下；根级 `README.md` / `LICENSE` 的排除不受影响。详见 [layout.md](layout.md)。
+> 注意：`dot_gitconfig` **不在**忽略之列——`apply` 会正常生成 `~/.gitconfig`（历史上的
+> 源名失配行 `dot_gitconfig` / `**/dot_git` 与 `**/REAMDME.md` 拼写错误均已修复，
+> `managed` 目标数 59→55）。详见 [layout.md](layout.md)。
 
 因此 `chezmoi diff` 中不会出现 `docs/` 的新增，`chezmoi doctor` 亦不会告警缺失——属预期行为。
 如需排查可执行 `chezmoi ignored` / `chezmoi status` 查看被忽略列表。
@@ -91,7 +94,7 @@ exec zsh   # 重启 shell 使全部配置生效（或重新打开终端）
 | --- | --- | --- |
 | `fish` / `pi` | `private_dot_config/private_fish/config.fish` 为空模板、`private_dot_pi/**`（pi agent 配置）直接生效，均随 `apply` 写入 `$HOME`；本文档只覆盖 `zsh` 栈，其余见 [layout.md](layout.md) | 首次启动 `fish` / `pi` 时 |
 | Zim 框架 | `~/.zshrc` 检测 `~/.zim/zimfw.zsh` 缺失时经 `curl` / `wget` 自动下载，随后 `zimfw init` 安装 `dot_zimrc` 中声明的全部模块（`environment` / `git` / `input` / `termtitle` / `utility` / `duration-info` / `git-info` / `prompt-pwd` / `asciiship` / `homebrew` / `site-functions` / `zsh-completions` / `completion` / `fast-syntax-highlighting` / `history-substring` / `autosuggestions` / `fzf-tab`） | 首次启动 `zsh` |
-| `PATH` / `brew` | `command -v brew` 守卫后的 `eval "$(brew shellenv)"` 注入 `/opt/homebrew/bin` 等；`export PATH` **前置** `~/bin:/opt/homebrew/bin:…` 及 `~/.local/bin`、`~/.cargo/bin` 等到 `$PATH` 最前（rustup/cargo 前缀同样带 brew 守卫） | 每次启动 `zsh` |
+| `PATH` / `brew` | `command -v brew` 守卫后的 `eval "$(brew shellenv)"` 注入 `/opt/homebrew/bin` 等；`export PATH` **前置** `~/bin:/opt/homebrew/bin:…` 及 `~/.local/bin` 等到 `$PATH` 最前；`~/.cargo/bin` 与 `${HOMEBREW_PREFIX:-/opt/homebrew}/opt/rustup/bin` 仅在目录存在且 PATH 尚未包含时前置（静态路径守卫、重复 source 幂等） | 每次启动 `zsh` |
 | `zoxide` / `mise` / `starship` / `fzf` | `zoxide` / `mise` / `starship` 逐项 `command -v` 守卫后 `eval` 初始化（未装静默跳过）；`fzf` 的键位绑定/补全只在 `fzf.zsh` 内带守卫地 `eval "$(fzf --zsh)"` **一次**（`~/.zshrc` 不再重复） | 每次启动 `zsh` |
 | `zsh` 三模块 | 按序 `source ~/.config/zsh/aliases.zsh` → `fzf.zsh`（含 `fzf` 前缀探测与 `~/.fzf_prefix_cache` 缓存）→ `sdk.zsh`（`pnpm` / `SDKMAN` **惰性加载** / `Go` / `Rust` / `Docker` / `kubectl`，补全走 `~/.cache/zsh/` 缓存 + `zcompile`，均有守卫） | 每次启动 `zsh` |
 | Neovim | 首次运行 `nvim` 时 `lazy.nvim` 自动 `bootstrap` 并按 `lazy-lock.json` 安装 44 个插件（需网络） | 首次运行 `nvim` |
@@ -186,13 +189,13 @@ nvim --headless +qa                  # 无插件加载错误
 # SSH / GitHub 可达性
 cat ~/.ssh/config                    # 顶部含 Include ~/.orbstack/ssh/config，github.com 走 ssh.github.com:443
 git lfs version                      # 确认 git-lfs 已装（缺失时 clone/push 会因 filter lfs required=true 全局失败）
-git config --get-regexp proxy        # 应为 socks5://127.0.0.1:5376（与 SSH ProxyCommand 5376 统一）
-                                     # 仅当已手工恢复/合并 ~/.gitconfig 时才有输出，因 .chezmoiignore 不自动部署 dot_gitconfig；
+git config --get-regexp proxy        # 应为 socks5://127.0.0.1:5376（与 SSH ProxyCommand 5376 统一；
+                                     # apply 已部署 ~/.gitconfig，可直接读取）
                                      # 也可直接校验源文件：
                                      # git config --file ~/.local/share/chezmoi/dot_gitconfig --get-regexp proxy
 ```
 
-> **日常更新速览**：`private_dot_config/zsh/aliases.zsh` 提供 `auto_update`（按工具守卫逐项 `brew_update` / `sdk_update` / `rust_update` / `tldr_update` / `uv_update`，5 项，不含 `mise`；不含 `brew cu`，已移至 `update-all`）与更细粒度的 `update-all [brew|mise|rustup|tldr|uv|sdk]`（关联数组 6 项，支持参数过滤、失败计数与耗时统计，**已覆盖 `mise`**；**失败即红**——失败目标打印红色 `✗` 与错误摘要、结尾汇总 `N/M 目标失败` 并返回非零，成功目标保持绿色 `✓`）；验证通过后可按需执行 `zsh -ic 'auto_update'` 或 `zsh -ic 'update-all'`，详见 [maintenance.md](maintenance.md) 与 [dev-tools.md](dev-tools.md) 的对比表及 `aliases.zsh` 源码。
+> **日常更新速览**：`private_dot_config/zsh/aliases.zsh` 提供 `auto_update`（若定义了 `onproxy` 函数则先切代理，随后直接委托 `update-all` 执行，覆盖目标一致）与更细粒度的 `update-all [brew|mise|rustup|tldr|uv|sdk]`（关联数组 6 项，支持参数过滤、失败计数与耗时统计，**含 `mise`**；**失败即红**——失败目标打印红色 `✗` 与错误摘要、结尾汇总 `N/M 目标失败` 并返回非零，成功目标保持绿色 `✓`）；验证通过后可按需执行 `zsh -ic 'auto_update'` 或 `zsh -ic 'update-all'`，详见 [maintenance.md](maintenance.md) 与 [dev-tools.md](dev-tools.md) 的对比表及 `aliases.zsh` 源码。
 
 全部通过后即可进入日常使用；更多维护流程见 [maintenance.md](maintenance.md)，完整映射见 [layout.md](layout.md)。
 

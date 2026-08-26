@@ -2,7 +2,7 @@
 
 A starter template for [LazyVim](https://github.com/LazyVim/LazyVim) — deployed via [chezmoi](https://www.chezmoi.io/) from `private_dot_config/nvim/` → `~/.config/nvim/`.
 
-> **chezmoi 视角**：本文件随 `nvim/**` 部署到 `~/.config/nvim/README.md`。仓库级一致性校验（extras 清单 / 44 锁定 / 选项与键位逐行核对）见 [`docs/neovim.md`](../../docs/neovim.md)，二者互补不重复；改动配置以 `lua/config/*.lua` 与 `lazy-lock.json` 为权威。
+> **chezmoi 视角**：本文件由源目录 `.chezmoiignore` 的 `**/README.md` 排除、**不**部署到 `~/.config/nvim/README.md`，仅仓库内查阅。仓库级一致性校验（extras 清单 / 44 锁定 / 选项与键位逐行核对）见 [`docs/neovim.md`](../../docs/neovim.md)，二者互补不重复；改动配置以 `lua/config/*.lua` 与 `lazy-lock.json` 为权威。
 
 ## Overview
 
@@ -61,7 +61,7 @@ nvim
 │   │   ├── keymaps.lua       custom keymaps (loaded after LazyVim defaults)
 │   │   └── autocmds.lua      autocmds (loaded on VeryLazy)
 │   └── plugins/
-│       └── example.lua       example specs (effective: catppuccin / trouble / telescope / cmp-emoji / pyright / treesitter / mason)
+│       └── example.lua       example specs (effective: catppuccin / trouble / telescope / pyright / treesitter / mason; nvim-cmp & second lualine spec disabled)
 ├── lazy-lock.json            44 plugins locked by commit (reproducible)
 ├── lazyvim.json              LazyVim metadata (extras=[], news 11866, version 8 — extras empty is expected, real list is in lazy.lua)
 ├── stylua.toml               Spaces 2 / 120 columns
@@ -111,12 +111,14 @@ See [`docs/neovim.md`](../../docs/neovim.md) for the full chezmoi mapping (`dot_
 - **catppuccin** — set as LazyVim default `colorscheme` (overrides tokyonight)
 - **trouble.nvim** — `use_diagnostic_signs = true`
 - **telescope.nvim** — `<leader>fp` "Find Plugin File" + `horizontal / prompt_position=top / ascending` layout
-- **nvim-cmp** — `cmp-emoji` source appended
 - **nvim-lspconfig** — `pyright` enabled; `tsserver` example kept commented (use the `lang.typescript` extra instead)
 - **nvim-treesitter** — `ensure_installed` includes bash/html/javascript/json/lua/markdown/markdown_inline/python/query/regex/tsx/typescript/vim/yaml (tsx/typescript appended twice via `list_extend`)
 - **mason.nvim** — `ensure_installed` includes stylua / shellcheck / shfmt / flake8
-- **lualine.nvim** — appends `😄` component (second spec is an empty override placeholder)
+- **lualine.nvim** — appends `😄` component (the second "empty override" spec is now commented out — an opts-function return value replaces merged opts and would wipe LazyVim's entire lualine config)
+- **nvim-cmp + cmp-emoji** — **disabled (commented out)**: inert dead config — LazyVim v14 ships blink.cmp and drops nvim-cmp specs unless the `lazyvim.plugins.extras.coding.nvim-cmp` extra is imported, so it never loaded (cmp-emoji is absent from the lock). To enable, import that extra first and run `:Lazy sync`
 - *(commented, inactive)*: gruvbox, mini.starter, dap.python, gitsigns/json extras — keep as templates.
+
+> `lazy-lock.json` still pins `nvim-cmp` / `fzf-lua`, but no spec references them anymore; a future manual `:Lazy sync` / `:Lazy clean` will drop them (committed lock stays 44 entries, reproducible).
 
 ### Built-in Settings (lua/config/options.lua)
 
@@ -135,16 +137,14 @@ Leader is `<Space>` (LazyVim default). Custom mappings loaded after defaults (so
 
 | Keymap            | Mode | Action                      | Description                  |
 | ----------------- | ---- | --------------------------- | ---------------------------- |
-| `<leader>u`       | n    | `UndotreeToggle`            | Toggle Undotree ⚠️ (see note) |
 | `jk`              | i    | `<ESC>`                     | Exit insert mode             |
 | `<leader><space>` | n    | `<cmd>nohlsearch<CR>`       | Clear search highlights      |
 | `<leader>sv`      | n    | `<C-w>v`                    | Split window vertically      |
 | `<leader>sh`      | n    | `<C-w>s`                    | Split window horizontally    |
 | `<leader>bd`      | n    | `<cmd>bdelete<CR>`          | Close current buffer         |
-| `<leader>f`       | n    | `vim.lsp.buf.format`        | Format code with LSP         |
 | `<leader>rl`      | n    | `<cmd>set relativenumber!<CR>` | Toggle relative line numbers |
 
-> **Note**: `<leader>u` requires `mbbill/undotree` which is **not** in `lazy-lock.json` nor in `lua/plugins/`. Pressing it now yields `E492: Not an editor command`. Add `return { "mbbill/undotree" }` under `lua/plugins/` and run `:Lazy sync` to enable.
+> **Note**: historical `<leader>u` (UndotreeToggle) and `<leader>f` (LSP format) maps were removed — the former errored `E492` because `mbbill/undotree` is neither in `lazy-lock.json` nor in `lua/plugins/`, and both clobbered LazyVim's `<leader>u` / `<leader>f` group prefixes. To restore undotree, first add a real spec (e.g. `return { "mbbill/undotree" }` + `:Lazy sync`), then map keys; formatting uses LazyVim's built-in `<leader>cf` / `<leader>uf`.
 
 All other keys are LazyVim defaults (flash, neo-tree, snacks, bufferline, which-key, etc.). Press `<leader>` and wait for which-key to see the full list; full reference at [lazyvim.org/keymaps](https://www.lazyvim.org/keymaps).
 
@@ -156,7 +156,8 @@ All other keys are LazyVim defaults (flash, neo-tree, snacks, bufferline, which-
 | `VimResized` | `ResizeWindows` | `*` | `tabdo wincmd =` — equalize splits |
 | `InsertEnter`/`InsertLeave` | `HighlightCursorLine` | `*` | Cursorline only in Normal mode |
 | `FileType` | `FileTypeSettings` | `python` | Force `tabstop=4` `shiftwidth=4` `expandtab` |
-| `BufWritePre` | `FormatOnSave` | `*.lua,*.py,*.js` | `vim.lsp.buf.format({ async=false })` on save |
+
+> Format-on-save is now handled solely by LazyVim's built-in autoformat (on by default; toggle with `<leader>uf` / `<leader>uF`). The custom `FormatOnSave` `BufWritePre` autocmd was removed — it double-formatted every save and kept running even after autoformat was disabled.
 
 ## Customization
 
@@ -192,9 +193,9 @@ vim.keymap.set("n", "<leader>sv", "<C-w>v", { desc = "Split window vertically" }
 
 ## Relationship to docs/neovim.md
 
-- This README = **applied view** (`~/.config/nvim/README.md`) — installation, features, keymaps, settings.
-- [`docs/neovim.md`](../../docs/neovim.md) = **repository view** — source structure, file-by-file mapping, extras provenance, lock verification, autocmd groups, and the `update-all` boundary.
-- Both share the same numbers: **10 extras (9 lang + mini-animate)** and **44 locked plugins**; conflicts — `lua/config/*.lua` + `lazy-lock.json` win.
+- This README = **repository view** (kept in the source tree; excluded by `.chezmoiignore` `**/README.md`, not deployed to `~/.config/nvim/README.md`) — installation, features, keymaps, settings.
+- [`docs/neovim.md`](../../docs/neovim.md) = **repository view (maintainer)** — source structure, file-by-file mapping, extras provenance, lock verification, autocmd groups, and the `update-all` boundary.
+- Both share the same numbers: **10 extras (9 lang + mini-animate)** and **44 locked plugins** / **6 custom keymaps**; conflicts — `lua/config/*.lua` + `lazy-lock.json` win.
 
 ## License
 
