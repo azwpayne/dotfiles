@@ -30,10 +30,10 @@
 - IDE 目录：`.idea` / `*.iml` / `.vscode`
 - 编译产物与构建目录：`*.aux` / `*.log*` / `.tox` / `dist/` / `build/` / `target/` / `bin/`
 - Python 相关：`__pycache__/`、`*.venv`、`*.cache`
-- 版本控制：`*.git`（排除嵌套仓库）
 - Node 依赖：`node_modules/`
 
-与 `dot_gitignore_global` 实际 21 条模式逐行一致。
+与 `dot_gitignore_global` 实际 20 条模式逐行一致（历史上的 `*.git` 笔误行已删，
+现为注释，不计入模式数）。
 
 ## GitHub CLI — `gh`
 

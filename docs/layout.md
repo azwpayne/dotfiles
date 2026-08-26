@@ -40,7 +40,7 @@
 
 | 源文件 | 目标路径 | 说明 |
 | --- | --- | --- |
-| `private_dot_config/zsh/aliases.zsh` | `~/.config/zsh/aliases.zsh` | 别名与通用函数（`update-all`、`auto_update`、`y`、`ruff_auto` 等）；`update-all` 为关联数组 6 目标 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise`，支持传参过滤、失败计数与耗时统计；`auto_update` 为旧版串行入口，仅 5 项目标（无 `mise`） |
+| `private_dot_config/zsh/aliases.zsh` | `~/.config/zsh/aliases.zsh` | 别名与通用函数（`update-all`、`auto_update`、`y`、`ruff_auto` 等）；`update-all` 为关联数组 6 目标 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise`，支持传参过滤、失败计数与耗时统计；`auto_update` 为兼容旧习惯的一键入口（可选 `onproxy` 切代理后直接委托 `update-all`，覆盖目标一致，均含 `mise`） |
 | `private_dot_config/zsh/fzf.zsh` | `~/.config/zsh/fzf.zsh` | fzf 前缀探测/缓存、全局选项、Ctrl-R/T/Alt-C 及 `frg`/`fkill`/`ftm`/`fl*` 函数 |
 | `private_dot_config/zsh/sdk.zsh` | `~/.config/zsh/sdk.zsh` | SDK 环境与补全（pnpm/SDKMAN(可选)/Android NDK/Python(uv)/Go/Rust/Docker/kubectl+kubecolor） |
 | `private_dot_config/zsh/dot_gitignore` | `~/.config/zsh/.gitignore` | 忽略运行时产物（`*.zwc`、`.fzf_prefix_cache`、`.DS_Store`） |

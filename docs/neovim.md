@@ -91,7 +91,7 @@ LSP / 格式化 / lint 由 LazyVim 内置的 mason + nvim-lspconfig + conform + 
 - `performance.rtp.disabled_plugins = { "tarPlugin", "tohtml", "tutor", "zipPlugin" }` 四项禁用来加速启动（其余 `gzip/matchit/matchparen/netrwPlugin` 保持注释未禁用）。
 - **复现**：换机器后首次 `nvim` 按 `lazy-lock.json` 安装同版本插件（当前 44 条，见下节）。
 - **升级 / 回滚**：`:Lazy update` 更新并同步 lock 文件；`:Lazy restore` 回滚到 lock 锁定版本；`:Lazy sync` 一键清理/安装/更新。
-- **与 shell `update-all` 无关联**：`private_dot_config/zsh/aliases.zsh` 中的 `update-all` 仅覆盖 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise` 六项，不触及 Neovim 插件；两者更新通道相互独立（`auto_update` 为其中 5 项子集，亦不含 Neovim）。
+- **与 shell `update-all` 无关联**：`private_dot_config/zsh/aliases.zsh` 中的 `update-all` 仅覆盖 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise` 六项，不触及 Neovim 插件；两者更新通道相互独立（`auto_update` 直接委托 `update-all`，目标一致，同样不含 Neovim）。
 
 ### lazy-lock.json（44 个）
 
