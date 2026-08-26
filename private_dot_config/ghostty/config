@@ -74,7 +74,7 @@ clipboard-write = allow
 copy-on-select = clipboard
 
 # --- Quick Terminal (Quake-style dropdown) ---
-# 注意：screen / animation-duration 的生效赋值在文件末尾（Ghostty 末次赋值生效，勿在此重复添加）
+# 注意：quick-terminal-screen / animation-duration 统一在文件末尾赋值（历史重复键已去重）
 quick-terminal-position = top
 quick-terminal-autohide = true
 
@@ -104,7 +104,6 @@ keybind = cmd+alt+up=goto_split:top
 keybind = cmd+alt+down=goto_split:bottom
 
 
-# option-as-meta = true
 macos-option-as-alt = right
 # macos-option-as-alt = true
 
