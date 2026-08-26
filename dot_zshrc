@@ -75,19 +75,6 @@ ZSH_AUTOSUGGEST_MANUAL_REBIND=1
 # See https://github.com/zsh-users/zsh-autosuggestions/blob/master/README.md#suggestion-highlight-style
 #ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=242'
 
-#
-# zsh-syntax-highlighting
-#
-
-# Set what highlighters will be used.
-# See https://github.com/zsh-users/zsh-syntax-highlighting/blob/master/docs/highlighters.md
-ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
-
-# Customize the main highlighter styles.
-# See https://github.com/zsh-users/zsh-syntax-highlighting/blob/master/docs/highlighters/main.md#how-to-tweak-it
-#typeset -A ZSH_HIGHLIGHT_STYLES
-#ZSH_HIGHLIGHT_STYLES[comment]='fg=242'
-
 # ------------------
 # Initialize modules
 # ------------------
@@ -116,7 +103,7 @@ source ${ZIM_HOME}/init.zsh
 export PATH="${HOME}/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:$HOME/.local/bin:$PATH"
 
 
-# init（逐项 command -v 守卫：工具未安装时静默跳过，不再打印 command not found）
+# init（逐项守卫：工具未安装时静默跳过，不再打印 command not found）
 # source <(mise activate zsh)
 command -v zoxide   >/dev/null 2>&1 && eval "$(zoxide init zsh)"
 command -v mise     >/dev/null 2>&1 && eval "$(mise activate zsh)"
@@ -124,7 +111,11 @@ command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
 # fzf 的键位绑定/补全不再在此 eval：统一由 fzf.zsh 内带守卫的
 # `command -v fzf && eval "$(fzf --zsh)"` 初始化（唯一初始化点，避免双重加载）
 command -v brew     >/dev/null 2>&1 && eval "$(brew shellenv)"
-command -v brew     >/dev/null 2>&1 && export PATH="$(brew --prefix rustup)/bin:$HOME/.cargo/bin:$PATH"
+# rustup 工具链 PATH：静态路径替代 `brew --prefix rustup` 子进程调用（省一次启动子进程，
+# 且 rustup 卸载后不再报错）；目录守卫避免注入死路径（~/.cargo/bin 不存在时跳过），
+# 去重守卫避免重复 source 时 PATH 重复累积
+[[ -d "$HOME/.cargo/bin" && "$PATH" != *"$HOME/.cargo/bin"* ]] && export PATH="$HOME/.cargo/bin:$PATH"
+[[ -d "${HOMEBREW_PREFIX:-/opt/homebrew}/opt/rustup/bin" && "$PATH" != *"${HOMEBREW_PREFIX:-/opt/homebrew}/opt/rustup/bin"* ]] && export PATH="${HOMEBREW_PREFIX:-/opt/homebrew}/opt/rustup/bin:$PATH"
 
 # Source external configs（先 aliases 后 fzf：fzf.zsh 的 Ctrl-O 绑定依赖 aliases.zsh 导出的 $EDITOR）
 for file in ~/.config/zsh/aliases.zsh ~/.config/zsh/fzf.zsh; do source "$file"; done

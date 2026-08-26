@@ -59,7 +59,7 @@ zmodule completion
 # <!-- zmodule zsh-users/zsh-syntax-highlighting -->
 zmodule zdharma-continuum/fast-syntax-highlighting
 # Fish-like history search for Zsh, must be sourced after
-# zsh-users/zsh-syntax-highlighting.
+# fast-syntax-highlighting.
 zmodule zsh-users/zsh-history-substring-search
 # Fish-like autosuggestions for Zsh. Add the following to your ~/.zshrc to boost
 # performance: ZSH_AUTOSUGGEST_MANUAL_REBIND=1
