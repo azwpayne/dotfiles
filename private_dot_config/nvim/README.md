@@ -66,9 +66,9 @@ nvim
 ├── lazyvim.json              LazyVim metadata (extras=[], news 11866, version 8 — extras empty is expected, real list is in lazy.lua)
 ├── stylua.toml               Spaces 2 / 120 columns
 ├── .gitignore                ignores tag / log / data
-├── .neoconf.json             neoconf / lua_ls project settings
-├── LICENSE                   Apache-2.0 (LazyVim starter, 与根 LICENSE 同源同哈希)
-└── README.md                 this file
+├── .neoconf.json             neoconf / lua_ls project settings（inert：仅被 neoconf.nvim 读取，需 lazyvim.plugins.extras.lsp.neoconf extra——未导入）
+├── LICENSE                   Apache-2.0 (LazyVim starter, 与根 LICENSE 同源同哈希)；仓库内，**/LICENSE 排除，不部署
+└── README.md                 this file（仓库内，**/README.md 排除，不部署）
 ```
 
 See [`docs/neovim.md`](../../docs/neovim.md) for the full chezmoi mapping (`dot_gitignore` → `.gitignore`, etc.) and `.chezmoiignore` notes.

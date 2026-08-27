@@ -17,7 +17,7 @@ return {
     -- Add gruvbox colorscheme uncommenting the line below:
     -- { "ellisonleao/gruvbox.nvim" },
 
-    -- Configure LazyVim to load gruvbox with catppuccin as default
+    -- Configure LazyVim's default colorscheme (catppuccin); gruvbox alternative kept commented above
     {
         "LazyVim/LazyVim",
         opts = {
