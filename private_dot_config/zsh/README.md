@@ -95,7 +95,7 @@ export VISUAL='nvim'
 ### 启动必需（缺失会导致功能缺失）
 
 - `fzf`（有 `command -v` 守卫；缺失则失去 Ctrl-R/Ctrl-T/Alt-C 按键绑定，且 `frg`/`fkill`/`ftm`/`fl*` 等函数不可用）
-- `fzf-tab` 插件（Homebrew formula；有 `[[ -r ]]` 守卫，路径 `/opt/homebrew/opt/fzf-tab/share/fzf-tab/fzf-tab.zsh`）
+- `fzf-tab` 插件（由 `dot_zimrc` 的 `zmodule Aloxaf/fzf-tab` 经 zimfw 加载，不再由 `fzf.zsh` source；缺失则补全菜单失去 fzf 化，`fzf.zsh` 中的 zstyle 配置不生效）
 - zsh 补全系统初始化（compinit，由 `~/.zshrc` 的 Zim 框架在最前面完成；`sdk.zsh` 的 `compdef` 依赖它）
 
 ### 有守卫的可选组件（未安装时静默跳过）

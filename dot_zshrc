@@ -68,8 +68,9 @@ WORDCHARS=${WORDCHARS//[\/]}
 #
 
 # Disable automatic widget re-binding on each precmd. Upstream suggests setting
-# this when zsh-autosuggestions is the last ~/.zimrc module; here Aloxaf/fzf-tab
-# is loaded right after it, but the option remains valid and still cuts precmd cost.
+# this when zsh-autosuggestions is the last ~/.zimrc module, which is the case
+# here (fzf-tab initializes before the syntax-highlighting block), and the
+# option cuts precmd cost.
 ZSH_AUTOSUGGEST_MANUAL_REBIND=1
 
 # Customize the style that the suggestions are shown with.
