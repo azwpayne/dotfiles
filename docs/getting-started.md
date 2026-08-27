@@ -52,8 +52,7 @@ nc -z 127.0.0.1 5376 && echo "proxy ok" || echo "proxy not listening on 5376"
 
 - 代理不在监听时先解决代理本身，或改走直连/镜像；探活通过后再执行 `chezmoi init`、
   首次启动 `zsh`、首次运行 `nvim`。
-- 两通道行为不对称：`dot_gitconfig` 中三处 GitHub 代理（`[http "https://github.com"]` /
-  `[https "https://github.com"]` / `[ssh "ssh.github.com"]`）固定为
+- 两通道行为不对称：`dot_gitconfig` 中仅一处按域名限定的 GitHub 代理（`[http "https://github.com"]`，对该 URL 匹配的 HTTP/HTTPS 远程均生效；冗余的 `[https …]` / `[ssh …]` 段已删）固定为
   `socks5://127.0.0.1:5376` 且**无直连回退**——代理离线时对 GitHub 的 git 操作会卡住或报
   `Connection refused`；`~/.ssh/config` 的 `ProxyCommand` 则先探测 `127.0.0.1:5376`，
   在线走 SOCKS5、离线自动回退直连。
@@ -198,4 +197,3 @@ git config --get-regexp proxy        # 应为 socks5://127.0.0.1:5376（与 SSH 
 > **日常更新速览**：`private_dot_config/zsh/aliases.zsh` 提供 `auto_update`（若定义了 `onproxy` 函数则先切代理，随后直接委托 `update-all` 执行，覆盖目标一致）与更细粒度的 `update-all [brew|mise|rustup|tldr|uv|sdk]`（关联数组 6 项，支持参数过滤、失败计数与耗时统计，**含 `mise`**；**失败即红**——失败目标打印红色 `✗` 与错误摘要、结尾汇总 `N/M 目标失败` 并返回非零，成功目标保持绿色 `✓`）；验证通过后可按需执行 `zsh -ic 'auto_update'` 或 `zsh -ic 'update-all'`，详见 [maintenance.md](maintenance.md) 与 [dev-tools.md](dev-tools.md) 的对比表及 `aliases.zsh` 源码。
 
 全部通过后即可进入日常使用；更多维护流程见 [maintenance.md](maintenance.md)，完整映射见 [layout.md](layout.md)。
-

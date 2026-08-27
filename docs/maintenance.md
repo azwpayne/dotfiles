@@ -120,8 +120,10 @@ rm -f ~/.fzf_prefix_cache && exec zsh
 
 ### 换了代理端口 / 地址
 
-`dot_gitconfig` 中三处引用 `socks5://127.0.0.1:5376`（`http "https://github.com"` / `https "https://github.com"` / `ssh "ssh.github.com"`），已与 `private_dot_ssh/config` 的 `ProxyCommand` 探测端口 `5376` 统一（`nc -z 127.0.0.1 5376`），全局替换即可。
-早年注释掉的 `[http]` / `[https]` 全局代理段已清理，无需再处理旧注释。详见 [dev-tools.md](dev-tools.md) 与 [getting-started.md](getting-started.md)。
+`dot_gitconfig` 中仅一处引用 `socks5://127.0.0.1:5376`（`http "https://github.com"`，对该 URL 匹配的
+HTTP/HTTPS 远程均生效），已与 `private_dot_ssh/config` 的 `ProxyCommand` 探测端口 `5376` 统一
+（`nc -z 127.0.0.1 5376`），全局替换即可。
+历史遗留的冗余 `[https …]` / `[ssh "ssh.github.com"]` 段及注释化全局代理段均已清理，无需再处理旧注释。详见 [dev-tools.md](dev-tools.md) 与 [getting-started.md](getting-started.md)。
 
 ### auto_update 与 update-all 的区别
 
@@ -187,4 +189,3 @@ git 历史。本仓库自 `init` 提交起从未打过 `baseline` 标签（`git 
 - 模板文件追加 `.tmpl` 后缀
 
 详见 [layout.md](layout.md)。新增配置请同步更新 [layout.md](layout.md) 的映射表与 [getting-started.md](getting-started.md) 的验证清单。
-

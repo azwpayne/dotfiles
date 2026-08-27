@@ -12,28 +12,23 @@
 | `core.excludesfile` | `~/.gitignore_global` | 全局忽略文件（`~` 由 git 原生展开，无用户名硬编码；见下文） |
 | `filter.lfs` | `smudge` / `clean` / `process` + `required true` | git-lfs 四件套 |
 | `[user]` | `azwpayne` / `paynewu0719@gmail.com` | 个人身份（公开 fork 前注意脱敏） |
-| `http "https://github.com"` | `socks5://127.0.0.1:5376` | 仅 `github.com` 走本地 SOCKS5 代理 |
-| `https "https://github.com"` | `socks5://127.0.0.1:5376` | 同上，`https` 协议，三处统一为 `5376` |
-| `ssh "ssh.github.com"` | `socks5://127.0.0.1:5376` | SSH over HTTPS（`ssh.github.com:443`）同样走 `socks5://127.0.0.1:5376` |
+| `http "https://github.com"` | `socks5://127.0.0.1:5376` | 唯一按域名限定的代理；`http.<url>` 段对匹配该 URL 的 HTTP/HTTPS 远程均生效（`[https …]` / `[ssh …]` 冗余段已删除） |
 | `push.default` | `current` | `push` 默认推送当前分支 |
 | `push.autoSetupRemote` | `true` | 首次 `push` 自动建立上游追踪 |
 | `safe.directory` | `*` | 信任所有目录（容器/挂载盘场景避免 `dubious ownership`） |
 
-> **非标准键告警**：`[push] rebase = true` 并非标准 git 配置键，会被 git 静默忽略；
-> 如需 `git pull` 一律变基，应改为 `pull.rebase = true`（或显式 `false`）。详见 `dot_gitconfig` 实测与本段告警。
->
-> **代理已统一**：当前 `dot_gitconfig` 已清理注释掉的全局 `[http]` / `[https]` 代理段，仅保留按域名限定的三条代理，且三条 `proxy` 均已统一为 `socks5://127.0.0.1:5376`（历史文档中的 `7890` 已失效），与 `private_dot_ssh/config` 的 `ProxyCommand` 探测端口 `5376` 保持一致。
+> **代理已精简**：当前 `dot_gitconfig` 仅保留一条按域名限定的代理行；历史遗留的注释化全局代理段及冗余的非标准 `[https …]`、`[ssh "ssh.github.com"]` 段均已删除（非标准键会被 git 静默忽略）。SSH 侧代理由 `private_dot_ssh/config` 的自适应 `ProxyCommand` 负责，探测端口同为 `5376`；如需 `git pull` 一律变基，应使用标准键 `pull.rebase = true`（当前未启用）。
 
 全局忽略规则（`dot_gitignore_global` → `~/.gitignore_global`，概要归类，完整清单以源文件为准）：
 
-- 编辑器临时文件与交换文件：`*~`、`.DS_Store`、`**/.DS_Store`、`*.swp` / `*.swo` / `*.bak`
+- 编辑器临时文件与交换文件：`*~`、`.DS_Store`（无斜杠模式递归匹配任意层级，等价覆盖 `**/.DS_Store`）、`*.swp` / `*.swo` / `*.bak`
 - IDE 目录：`.idea` / `*.iml` / `.vscode`
 - 编译产物与构建目录：`*.aux` / `*.log*` / `.tox` / `dist/` / `build/` / `target/` / `bin/`
 - Python 相关：`__pycache__/`、`*.venv`、`*.cache`
 - Node 依赖：`node_modules/`
 
-与 `dot_gitignore_global` 实际 20 条模式逐行一致（历史上的 `*.git` 笔误行已删，
-现为注释，不计入模式数）。
+与 `dot_gitignore_global` 实际 19 条模式逐行一致（历史上的 `*.git` 笔误行与冗余的
+`**/.DS_Store` 行已删；现存 1 行说明性注释，不计入模式数）。
 
 ## GitHub CLI — `gh`
 
@@ -104,17 +99,20 @@ mise upgrade             # 升级全部受管工具（被 aliases.zsh 的 update
   "lastChangelogVersion": "0.84.3",
   "hideThinkingBlock": true,
   "packages": [
-    "npm:pi-web-access",
-    "npm:pi-subagents",
-    "npm:@quintinshaw/pi-dynamic-workflows",
-    "npm:@narumitw/pi-btw",
-    "npm:@narumitw/pi-goal",
+    "npm:@gotgenes/pi-permission-system",
     "npm:pi-landstrip",
-    "npm:@gotgenes/pi-permission-system"
+    "npm:@quintinshaw/pi-dynamic-workflows",
+    "npm:@narumitw/pi-goal",
+    { "source": "npm:@juicesharp/rpiv-todo", "extensions": ["-index.ts"] },
+    { "source": "npm:@asermax/pi-cc-plugins", "extensions": ["-index.ts"] },
+    { "source": "npm:@narumitw/pi-btw", "extensions": ["-dist/index.ts"] },
+    { "source": "npm:pi-web-access", "extensions": ["-index.ts"] },
+    { "source": "npm:pi-lens", "extensions": ["-dist/index.js"] },
+    "npm:pi-subagents"
   ],
-  "defaultProvider": "zai-coding-cn",
-  "defaultModel": "glm-5.3",
-  "defaultThinkingLevel": "max"
+  "defaultProvider": "cc-switch-zhipu-glm",
+  "defaultModel": "glm-5.3-flash",
+  "defaultThinkingLevel": "high"
 }
 ```
 
@@ -123,10 +121,10 @@ mise upgrade             # 升级全部受管工具（被 aliases.zsh 的 update
 | `theme` | `dark` | 深色主题 |
 | `lastChangelogVersion` | `0.84.3` | 已同步至最新 pi 版本 |
 | `hideThinkingBlock` | `true` | 隐藏思考块（界面默认不展示 thinking 内容） |
-| `packages` | 7 个 `npm:` 包 | `pi-web-access`、`pi-subagents`、`@quintinshaw/pi-dynamic-workflows`、`@narumitw/pi-btw`、`@narumitw/pi-goal`、`pi-landstrip`、`@gotgenes/pi-permission-system` |
-| `defaultProvider` | `zai-coding-cn` | 默认 provider |
-| `defaultModel` | `glm-5.3` | 默认模型 |
-| `defaultThinkingLevel` | `max` | 默认思考强度（拉满） |
+| `packages` | 10 个条目 | 5 个纯字符串包（`@gotgenes/pi-permission-system`、`pi-landstrip`、`@quintinshaw/pi-dynamic-workflows`、`@narumitw/pi-goal`、`pi-subagents`）+ 5 个带 `extensions` 过滤的对象形式条目（`rpiv-todo`、`pi-cc-plugins`、`pi-btw`、`pi-web-access`、`pi-lens`），顺序同源文件 |
+| `defaultProvider` | `cc-switch-zhipu-glm` | 默认 provider |
+| `defaultModel` | `glm-5.3-flash` | 默认模型 |
+| `defaultThinkingLevel` | `high` | 默认思考强度 |
 
 > 实值以 `private_dot_pi/private_agent/settings.json` 为唯一权威；跨文档冲突时一律以源文件为准。
 
@@ -201,14 +199,12 @@ mise upgrade             # 升级全部受管工具（被 aliases.zsh 的 update
 
 ### workflows/settings.json — 动态工作流设置
 
-位于 `private_dot_pi/workflows/settings.json`（部署到 `~/.pi/workflows/settings.json`），为带注释的 JSON（JSONC），与实际文件一致：
+位于 `private_dot_pi/workflows/settings.json`（部署到 `~/.pi/workflows/settings.json`），为不含注释的纯 JSON，与实际文件一致：
 
-```jsonc
+```json
 {
     "defaultConcurrency"    : 10,
     "defaultAgentRetries"   : 2,
-    // "defaultAgentTimeoutMs" : 600000,
-    // "defaultTokenBudget"    : 50000,
     "progressPanelMode"     : "compact",
     "progressPanelMaxAgents": 8,
     "persistAgentSessions"  : false,
@@ -220,8 +216,8 @@ mise upgrade             # 升级全部受管工具（被 aliases.zsh 的 update
 | --- | --- | --- |
 | `defaultConcurrency` | `10` | 工作流默认并发代理数（`6cc29ce` 由 `5` 提升至 `10`） |
 | `defaultAgentRetries` | `2` | 单个代理默认重试次数 |
-| `defaultAgentTimeoutMs` | （已注释，值 `600000`） | 单代理超时，当前未启用 |
-| `defaultTokenBudget` | （已注释，值 `50000`） | 单代理 token 预算，当前未启用 |
+| `defaultAgentTimeoutMs` | （该键已不存在） | 单代理超时，已从文件中删除 |
+| `defaultTokenBudget` | （该键已不存在） | 单代理 token 预算，已从文件中删除 |
 | `progressPanelMode` | `compact` | 进度面板紧凑模式 |
 | `progressPanelMaxAgents` | `8` | 进度面板最大并发/展示代理数 |
 | `persistAgentSessions` | `false` | 不持久化代理会话 |
@@ -238,31 +234,30 @@ mise upgrade             # 升级全部受管工具（被 aliases.zsh 的 update
 ```json
 {
   "tiers": {
-    "small" : "zai-coding-cn/glm-5-turbo:minimal",
-    "medium": "zai-coding-cn/glm-5.2:medium",
-    "big"   : "zai-coding-cn/glm-5.2:xhigh"
+    "small" : "cc-switch-zhipu-glm/glm-4.7",
+    "medium": "cc-switch-zhipu-glm/glm-5.3-flash",
+    "big"   : "cc-switch-zhipu-glm/glm-5.3:max"
   }
 }
 ```
 
-- 三档 `small` / `medium` / `big` 分别绑定 `glm-5-turbo:minimal`、`glm-5.2:medium`、`glm-5.2:xhigh`——思考预算随档位递增（`3fd2f58` 将 medium 升级为 glm-5.2、big 改为 xhigh）。
-- 成本分层意图明显：轻量任务下沉到 5-turbo（minimal 思考）降本，中重档统一用 5.2（medium / xhigh），主模型 `defaultModel: glm-5.3` 居高兜底。
+- 三档 `small` / `medium` / `big` 分别绑定 `glm-4.7`、`glm-5.3-flash`、`glm-5.3:max`——思考预算随档位递增。
+- 成本分层意图明显：轻量任务下沉到 glm-4.7 降本，中档用 glm-5.3-flash，重档 glm-5.3:max 拉满思考；主模型 `defaultModel: glm-5.3-flash`（settings.json）。
 
 ### extensions/pi-permission-system/config.json — 工具级权限矩阵
 
-> 与源文件逐行核对一致：`// script` 分组实际为 `python* *` / `node *` 两条 `ask`（并无 `npm` / `pnpm` / `cargo` 条目）；早期版本放行的只读命令（`chezmoi *` / `xargs *` / `which *` / `pwd` / `ls *` 等 20 条）与 `git *` allow、`git rm *` / `git config *` deny 等条目现均已整段注释、**当前不生效**（由 `bash` 的 `*` : `allow` 默认兜底）。
+> 与源文件逐行核对一致：`bash` 组内脚本类为 `python3 *` / `node *` 两条 `ask`（文件为无注释的纯 JSON）；不存在任何被整段注释的历史遗留条目，其余命令由 `*` : `allow` 默认兜底。
 
 | 类别 | 策略 |
 | --- | --- |
 | `*` | `allow`（全局默认放行） |
-| `mcp` | 全部 `allow`（`*` / `mcp_status` / `mcp_list`） |
+| `mcp` | 全部 `allow`（`*` / `mcp_status` / `exa:*`） |
 | `skill` | `allow` |
 | `read` | 默认 `allow`；`deny` → `*.env`、`*.env.*`、`~/.ssh/*`、`~/.aws/*`、`~/.gnupg/*`（`*.env.example` 例外 `allow`） |
 | `write` / `edit` | 默认 `allow`；`deny` → `*.env`、`*.env.*`、`~/.ssh/*`、`~/.aws/*`（注意：`*.env.example` 在 `write` / `edit` 段未单独放行） |
 | `path` | 默认 `allow`；`deny` → `*.env`、`*.env.*`、`*.pem`、`*.key`、`~/.ssh/*`、`/etc/*`、`/var/*`（`*.env.example` 放行） |
-| `external_directory` | 全部 `allow`（`*` 及 `~/.cargo/registry/*`、`~/.npm/*`、`~/.cache/*`） |
-| `bash` | 默认 `*` → `allow`；危险命令 `sudo *` / `mv *` / `rm *` / `unlink *` / `dd if=* of=*` / `mkfs.*` 为 `deny`；脚本类（`// script` 组）`python* *` / `node *` 为 `ask`；另有只读命令放行与 `git *` allow、`git rm *` / `git config *` deny 等条目已整段注释、当前不生效 |
+| `external_directory` | 默认 `ask`；`~/.cargo/registry/*`、`~/.npm/*`、`~/.cache/*` 为 `allow` |
+| `bash` | 默认 `*` → `allow`；危险命令 `sudo *` / `mv *` / `rm *` / `unlink *` / `dd if=* of=*` / `mkfs.*` 为 `deny`；脚本类 `python3 *` / `node *` 为 `ask`（文件为纯 JSON，无注释分组、无历史注释条目） |
 
 这套策略的目标：让 agent 能完成日常编码、只读检索与受控编辑，同时杜绝误删、密钥外泄与敏感路径写入，并把脚本执行类命令收敛到 `ask`。
 `promptMaxRows: 8`，`$schema` 指向 `pi-permission-system` 的 JSON Schema，与源文件一致。
-
