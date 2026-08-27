@@ -19,7 +19,7 @@
 | 运行时管理 | mise | bun / deno / go / node / pnpm 一键切换 |
 | Git 工作流 | git + gh (CLI) | LFS、GitHub 走本地 SOCKS5 代理、`push.default=current` + `autoSetupRemote` |
 | SSH | OpenSSH `~/.ssh/config` | `ssh.github.com:443` + 自适应 `ProxyCommand`（探活 `127.0.0.1:5376` SOCKS5，失败直连）+ OrbStack `Include` |
-| AI Agent | pi coding agent | 默认 `cc-switch-zhipu-glm` / `glm-5.3-flash`（`high`）；文件系统沙箱 + 禁网策略（`allowNetwork: false`）+ 允许优先的工具权限矩阵（敏感路径与高危命令 deny）；`workflows/settings.json` 控制并发与进度面板（`defaultConcurrency: 10` / `progressPanelMaxAgents: 8`），`workflows/model-tiers.json` 定义三档模型分层（small/medium/big，成本分级），子代理总数由 `landstrip.json` 限定（5，`maxSubagents`；任务权限 `*`: ask、`review`: allow） |
+| AI Agent | pi coding agent | 默认 `cc-switch-zhipu-glm` / `glm-5.3-flash`（`max`）；文件系统沙箱 + 禁网策略（`allowNetwork: false`）+ 允许优先的工具权限矩阵（敏感路径与高危命令 deny）；`workflows/settings.json` 控制并发与进度面板（`defaultConcurrency: 8` / `progressPanelMaxAgents: 8`），`workflows/model-tiers.json` 定义三档模型分层（small/medium/big，成本分级），子代理总数由 `landstrip.json` 限定（8，`maxSubagents`；任务权限 `*`: ask、`review`: allow） |
 
 ## 🚀 快速开始
 
@@ -93,12 +93,12 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 │   └── config                         →  ~/.ssh/config                ★ GitHub 走 ssh.github.com:443 + 自适应 SOCKS5 ProxyCommand（含 OrbStack Include；~/.ssh 目录 0700）
 └── private_dot_pi/
     ├── private_agent/                 →  ~/.pi/agent/                 pi coding agent 主配置（目录 0700）
-    │   ├── settings.json              →  ~/.pi/agent/settings.json     主题 `dark` / 10 个 npm 包 / `hideThinkingBlock: true` / `defaultProvider: cc-switch-zhipu-glm` / `defaultModel: glm-5.3-flash` / `defaultThinkingLevel: high`（`lastChangelogVersion: 0.84.3`）
+    │   ├── settings.json              →  ~/.pi/agent/settings.json     主题 `dark` / 10 个 npm 包 / `hideThinkingBlock: true` / `defaultProvider: cc-switch-zhipu-glm` / `defaultModel: glm-5.3-flash` / `defaultThinkingLevel: max`（`lastChangelogVersion: 0.84.3`）
     │   ├── sandbox.json               →  ~/.pi/agent/sandbox.json     文件系统与网络沙箱策略（`allowRead: ["**"]`、`allowNetwork: false` 禁网、`allowLocalBinding: false`，域名白名单 3 项）
-    │   ├── landstrip.json             →  ~/.pi/agent/landstrip.json   子代理总数上限 `maxSubagents: 5`（`toolFilesystemPolicy: sandbox`，任务权限 `*`: ask、`review`: allow）
+    │   ├── landstrip.json             →  ~/.pi/agent/landstrip.json   子代理总数上限 `maxSubagents: 8`（`toolFilesystemPolicy: sandbox`，任务权限 `*`: ask、`review`: allow）
     │   └── extensions/pi-permission-system/config.json → 细粒度工具权限矩阵（允许优先：默认 allow，敏感路径/高危命令 deny）
     └── workflows/
-        ├── settings.json              →  ~/.pi/workflows/settings.json 工作流设置（defaultConcurrency=10 / progressPanelMaxAgents=8）
+        ├── settings.json              →  ~/.pi/workflows/settings.json 工作流设置（defaultConcurrency=8 / progressPanelMaxAgents=8）
         └── model-tiers.json           →  ~/.pi/workflows/model-tiers.json 三档模型分层（provider 均为 cc-switch-zhipu-glm：small=glm-4.7 / medium=glm-5.3-flash / big=glm-5.3:max，用于成本分级）
 ```
 
@@ -128,7 +128,7 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
   在目标机器上生成，含凭据，不入仓库。
 - pi agent 的沙箱与权限策略显式拒绝读取 `*.env`、`~/.ssh/*`、`~/.aws/*` 等，
   并禁止 `sudo` / `rm` 类命令——细节见 [docs/dev-tools.md](docs/dev-tools.md)。
-- `dot_gitconfig` 与 `private_dot_ssh/config` 中包含本地代理地址（`socks5://127.0.0.1:5376`，git 三处与 SSH 探测均统一为 5376，仅对 `github.com`/`ssh.github.com` 生效）
+- `dot_gitconfig` 与 `private_dot_ssh/config` 中包含本地代理地址（`socks5://127.0.0.1:5376`，git 一处（gitconfig 单条代理行）与 SSH 探测均统一为 5376，仅对 `github.com`/`ssh.github.com` 生效）
   与个人身份信息，公开 fork 前请先脱敏。
 
 ## 🧾 环境
