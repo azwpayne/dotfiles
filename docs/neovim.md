@@ -28,7 +28,7 @@ nvim/  (private_dot_config/nvim → ~/.config/nvim)
 ├── lazyvim.json              LazyVim 元数据（extras 为空、news 已读至 11866、version 8；见下文说明）
 ├── stylua.toml               Lua 格式化规则（Spaces 2 宽 120 列）
 ├── dot_gitignore             → .gitignore  忽略 tag / log / data 等运行时产物
-├── dot_neoconf.json          → .neoconf.json  LSP 项目级设置（neoconf / lua_ls 配置）
+├── dot_neoconf.json          → .neoconf.json  LSP 项目级设置（neoconf / lua_ls 配置）（inert：仅被 neoconf.nvim 读取，需 lazyvim.plugins.extras.lsp.neoconf extra——未导入）
 ├── LICENSE                   上游 LazyVim starter 原件（Apache-2.0）；**/LICENSE 排除，不部署
 └── README.md                 仓库内文档（LazyVim starter 模板）；**/README.md 排除，不部署
 ```
@@ -119,7 +119,7 @@ LSP / 格式化 / lint 由 LazyVim 内置的 mason + nvim-lspconfig + conform + 
     `telescope.nvim` 的 `<leader>fp` "Find Plugin File"（`cwd = require("lazy.core.config").options.root`）及 `horizontal / prompt_position=top / ascending` 布局；
     `nvim-lspconfig` 的 `pyright = {}`；`nvim-treesitter` 的 `ensure_installed`（bash/html/javascript/json/lua/markdown/markdown_inline/python/query/regex/tsx/typescript/vim/yaml）及后续 `vim.list_extend` 对 `tsx/typescript` 的重复追加；
     `mason.nvim` 的 `ensure_installed`（stylua / shellcheck / shfmt / flake8）；`lualine.nvim` 的 `😄` 组件追加。
-  - 已注释（当前不生效）的示例：`gruvbox.nvim`、`tsserver + typescript.nvim`、`mini.starter`、`dap.python`、`gitsigns` extras、`jsonls/schemastore` 等模板参考，以及两段带说明的禁用块——
+  - 已注释（当前不生效）的示例：`gruvbox.nvim`、`tsserver + typescript.nvim`、`mini.starter`、`dap.python`、`gitsigns` extras 等模板参考，以及两段带说明的禁用块——
     **nvim-cmp + cmp-emoji**（惰性死配置——LazyVim v14 内置 blink.cmp，未 import `lazyvim.plugins.extras.coding.nvim-cmp` 时该 spec 被直接丢弃、从未生效；如需启用先 import 该 extra 并 `:Lazy sync`）与
     **lualine 第二段空表覆盖**（opts 函数返回值会整体替换合并后的 opts，抹掉 LazyVim 全部 lualine 配置）。
 

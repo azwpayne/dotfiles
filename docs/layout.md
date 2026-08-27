@@ -85,11 +85,11 @@
 
 | 源文件 | 目标路径 | 说明 |
 | --- | --- | --- |
-| `private_dot_pi/private_agent/settings.json` | `~/.pi/agent/settings.json` (0644) | 完整字段：`theme: dark`、`lastChangelogVersion: 0.84.3`、`hideThinkingBlock: true`、`defaultProvider: cc-switch-zhipu-glm`、`defaultModel: glm-5.3-flash`、`defaultThinkingLevel: high`、10 个 npm 包（`pi-web-access`/`pi-subagents`/`@quintinshaw/pi-dynamic-workflows`/`@narumitw/pi-btw`/`@narumitw/pi-goal`/`pi-landstrip`/`@gotgenes/pi-permission-system`/`@juicesharp/rpiv-todo`/`@asermax/pi-cc-plugins`/`pi-lens`） |
+| `private_dot_pi/private_agent/settings.json` | `~/.pi/agent/settings.json` (0644) | 完整字段：`theme: dark`、`lastChangelogVersion: 0.84.3`、`hideThinkingBlock: true`、`defaultProvider: cc-switch-zhipu-glm`、`defaultTools`（7 项：`read`/`write`/`edit`/`bash`/`grep`/`find`/`ls`）、`defaultModel: glm-5.3-flash`、`defaultThinkingLevel: max`、`httpProxy: http://127.0.0.1:5376`、10 个 npm 包（`pi-web-access`/`pi-subagents`/`@quintinshaw/pi-dynamic-workflows`/`@narumitw/pi-btw`/`@narumitw/pi-goal`/`pi-landstrip`/`@gotgenes/pi-permission-system`/`@juicesharp/rpiv-todo`/`@asermax/pi-cc-plugins`/`pi-lens`） |
 | `private_dot_pi/private_agent/sandbox.json` | `~/.pi/agent/sandbox.json` (0644) | 文件系统与网络沙箱策略（`denyRead` 含 `/Users` `/etc` 等、`denyWrite` 含 `**/.env` `~/.ssh` 等、`allowNetwork: false`、`allowLocalBinding: false`、`allowedDomains: *.githubusercontent.com`/`*.github.com`/`github.com`） |
-| `private_dot_pi/private_agent/landstrip.json` | `~/.pi/agent/landstrip.json` (0644) | 子代理上限 `maxSubagents: 5`（`toolFilesystemPolicy: sandbox`，任务权限 `*`: ask、`review`: allow） |
+| `private_dot_pi/private_agent/landstrip.json` | `~/.pi/agent/landstrip.json` (0644) | 子代理上限 `maxSubagents: 8`（`toolFilesystemPolicy: sandbox`，任务权限 `*`: ask、`review`: allow） |
 | `private_dot_pi/private_agent/extensions/pi-permission-system/config.json` | `~/.pi/agent/extensions/pi-permission-system/config.json` (0644) | 工具级权限矩阵（`read/write/edit/bash/path` 细粒度 allow/deny/ask，禁 `sudo`/`rm`/`mv` 等） |
-| `private_dot_pi/workflows/settings.json` | `~/.pi/workflows/settings.json` (0644) | workflow 运行时配置：默认并发 `defaultConcurrency: 10`、进度面板并发/展示上限 `progressPanelMaxAgents: 8`，与 `landstrip.json` 的 `maxSubagents: 5` 职责不同、相互独立 |
+| `private_dot_pi/workflows/settings.json` | `~/.pi/workflows/settings.json` (0644) | workflow 运行时配置：默认并发 `defaultConcurrency: 8`、进度面板并发/展示上限 `progressPanelMaxAgents: 8`，与 `landstrip.json` 的 `maxSubagents: 8` 职责不同、相互独立 |
 | `private_dot_pi/workflows/model-tiers.json` | `~/.pi/workflows/model-tiers.json` (0644) | 三档模型分层：small=`glm-4.7` / medium=`glm-5.3-flash` / big=`glm-5.3:max`（provider 均为 `cc-switch-zhipu-glm`），用于成本分级 |
 
 > 权限实测（stat）：`private_dot_pi`/`private_agent` 目录前缀使 `~/.pi`、`~/.pi/agent` 为 0700，其内文件（含 `extensions/**`）均为 0644；

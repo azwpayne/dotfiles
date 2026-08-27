@@ -101,18 +101,20 @@ mise upgrade             # 升级全部受管工具（被 aliases.zsh 的 update
   "packages": [
     "npm:@gotgenes/pi-permission-system",
     "npm:pi-landstrip",
-    "npm:@quintinshaw/pi-dynamic-workflows",
+    "npm:pi-subagents",
     "npm:@narumitw/pi-goal",
     { "source": "npm:@juicesharp/rpiv-todo", "extensions": ["-index.ts"] },
     { "source": "npm:@asermax/pi-cc-plugins", "extensions": ["-index.ts"] },
     { "source": "npm:@narumitw/pi-btw", "extensions": ["-dist/index.ts"] },
     { "source": "npm:pi-web-access", "extensions": ["-index.ts"] },
     { "source": "npm:pi-lens", "extensions": ["-dist/index.js"] },
-    "npm:pi-subagents"
+    "npm:@quintinshaw/pi-dynamic-workflows"
   ],
   "defaultProvider": "cc-switch-zhipu-glm",
+  "defaultTools": ["read", "write", "edit", "bash", "grep", "find", "ls"],
   "defaultModel": "glm-5.3-flash",
-  "defaultThinkingLevel": "high"
+  "defaultThinkingLevel": "max",
+  "httpProxy": "http://127.0.0.1:5376"
 }
 ```
 
@@ -121,10 +123,12 @@ mise upgrade             # 升级全部受管工具（被 aliases.zsh 的 update
 | `theme` | `dark` | 深色主题 |
 | `lastChangelogVersion` | `0.84.3` | 已同步至最新 pi 版本 |
 | `hideThinkingBlock` | `true` | 隐藏思考块（界面默认不展示 thinking 内容） |
-| `packages` | 10 个条目 | 5 个纯字符串包（`@gotgenes/pi-permission-system`、`pi-landstrip`、`@quintinshaw/pi-dynamic-workflows`、`@narumitw/pi-goal`、`pi-subagents`）+ 5 个带 `extensions` 过滤的对象形式条目（`rpiv-todo`、`pi-cc-plugins`、`pi-btw`、`pi-web-access`、`pi-lens`），顺序同源文件 |
+| `packages` | 10 个条目 | 5 个纯字符串包（`@gotgenes/pi-permission-system`、`pi-landstrip`、`pi-subagents`、`@narumitw/pi-goal`、`@quintinshaw/pi-dynamic-workflows`）+ 5 个带 `extensions` 过滤的对象形式条目（`rpiv-todo`、`pi-cc-plugins`、`pi-btw`、`pi-web-access`、`pi-lens`），顺序同源文件 |
 | `defaultProvider` | `cc-switch-zhipu-glm` | 默认 provider |
+| `defaultTools` | 7 项：`read`/`write`/`edit`/`bash`/`grep`/`find`/`ls` | 默认启用工具清单 |
 | `defaultModel` | `glm-5.3-flash` | 默认模型 |
-| `defaultThinkingLevel` | `high` | 默认思考强度 |
+| `defaultThinkingLevel` | `max` | 默认思考强度 |
+| `httpProxy` | http://127.0.0.1:5376 | pi 出站代理，与 git/SSH 同端口 |
 
 > 实值以 `private_dot_pi/private_agent/settings.json` 为唯一权威；跨文档冲突时一律以源文件为准。
 
@@ -141,7 +145,7 @@ mise upgrade             # 升级全部受管工具（被 aliases.zsh 的 update
     "denyRead"  : ["/Users", "/home", "/root", "/etc", "/var", "/tmp", "/private/var", "/private/tmp"],
     "allowWrite": [
       ".",                    "/dev/null",            "/tmp",                 "~/.npm",
-      "~/.cargo/registry",    "~/.cache",             "~/.gitconfig",         "~/.config/git/config"
+      "~/.cargo/registry",    "~/.cache",             "~/.config/git/config"
     ],
     "denyWrite" : [
       "**/.env",          "**/*.pem",         "**/.env.*",        "~/.ssh",
@@ -167,7 +171,7 @@ mise upgrade             # 升级全部受管工具（被 aliases.zsh 的 update
 | `shell.readAccess` | `host` | shell 可读宿主文件系统 |
 | `filesystem.allowRead` | `["**"]` | 全域读取放行（1b535e9 放宽，实际约束靠 `denyRead` 与工具级权限矩阵） |
 | `filesystem.denyRead` | 8 项 | `/Users`、`/home`、`/root`、`/etc`、`/var`、`/tmp`、`/private/var`、`/private/tmp`（大范围 deny，工作区由 `cwd` 白名单放行） |
-| `filesystem.allowWrite` | 8 项 | `.`、`/dev/null`、`/tmp`、`~/.npm`、`~/.cargo/registry`、`~/.cache`、`~/.gitconfig`、`~/.config/git/config` |
+| `filesystem.allowWrite` | 7 项 | `.`、`/dev/null`、`/tmp`、`~/.npm`、`~/.cargo/registry`、`~/.cache`、`~/.config/git/config` |
 | `filesystem.denyWrite` | 10 项 | `**/.env`、`**/*.pem`、`**/.env.*`、`~/.ssh`、`**/*.key`、`.pi/sandbox.json`、`~/.bashrc`、`~/.zshrc`、`~/.profile`、`~/.gitconfig` |
 | `network.allowNetwork` | `false` | **网络默认关闭**（禁网策略） |
 | `network.allowLocalBinding` | `false` | 禁止本地端口绑定 |
@@ -178,8 +182,8 @@ mise upgrade             # 升级全部受管工具（被 aliases.zsh 的 update
 | `windows` | `appContainerMode: standard`、`allowLoopback: false` | Windows 平台的沙箱容器模式（macOS 上不生效） |
 
 - **网络默认关闭（禁网策略）**：`allowNetwork: false` + `allowLocalBinding: false` + `allowAllUnixSockets: false`，沙箱内禁止出站网络、本地端口绑定与 Unix socket；`allowedDomains` 3 项域名白名单仅在网络启用时才作为出站限制生效（当前不生效）；`deniedDomains` 为空。
-- **重复项已清理**：历史上 `allowWrite` 中 `/dev/null` 重复一次（9 项）、`denyWrite` 中 `**/.env` 与 `**/*.pem` 各重复一次（12 项），去重后为 8 / 10 项、无重复，语义不变（实测：`python3 -c "import json; d=json.load(open('private_dot_pi/private_agent/sandbox.json'))['filesystem']; print(len(d['allowWrite']), len(d['denyWrite']))"` → `8 10`）。
-- `~/.gitconfig` 同时出现在 `allowWrite` 与 `denyWrite`（交集未收口，属已知的配置矛盾）。
+- **重复项已清理**：历史上 `allowWrite` 中 `/dev/null` 重复一次（9 项）、`denyWrite` 中 `**/.env` 与 `**/*.pem` 各重复一次（12 项），去重后为 8 / 10 项、无重复，语义不变（其后 `~/.gitconfig` 又从 `allowWrite` 移除，现为 7 / 10 项；实测：`python3 -c "import json; d=json.load(open('private_dot_pi/private_agent/sandbox.json'))['filesystem']; print(len(d['allowWrite']), len(d['denyWrite']))"` → `7 10`）。
+- `~/.gitconfig` 已从 `allowWrite` 移除，仅保留 `denyWrite` 硬拒绝（allow 条目在硬 deny 下本就无法生效）。
 
 ### landstrip.json — 子代理与任务权限
 
@@ -187,15 +191,15 @@ mise upgrade             # 升级全部受管工具（被 aliases.zsh 的 update
 
 ```json
 {
-  "maxSubagents"        : 5,
+  "maxSubagents"        : 8,
   "toolFilesystemPolicy": "sandbox",
   "permission"          : { "task": {"*": "ask", "review": "allow"} }
 }
 ```
 
-- 子代理上限 **5**（更早版本曾为 `16` / `8`）；`toolFilesystemPolicy: sandbox` 复用上节沙箱。
+- 子代理上限 **8**（更早版本曾为 `16` / `5`）；`toolFilesystemPolicy: sandbox` 复用上节沙箱。
 - 任务级权限 `*`: `ask`、`review`: `allow`——派生子代理前需用户确认（`c6408c0` 将 `*` 由 `deny` 放宽为 `ask`）：防止 agent 未经询问自行派生执行类子代理，同时免询问放行只读审查。
-- **与 `workflows/settings.json` 的关系**：`landstrip.json` 的 `maxSubagents` 限制**子代理工具可派生的子代理总数上限**；`workflows/settings.json` 的 `progressPanelMaxAgents` 限制**工作流进度面板的并发/展示代理数上限**。二者职责不同、相互独立，当前值分别为 `5` / `8`。详见 [layout.md](layout.md) 与下节。
+- **与 `workflows/settings.json` 的关系**：`landstrip.json` 的 `maxSubagents` 限制**子代理工具可派生的子代理总数上限**；`workflows/settings.json` 的 `progressPanelMaxAgents` 限制**工作流进度面板的并发/展示代理数上限**。二者职责不同、相互独立，当前值均为 `8`。详见 [layout.md](layout.md) 与下节。
 
 ### workflows/settings.json — 动态工作流设置
 
@@ -203,28 +207,26 @@ mise upgrade             # 升级全部受管工具（被 aliases.zsh 的 update
 
 ```json
 {
-    "defaultConcurrency"    : 10,
+    "defaultConcurrency"    : 8,
     "defaultAgentRetries"   : 2,
     "progressPanelMode"     : "compact",
     "progressPanelMaxAgents": 8,
-    "persistAgentSessions"  : false,
-    "allowBudgetCaps"       : false
+    "persistAgentSessions"  : false
 }
 ```
 
 | 字段 | 值 | 说明 |
 | --- | --- | --- |
-| `defaultConcurrency` | `10` | 工作流默认并发代理数（`6cc29ce` 由 `5` 提升至 `10`） |
+| `defaultConcurrency` | `8` | 工作流默认并发代理数（曾为 `5`、`10`，现为 `8`） |
 | `defaultAgentRetries` | `2` | 单个代理默认重试次数 |
 | `defaultAgentTimeoutMs` | （该键已不存在） | 单代理超时，已从文件中删除 |
 | `defaultTokenBudget` | （该键已不存在） | 单代理 token 预算，已从文件中删除 |
 | `progressPanelMode` | `compact` | 进度面板紧凑模式 |
 | `progressPanelMaxAgents` | `8` | 进度面板最大并发/展示代理数 |
 | `persistAgentSessions` | `false` | 不持久化代理会话 |
-| `allowBudgetCaps` | `false` | 不启用预算上限 |
 
 `progressPanelMaxAgents: 8` 用于 `pi-dynamic-workflows` 的进度面板。它与上节 `pi-subagents` 的
-`maxSubagents: 5` 相互独立：前者限制工作流进度面板的并发/展示代理数上限，
+`maxSubagents: 8` 相互独立：前者限制工作流进度面板的并发/展示代理数上限，
 后者限制子代理工具可派生的子代理总数上限。详见 [layout.md](layout.md)。
 
 ### workflows/model-tiers.json — 工作流三档模型分层
@@ -250,6 +252,7 @@ mise upgrade             # 升级全部受管工具（被 aliases.zsh 的 update
 
 | 类别 | 策略 |
 | --- | --- |
+| `yoloMode` | `true`——显式全放行开关：所有 `ask` 结果自动批准、不再弹窗（`deny` 条目仍生效） |
 | `*` | `allow`（全局默认放行） |
 | `mcp` | 全部 `allow`（`*` / `mcp_status` / `exa:*`） |
 | `skill` | `allow` |
@@ -259,5 +262,5 @@ mise upgrade             # 升级全部受管工具（被 aliases.zsh 的 update
 | `external_directory` | 默认 `ask`；`~/.cargo/registry/*`、`~/.npm/*`、`~/.cache/*` 为 `allow` |
 | `bash` | 默认 `*` → `allow`；危险命令 `sudo *` / `mv *` / `rm *` / `unlink *` / `dd if=* of=*` / `mkfs.*` 为 `deny`；脚本类 `python3 *` / `node *` 为 `ask`（文件为纯 JSON，无注释分组、无历史注释条目） |
 
-这套策略的目标：让 agent 能完成日常编码、只读检索与受控编辑，同时杜绝误删、密钥外泄与敏感路径写入，并把脚本执行类命令收敛到 `ask`。
+这套策略的目标：让 agent 能完成日常编码、只读检索与受控编辑，同时杜绝误删、密钥外泄与敏感路径写入；脚本执行类命令（`python3 *` / `node *`）与 `external_directory` 的 `ask` 在 `yoloMode: true` 下被自动放行，实际硬约束仅剩 `deny` 条目。
 `promptMaxRows: 8`，`$schema` 指向 `pi-permission-system` 的 JSON Schema，与源文件一致。
