@@ -1,7 +1,7 @@
 {
   "tiers": {
-    "small" : "zai-coding-cn/glm-5-turbo:minimal",
-    "medium": "zai-coding-cn/glm-5.2:medium",
-    "big"   : "zai-coding-cn/glm-5.2:xhigh"
+    "small" : "cc-switch-zhipu-glm/glm-4.7",
+    "medium": "cc-switch-zhipu-glm/glm-5.3-flash",
+    "big"   : "cc-switch-zhipu-glm/glm-5.3:max"
   }
 }

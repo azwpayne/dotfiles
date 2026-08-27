@@ -1,10 +1,11 @@
 {
     "$schema": "https://raw.githubusercontent.com/gotgenes/pi-packages/main/packages/pi-permission-system/schemas/permissions.schema.json",
+    "yoloMode": true,
     "promptMaxRows": 8,
     "permission": {
         "*": "allow",
-        "mcp": {"*": "allow", "mcp_status": "allow", "mcp_list": "allow"},
-        "skill": {"*": "allow"},
+        "mcp": {"*": "allow", "mcp_status": "allow", "exa:*": "allow"},
+        "skill": {"*": "allow", "librarian": "allow"},
         "read": {
             "*"            : "allow",
             "*.env"        : "deny",
@@ -18,40 +19,13 @@
         "edit": {"*": "allow", "*.env": "deny", "*.env.*": "deny", "~/.ssh/*": "deny", "~/.aws/*": "deny"},
         "bash": {
             "*"           : "allow",
-            // "chezmoi *"   : "allow",
-            // "xargs *"     : "allow",
-            // "which *"     : "allow",
-            // "tail *"      : "allow",
-            // "sleep *"     : "allow",
-            // "ps *"        : "allow",
-            // "lsof *"      : "allow",
-            // "find *"      : "allow",
-            // "wc *"        : "allow",
-            // "sed *"       : "allow",
-            // "head *"      : "allow",
-            // "awk *"       : "allow",
-            // "grep *"      : "allow",
-            // "pwd"         : "allow",
-            // "for *"       : "allow",
-            // "cd *"        : "allow",
-            // "ls *"        : "allow",
-            // "cat *"       : "allow",
-            // "echo *"      : "allow",
-            // "mkdir *"     : "allow",
-            // "touch *"     : "allow",
-            // dangerous
             "sudo *"      : "deny",
             "mv *"        : "deny",
             "rm *"        : "deny",
             "unlink *"    : "deny",
             "dd if=* of=*": "deny",
             "mkfs.*"      : "deny",
-            // git
-            // "git *"       : "allow",
-            // "git rm *"    : "deny",
-            // "git config *": "deny",
-            // script
-            "python* *"   : "ask",
+            "python3 *"   : "ask",
             "node *"      : "ask"
         },
         "path": {
@@ -65,6 +39,6 @@
             "/etc/*"       : "deny",
             "/var/*"       : "deny"
         },
-        "external_directory": {"*": "allow", "~/.cargo/registry/*": "allow", "~/.npm/*": "allow", "~/.cache/*": "allow"}
+        "external_directory": {"*": "ask", "~/.cargo/registry/*": "allow", "~/.npm/*": "allow", "~/.cache/*": "allow"}
     }
 }

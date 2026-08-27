@@ -3,15 +3,18 @@
   "lastChangelogVersion": "0.84.3",
   "hideThinkingBlock"   : true,
   "packages"            : [
-    "npm:pi-web-access",
-    "npm:pi-subagents",
-    "npm:@quintinshaw/pi-dynamic-workflows",
-    "npm:@narumitw/pi-btw",
-    "npm:@narumitw/pi-goal",
+    "npm:@gotgenes/pi-permission-system",
     "npm:pi-landstrip",
-    "npm:@gotgenes/pi-permission-system"
+    "npm:@quintinshaw/pi-dynamic-workflows",
+    "npm:@narumitw/pi-goal",
+    { "source": "npm:@juicesharp/rpiv-todo", "extensions": ["-index.ts"] },
+    { "source": "npm:@asermax/pi-cc-plugins", "extensions": ["-index.ts"] },
+    { "source": "npm:@narumitw/pi-btw", "extensions": ["-dist/index.ts"] },
+    { "source": "npm:pi-web-access", "extensions": ["-index.ts"] },
+    { "source": "npm:pi-lens", "extensions": ["-dist/index.js"] },
+    "npm:pi-subagents"
   ],
-  "defaultProvider"     : "zai-coding-cn",
-  "defaultModel"        : "glm-5.3",
-  "defaultThinkingLevel": "max"
+  "defaultProvider"     : "cc-switch-zhipu-glm",
+  "defaultModel"        : "glm-5.3-flash",
+  "defaultThinkingLevel": "high"
 }
