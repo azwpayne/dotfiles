@@ -19,7 +19,7 @@
 | 运行时管理 | mise | bun / deno / go / node / pnpm 一键切换 |
 | Git 工作流 | git + gh (CLI) | LFS、GitHub 走本地 SOCKS5 代理、`push.default=current` + `autoSetupRemote` |
 | SSH | OpenSSH `~/.ssh/config` | `ssh.github.com:443` + 自适应 `ProxyCommand`（探活 `127.0.0.1:5376` SOCKS5，失败直连）+ OrbStack `Include` |
-| AI Agent | pi coding agent | 默认 `zai-coding-cn` / `glm-5.3`（`max`）；文件系统沙箱 + 禁网策略（`allowNetwork: false`）+ 允许优先的工具权限矩阵（敏感路径与高危命令 deny）；`workflows/settings.json` 控制并发与进度面板（`defaultConcurrency: 10` / `progressPanelMaxAgents: 8`），`workflows/model-tiers.json` 定义三档模型分层（small/medium/big，成本分级），子代理总数由 `landstrip.json` 限定（5，`maxSubagents`；任务权限 `*`: ask、`review`: allow） |
+| AI Agent | pi coding agent | 默认 `cc-switch-zhipu-glm` / `glm-5.3-flash`（`high`）；文件系统沙箱 + 禁网策略（`allowNetwork: false`）+ 允许优先的工具权限矩阵（敏感路径与高危命令 deny）；`workflows/settings.json` 控制并发与进度面板（`defaultConcurrency: 10` / `progressPanelMaxAgents: 8`），`workflows/model-tiers.json` 定义三档模型分层（small/medium/big，成本分级），子代理总数由 `landstrip.json` 限定（5，`maxSubagents`；任务权限 `*`: ask、`review`: allow） |
 
 ## 🚀 快速开始
 
@@ -93,13 +93,13 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 │   └── config                         →  ~/.ssh/config                ★ GitHub 走 ssh.github.com:443 + 自适应 SOCKS5 ProxyCommand（含 OrbStack Include；~/.ssh 目录 0700）
 └── private_dot_pi/
     ├── private_agent/                 →  ~/.pi/agent/                 pi coding agent 主配置（目录 0700）
-    │   ├── settings.json              →  ~/.pi/agent/settings.json     主题 `dark` / 7 个 npm 包 / `hideThinkingBlock: true` / `defaultProvider: zai-coding-cn` / `defaultModel: glm-5.3` / `defaultThinkingLevel: max`（`lastChangelogVersion: 0.84.3`）
+    │   ├── settings.json              →  ~/.pi/agent/settings.json     主题 `dark` / 10 个 npm 包 / `hideThinkingBlock: true` / `defaultProvider: cc-switch-zhipu-glm` / `defaultModel: glm-5.3-flash` / `defaultThinkingLevel: high`（`lastChangelogVersion: 0.84.3`）
     │   ├── sandbox.json               →  ~/.pi/agent/sandbox.json     文件系统与网络沙箱策略（`allowRead: ["**"]`、`allowNetwork: false` 禁网、`allowLocalBinding: false`，域名白名单 3 项）
     │   ├── landstrip.json             →  ~/.pi/agent/landstrip.json   子代理总数上限 `maxSubagents: 5`（`toolFilesystemPolicy: sandbox`，任务权限 `*`: ask、`review`: allow）
     │   └── extensions/pi-permission-system/config.json → 细粒度工具权限矩阵（允许优先：默认 allow，敏感路径/高危命令 deny）
     └── workflows/
         ├── settings.json              →  ~/.pi/workflows/settings.json 工作流设置（defaultConcurrency=10 / progressPanelMaxAgents=8）
-        └── model-tiers.json           →  ~/.pi/workflows/model-tiers.json 三档模型分层（small=glm-5-turbo:minimal / medium=glm-5.2:medium / big=glm-5.2:xhigh，用于成本分级）
+        └── model-tiers.json           →  ~/.pi/workflows/model-tiers.json 三档模型分层（provider 均为 cc-switch-zhipu-glm：small=glm-4.7 / medium=glm-5.3-flash / big=glm-5.3:max，用于成本分级）
 ```
 
 > 根级 `README.md` / `LICENSE` / `docs/` 与全部嵌套 `README.md` / `LICENSE`（含 `zsh/README.md`、`nvim/README.md`、`nvim/LICENSE`）均由 `.chezmoiignore`（`**/README.md`、`**/LICENSE` 等按目标名书写的模式）排除、不部署；历史上的 `**/REAMDME.md` 拼写失配与 `dot_git`/`dot_DS_Store`/`dot_gitconfig` 源名失配已修复，`managed` 目标数 59→55（后续去重又清理了被更宽模式覆盖的冗余行，目标数不变）。

@@ -65,7 +65,7 @@ zsh -l
 
 ## Starship 提示符（starship.toml）
 
-- **主题**：Catppuccin Mocha（`palette = 'catppuccin_mocha'`，唯一内置调色板；曾内置的 frappe/latte/macchiato 三套备用调色板因死代码干 111 行已删除）。
+- **主题**：Catppuccin Mocha（`palette = 'catppuccin_mocha'`，唯一内置调色板；曾内置的 frappe/latte/macchiato 三套备用调色板属死代码，已删除，净减约 111 行）。
 - **单行 powerline 布局**：`[line_break] disabled = true` 使 `$line_break` 不换行，整条提示符渲染为单行，段间用 `` / `` / `` 电源线符号衔接：
 
 ```txt
