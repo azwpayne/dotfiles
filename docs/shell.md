@@ -50,8 +50,8 @@ zsh -l
 | --- | --- | --- |
 | 环境 | `environment` `git` `input` `termtitle` `utility` | 基础选项、git 别名、按键绑定、终端标题、utility 着色（ls/grep/less） |
 | 提示符 | `duration-info` `git-info` `prompt-pwd` `asciiship` | 为 prompt 准备的信息模块 + ASCII 主题（实际被 Starship 覆盖，见下） |
-| 补全 | `zimfw/homebrew` → 条件 `site-functions`（`$HOMEBREW_PREFIX/share/zsh/site-functions` 优先，`/usr/local/share/zsh/site-functions` 兜底 Intel）→ `zsh-users/zsh-completions --fpath src` → `completion` | Homebrew 补全路径自适应 + 额外补全定义 + compinit |
-| 收尾 | `zdharma-continuum/fast-syntax-highlighting` → `zsh-users/zsh-history-substring-search` → `zsh-users/zsh-autosuggestions` → `Aloxaf/fzf-tab` | 必须最后初始化的高亮 / 历史子串搜索 / 自动建议 / fzf 化补全菜单 |
+| 补全 | `zimfw/homebrew` → 条件 `site-functions`（`$HOMEBREW_PREFIX/share/zsh/site-functions` 优先，`/usr/local/share/zsh/site-functions` 兜底 Intel）→ `zsh-users/zsh-completions --fpath src` → `completion` → `Aloxaf/fzf-tab` | Homebrew 补全路径自适应 + 额外补全定义 + compinit + fzf-tab fzf 化补全菜单（位于 completion 之后、高亮之前） |
+| 收尾 | `zdharma-continuum/fast-syntax-highlighting` → `zsh-users/zsh-history-substring-search` → `zsh-users/zsh-autosuggestions` | 必须最后初始化的高亮 / 历史子串搜索 / 自动建议 |
 
 补充说明：
 
@@ -168,7 +168,7 @@ zsh -l
 
 ### fzf-tab
 
-仅当 `[[ -r "/opt/homebrew/opt/fzf-tab/share/fzf-tab/fzf-tab.zsh" ]]` 时加载，并配置：
+插件本体由 `dot_zimrc` 的 `zmodule Aloxaf/fzf-tab` 经 zimfw 加载（不再由 `fzf.zsh` source，历史的 `[[ -r ]]` 守卫已删除）；`fzf.zsh` 仅保留以下 zstyle 配置：
 
 - `zstyle ':completion:*:git-checkout:*' sort false`
 - `zstyle ':completion:*:descriptions' format '[%d]'`
