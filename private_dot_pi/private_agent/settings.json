@@ -5,16 +5,18 @@
   "packages"            : [
     "npm:@gotgenes/pi-permission-system",
     "npm:pi-landstrip",
-    "npm:@quintinshaw/pi-dynamic-workflows",
+    "npm:pi-subagents",
     "npm:@narumitw/pi-goal",
     { "source": "npm:@juicesharp/rpiv-todo", "extensions": ["-index.ts"] },
     { "source": "npm:@asermax/pi-cc-plugins", "extensions": ["-index.ts"] },
     { "source": "npm:@narumitw/pi-btw", "extensions": ["-dist/index.ts"] },
     { "source": "npm:pi-web-access", "extensions": ["-index.ts"] },
     { "source": "npm:pi-lens", "extensions": ["-dist/index.js"] },
-    "npm:pi-subagents"
+    "npm:@quintinshaw/pi-dynamic-workflows"
   ],
   "defaultProvider"     : "cc-switch-zhipu-glm",
+  "defaultTools"        : ["read", "write", "edit", "bash", "grep", "find", "ls"],
   "defaultModel"        : "glm-5.3-flash",
-  "defaultThinkingLevel": "high"
+  "defaultThinkingLevel": "max",
+  "httpProxy"           : "http://127.0.0.1:5376"
 }
