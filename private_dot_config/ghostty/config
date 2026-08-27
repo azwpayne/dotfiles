@@ -132,7 +132,7 @@ image-storage-limit = 268435456
 
 # GTK 单实例模式（Linux 性能关键）
 gtk-single-instance = true
-# # 无限滚动缓冲，但保留确认提示避免误删
+# 关闭退出前确认提示；滚动缓冲并非无限，见上方 scrollback-limit（64MB）
 confirm-close-surface = false
 
 

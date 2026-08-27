@@ -135,6 +135,7 @@ symbol = ""
 style = "bg:green"
 format = '[[ $symbol( $version)(\(#$virtualenv\)) ](fg:crust bg:green)]($style)'
 
+# 未生效：docker_context 未列入顶部 format，永远不会渲染；如需启用须先加入 format
 [docker_context]
 symbol = ""
 style = "bg:sapphire"

@@ -17,6 +17,7 @@ italic = { family = "JetBrainsMono Nerd Font Mono", style = "Italic" }
 bold_italic = { family = "JetBrainsMono Nerd Font Mono", style = "Bold Italic" }
 
 
+# Note: this palette is Dracula, while ghostty uses 'Catppuccin Mocha' and starship uses palette catppuccin_mocha
 [colors]
 primary = { background = '0x282a36', foreground = '0xf8f8f2' }
 cursor = { background = '0x44475a', foreground = '0xf8f8f2' }
