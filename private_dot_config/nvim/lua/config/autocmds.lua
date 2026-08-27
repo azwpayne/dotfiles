@@ -3,7 +3,7 @@
 -- Autocmds are automatically loaded on the VeryLazy event.
 
 --
--- Highlight on yank (copy) in visual mode
+-- Highlight on yank (copy); TextYankPost fires for any-mode yanks (normal yy included), not just visual
 -- When text is yanked, briefly highlight it using the IncSearch highlight group
 -- to provide visual feedback that the yank was registered.
 -- A timeout of 300ms ensures the highlight doesn't persist too long.

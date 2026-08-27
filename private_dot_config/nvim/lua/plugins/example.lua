@@ -1,4 +1,4 @@
--- since this is just an example spec, don't actually load anything here and return an empty spec
+-- starter comment kept only for history: unlike the pristine template, several specs below DO take effect (guard is commented out)
 -- stylua: ignore
 -- if true then return {} end
 
@@ -217,7 +217,7 @@ return {
     -- { import = "lazyvim.plugins.extras.ui.mini-starter" },
 
     -- ============================================================================
-    -- Add jsonls and schemastore packages
+    -- JSON LSP/schema support comes from the lang.json extra (already imported in lua/config/lazy.lua)
     -- ============================================================================
     -- Setup treesitter for json, json5 and jsonc
     -- { import = "lazyvim.plugins.extras.lang.json" },

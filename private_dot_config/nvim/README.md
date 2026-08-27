@@ -43,7 +43,7 @@ mv ~/.config/nvim ~/.config/nvim.bak
 
 # 2. Clone / copy this directory
 git clone <your-fork-url> ~/.config/nvim
-# or: cp -r private_dot_config/nvim ~/.config/nvim
+# NOTE: raw cp keeps chezmoi names like dot_gitignore/.gitignore unrenamed — prefer chezmoi apply over manual copy
 
 # 3. Start Neovim (auto-bootstrap)
 nvim
