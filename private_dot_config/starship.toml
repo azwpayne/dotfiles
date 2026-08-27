@@ -26,7 +26,6 @@ $conda\
 $time\
 [ ](fg:lavender)\
 $cmd_duration\
-$line_break\
 $character"""
 
 palette = 'catppuccin_mocha'

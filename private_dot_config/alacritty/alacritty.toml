@@ -16,7 +16,6 @@ bold = { family = "JetBrainsMono Nerd Font Mono", style = "Bold" }
 italic = { family = "JetBrainsMono Nerd Font Mono", style = "Italic" }
 bold_italic = { family = "JetBrainsMono Nerd Font Mono", style = "Bold Italic" }
 
-
 # Note: this palette is Dracula, while ghostty uses 'Catppuccin Mocha' and starship uses palette catppuccin_mocha
 [colors]
 primary = { background = '0x282a36', foreground = '0xf8f8f2' }
@@ -32,7 +31,6 @@ option_as_alt = "OnlyRight"
 # decorations = "Buttonless"
 startup_mode = "Fullscreen"
 
-
 [selection]
 save_to_clipboard = true
 
@@ -47,7 +45,7 @@ save_to_clipboard = true
 
 [keyboard]
 # Key bindings for Alacritty
-# referer: https://github.com/theniceboy/.config/blob/master/alacritty/alacritty.yml
+# referrer: https://github.com/theniceboy/.config/blob/master/alacritty/alacritty.yml
 bindings = [
   # { key = "Return", mods = "Command", action = "ToggleSimpleFullscreen" },
   { mods = "Command", key = "Enter", action = "ToggleFullscreen" },
