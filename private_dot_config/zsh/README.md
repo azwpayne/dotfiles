@@ -2,7 +2,7 @@
 
 个人 zsh 配置模块集合。目标环境：**macOS (Apple Silicon) + Homebrew (`/opt/homebrew`) + zsh 5.9**。
 
-本仓库只包含按模块拆分的配置文件；入口加载器是仓库外的 `~/.zshrc`（即 `dot_zshrc`）。
+本仓库包含按模块拆分的配置文件；入口加载器是仓库根的 `dot_zshrc`（部署为 `~/.zshrc`）。
 
 ## 模块总览
 
@@ -47,7 +47,7 @@ export VISUAL='nvim'
 ### 前缀缓存
 
 首次启动探测 fzf 安装前缀（Apple Silicon Homebrew → Intel Homebrew → `~/.fzf` → `/usr`），
-结果写入 `~/.fzf_prefix_cache`（已被 `.gitignore` 忽略）。缓存仅在
+结果写入 `~/.fzf_prefix_cache`（不入仓库，无 git 规则覆盖此路径）。缓存仅在
 `$FZF_PREFIX/bin/fzf` 可执行时被信任，否则自动删除并重新探测——换机器/卸载重装无需手工清理。
 探测顺序与 `fzf.zsh` 一致：`/opt/homebrew/opt/fzf` → `/usr/local/opt/fzf` → `~/.fzf` → `/usr`，
 缓存文件位于 `$HOME` 下（`~/.fzf_prefix_cache`），不入仓库。
@@ -62,7 +62,7 @@ export VISUAL='nvim'
 | 函数 | 所在文件 | 用途 | 关键实现 |
 | --- | --- | --- | --- |
 | `auto_update` | aliases.zsh | 一键全量更新入口：若存在 `onproxy` 函数则先切代理，随后直接委托同文件的 `update-all` 执行（无参全量） | 打印 🚀 横幅 → `onproxy`（可选）→ `update-all`；覆盖目标与行为与 `update-all` 完全一致 |
-| `update-all [targets...]` | aliases.zsh | 声明式批量更新（默认全部，支持参数过滤如 `update-all brew uv`） | `local -A tasks=(brew … sdk … rustup … tldr … uv … mise …)` 6 项；`targets=(${(k)tasks})` 全量或过滤；`command -v $name` 守卫（未安装黄色 `⚠️ not found` 跳过）；`eval "${tasks[$name]}" \|\| ((failed++))` 失败计数；`print -P %F{blue/green/red/yellow}` 彩色输出；`start_time/duration` 统计耗时 `${mins}m${secs}s`；未知参数提示 `Available: …` 并返回 1 |
+| `update-all [targets...]` | aliases.zsh | 声明式批量更新（默认全部，支持参数过滤如 `update-all brew uv`） | `local -A tasks=(brew … sdk … rustup … tldr … uv … mise …)` 6 项；`targets=(${(k)tasks})` 全量或过滤；`command -v $name` 守卫（未安装黄色 `⚠️ not found` 跳过）；`eval "${tasks[$name]}" 2>! 临时错误文件 \|\| rc=$?`，失败收集 stderr 摘要并累计 failed/attempted；`print -P %F{blue/green/red/yellow}` 彩色输出；`start_time/duration` 统计耗时 `${mins}m${secs}s`；未知参数提示 `Available: …` 并返回 1 |
 | `ruff_auto [dir]` | aliases.zsh | ruff 自动修复 lint 并格式化（默认当前目录） | `ruff check --fix --exit-zero && ruff format` |
 | `y [args]` | aliases.zsh | yazi 包装：退出后 cd 到最后浏览的目录 | `yazi --cwd-file` + `mktemp` |
 | `jdx [args]` / `scr [args]` | aliases.zsh | 后台启动 jadx-gui / scrcpy | `nohup ... &` |
