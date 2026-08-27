@@ -4,7 +4,7 @@
 
 交互式 zsh 启动时按以下顺序执行（`~/.zshrc` 即仓库中的 `dot_zshrc`）：
 
-```
+```text
 zsh -l
  └─ ~/.zshrc
      ├─ ① Zim 引导块：下载 zimfw（如缺失）→ zimfw init → source ~/.zim/init.zsh
@@ -68,7 +68,7 @@ zsh -l
 - **主题**：Catppuccin Mocha（`palette = 'catppuccin_mocha'`，唯一内置调色板；曾内置的 frappe/latte/macchiato 三套备用调色板因死代码干 111 行已删除）。
 - **单行 powerline 布局**：`[line_break] disabled = true` 使 `$line_break` 不换行，整条提示符渲染为单行，段间用 `` / `` / `` 电源线符号衔接：
 
-```
+```txt
  OS → 用户名 → 目录 → git 分支/状态 → 语言版本(c/rust/golang/nodejs/bun/php/java/kotlin/haskell/python) → conda → 时间 → 耗时 → ❯
 （❯ 绿色=上条命令成功，红色=失败；vim 模式下显示 ❮；耗时段仅在命令超过 starship 默认 2s 阈值时出现）
 ```
