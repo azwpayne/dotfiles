@@ -19,7 +19,7 @@
 ```zsh
 source ${ZIM_HOME}/init.zsh          # compinit 在此完成
 for file in ~/.config/zsh/aliases.zsh ~/.config/zsh/fzf.zsh; do source "$file"; done
-source ~/.config/zsh/sdk.zsh         # 无条件加载（注释称“可选/需取消注释”与实际不符，以代码为准）
+source ~/.config/zsh/sdk.zsh         # 无条件加载（如需禁用请注释 source 行）
 ```
 
 > ⚠️ **顺序即语义**：同名定义后加载者生效。典型例子是短别名 `k`：
@@ -75,7 +75,7 @@ export VISUAL='nvim'
 | `flnet` | fzf.zsh | 仅显示 TCP/UDP 网络连接 | `lsof -i \| fzf` |
 | `fluser [user]` | fzf.zsh | 按用户过滤打开文件（默认 `$USER`） | `lsof -u "$user" \| fzf` |
 
-> `auto_update` 为守卫式串行（逐项 `command -v` 判断），`update-all` 为关联数组驱动（声明式、可过滤、可统计），二者分工对比见 `docs/shell.md`；日常推荐 `update-all`。
+> `auto_update` 为薄包装（横幅 + 可选 `onproxy` 后直接委托 `update-all`），`update-all` 为关联数组驱动（声明式、可过滤、可统计），二者分工对比见 `docs/shell.md`；日常推荐 `update-all`。
 
 破坏性命令不在此表：`uv_resync`（`rm -rf .venv uv.lock && uv sync`）见注意事项。
 

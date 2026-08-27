@@ -166,7 +166,7 @@ flf() {
       --preview-window=right:50% --header 'Enter: select, Ctrl-C: exit'
 }
 
-# 交互式杀死进程（安全确认版）
+# 交互式杀死进程（无二次确认）
 # 使用：flkill —— 选择一个打开文件的进程，提取 PID 并执行 kill -9。
 flkill() {
   local pid
@@ -197,11 +197,8 @@ fluser() {
 }
 
 # -----------------------------------------------------------------------------
-# 5. fzf-tab 插件（补全菜单模糊化）
+# 5. fzf-tab zstyle 配置（补全菜单模糊化；插件本体由 Zim 模块加载）
 # -----------------------------------------------------------------------------
-# 仅在插件实际存在时加载（Homebrew 前缀可能因机器架构而异）
-[[ -r "/opt/homebrew/opt/fzf-tab/share/fzf-tab/fzf-tab.zsh" ]] && \
-  source "/opt/homebrew/opt/fzf-tab/share/fzf-tab/fzf-tab.zsh"
 
 # disable sort when completing `git checkout`
 zstyle ':completion:*:git-checkout:*' sort false

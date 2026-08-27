@@ -105,7 +105,6 @@ source ${ZIM_HOME}/init.zsh
 
 
 # init（逐项守卫：工具未安装时静默跳过，不再打印 command not found）
-# source <(mise activate zsh)
 command -v zoxide   >/dev/null 2>&1 && eval "$(zoxide init zsh)"
 command -v mise     >/dev/null 2>&1 && eval "$(mise activate zsh)"
 command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"

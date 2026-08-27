@@ -51,6 +51,9 @@ zmodule zsh-users/zsh-completions --fpath src
 # after all modules that add completion definitions.
 zmodule completion
 
+# <!-- zmodule fzf -->
+zmodule Aloxaf/fzf-tab
+
 #
 # Modules that must be initialized last
 #
@@ -66,5 +69,3 @@ zmodule zsh-users/zsh-history-substring-search
 zmodule zsh-users/zsh-autosuggestions
 
 # <!-- zmodule pabloariasal/zfm -->
-# <!-- zmodule fzf -->
-zmodule Aloxaf/fzf-tab
