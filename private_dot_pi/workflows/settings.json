@@ -1,8 +1,7 @@
 {
-    "defaultConcurrency"    : 10,
+    "defaultConcurrency"    : 8,
     "defaultAgentRetries"   : 2,
     "progressPanelMode"     : "compact",
     "progressPanelMaxAgents": 8,
-    "persistAgentSessions"  : false,
-    "allowBudgetCaps"       : false
+    "persistAgentSessions"  : false
 }

@@ -1,5 +1,5 @@
 {
-  "maxSubagents"        : 5,
+  "maxSubagents"        : 8,
   "toolFilesystemPolicy": "sandbox",
   "permission"          : { "task": {"*": "ask", "review": "allow"} }
 }
