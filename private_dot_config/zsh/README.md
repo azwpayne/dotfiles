@@ -85,7 +85,7 @@ export VISUAL='nvim'
 
 | 变量 | 定义位置 | 说明 |
 | --- | --- | --- |
-| `LANG` | `dot_zshrc:6` | `export LANG=en_US.UTF-8` 已生效，统一固定为 `en_US.UTF-8`，与 Ghostty `LANG=zh_CN.UTF-8` 互补（终端侧中文、shell 侧英文，避免远端/脚本 locale 回退） |
+| `LANG` | `dot_zshrc:7` | `export LANG=zh_CN.UTF-8` 已生效（`en_US.UTF-8` 保留为注释备用项），与 Ghostty `LANG=zh_CN.UTF-8` 一致 |
 | `EDITOR` / `VISUAL` | `aliases.zsh` | 均为 `nvim`，环境变量（非 alias），供 git/crontab/fzf Ctrl-O 等读取 |
 | `GOPROXY` / `GOPATH` / `GOBIN` | `sdk.zsh` | `GOPROXY=https://goproxy.cn,direct`、`GOPATH=~/WorkSpaces/project/go`、`GOBIN=$GOPATH/bin`（`GOBIN` 存在时才加入 PATH） |
 | `ANDROID_NDK_HOME` | `sdk.zsh` | `/opt/homebrew/share/android-ndk`（目录存在时才导出） |
