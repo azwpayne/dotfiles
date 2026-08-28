@@ -6,6 +6,10 @@
 **/LICENSE
 docs/
 **/.DS_Store
+nvim.log
+
+# fish 机器本地状态（不跨机器部署）
+.config/fish/fish_variables
 
 # 敏感信息
 *token*
