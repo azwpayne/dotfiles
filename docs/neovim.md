@@ -24,7 +24,7 @@ nvim/  (private_dot_config/nvim → ~/.config/nvim)
 │   │   └── autocmds.lua      自动命令（VeryLazy 时加载）
 │   └── plugins/
 │       └── example.lua       自定义插件 spec（往此目录加文件即生效，含已生效的示例配置）
-├── lazy-lock.json            44 个插件的 commit 级锁定（可复现环境，branch: main/master + commit）
+├── lazy-lock.json            43 个插件的 commit 级锁定（可复现环境，branch: main/master + commit）
 ├── lazyvim.json              LazyVim 元数据（extras 为空、news 已读至 11866、version 8；见下文说明）
 ├── stylua.toml               Lua 格式化规则（Spaces 2 宽 120 列）
 ├── dot_gitignore             → .gitignore  忽略 tag / log / data 等运行时产物
@@ -89,24 +89,24 @@ LSP / 格式化 / lint 由 LazyVim 内置的 mason + nvim-lspconfig + conform + 
 - `install.colorscheme = { "tokyonight", "habamax" }`：首次安装时自动尝试这两套配色。
 - `checker.enabled = true, notify = false`：后台静默检查更新，不弹通知。
 - `performance.rtp.disabled_plugins = { "tarPlugin", "tohtml", "tutor", "zipPlugin" }` 四项禁用来加速启动（其余 `gzip/matchit/matchparen/netrwPlugin` 保持注释未禁用）。
-- **复现**：换机器后首次 `nvim` 按 `lazy-lock.json` 安装同版本插件（当前 44 条，见下节）。
+- **复现**：换机器后首次 `nvim` 按 `lazy-lock.json` 安装同版本插件（当前 43 条，见下节）。
 - **升级 / 回滚**：`:Lazy update` 更新并同步 lock 文件；`:Lazy restore` 回滚到 lock 锁定版本；`:Lazy sync` 一键清理/安装/更新。
 - **与 shell `update-all` 无关联**：`private_dot_config/zsh/aliases.zsh` 中的 `update-all` 仅覆盖 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise` 六项，不触及 Neovim 插件；两者更新通道相互独立（`auto_update` 直接委托 `update-all`，目标一致，同样不含 Neovim）。
 
-### lazy-lock.json（44 个）
+### lazy-lock.json（43 个）
 
-验证：`python3 -c "import json; print(len(json.load(open('private_dot_config/nvim/lazy-lock.json'))))"` → `44`。
+验证：`python3 -c "import json; print(len(json.load(open('private_dot_config/nvim/lazy-lock.json'))))"` → `43`。
 当前锁定（按字母序，均为 `branch: main/master` + commit）：
 
 `LazyVim`、`SchemaStore.nvim`、`blink.cmp`、`bufferline.nvim`、`catppuccin`、`cmake-tools.nvim`、
 `conform.nvim`、`crates.nvim`、`flash.nvim`、`friendly-snippets`、`fzf-lua`、`gitsigns.nvim`、
 `grug-far.nvim`、`lazy.nvim`、`lazydev.nvim`、`lualine.nvim`、`markdown-preview.nvim`、
 `mason-lspconfig.nvim`、`mason.nvim`、`mini.ai`、`mini.animate`、`mini.icons`、`mini.pairs`、
-`neo-tree.nvim`、`noice.nvim`、`nui.nvim`、`nvim-cmp`、`nvim-lint`、`nvim-lspconfig`、
+`neo-tree.nvim`、`noice.nvim`、`nui.nvim`、`nvim-lint`、`nvim-lspconfig`、
 `nvim-treesitter`、`nvim-treesitter-textobjects`、`nvim-ts-autotag`、`persistence.nvim`、
 `plenary.nvim`、`render-markdown.nvim`、`rustaceanvim`、`snacks.nvim`、`telescope.nvim`、
 `todo-comments.nvim`、`tokyonight.nvim`、`trouble.nvim`、`ts-comments.nvim`、
-`venv-selector.nvim`、`which-key.nvim` 共 44 个。
+`venv-selector.nvim`、`which-key.nvim` 共 43 个。
 
 > 清单与 `lazy-lock.json` 实值一一对应；新增/删除插件后需提交更新后的 lock 文件以保持可复现。
 
@@ -123,7 +123,7 @@ LSP / 格式化 / lint 由 LazyVim 内置的 mason + nvim-lspconfig + conform + 
     **nvim-cmp + cmp-emoji**（惰性死配置——LazyVim v14 内置 blink.cmp，未 import `lazyvim.plugins.extras.coding.nvim-cmp` 时该 spec 被直接丢弃、从未生效；如需启用先 import 该 extra 并 `:Lazy sync`）与
     **lualine 第二段空表覆盖**（opts 函数返回值会整体替换合并后的 opts，抹掉 LazyVim 全部 lualine 配置）。
 
-> lock 中仍钉着 `nvim-cmp` / `fzf-lua`，但当前没有任何 spec 引用它们；将来手动执行 `:Lazy sync` / `:Lazy clean` 时会被移除（lock 提交态仍为 44 条、可复现）。
+> lock 中仍钉着 `fzf-lua`，但当前没有任何 spec 引用它；将来手动执行 `:Lazy sync` / `:Lazy clean` 时会被移除（lock 提交态仍为 43 条、可复现）。
 
 ## 自定义键位速查（lua/config/keymaps.lua）
 
@@ -165,7 +165,7 @@ Leader 为空格（LazyVim 默认），以下为本仓库在 LazyVim 默认之�
 ## 与 private_dot_config/nvim/README.md 的分工
 
 - 本文档（`docs/neovim.md`）：**chezmoi 仓库视角**，面向维护者，逐行核对源文件与目标路径、extras 清单、选项/键位/autocmds 实值、lock 数量与 checker 策略、与 shell `update-all` 的边界。
-- `private_dot_config/nvim/README.md`（仓库内文档，由 `**/README.md` 排除、不部署到 `~/.config/nvim/README.md`）：**仓库内视角**，面向新机器使用者，基于 LazyVim starter 模板的安装步骤、功能概览、键位与设置速览，术语与本文档保持一致（10 extras / 44 锁定 / 键位 6 项等）。
+- `private_dot_config/nvim/README.md`（仓库内文档，由 `**/README.md` 排除、不部署到 `~/.config/nvim/README.md`）：**仓库内视角**，面向新机器使用者，基于 LazyVim starter 模板的安装步骤、功能概览、键位与设置速览，术语与本文档保持一致（10 extras / 43 锁定 / 键位 6 项等）。
 
 二者互补不矛盾；改动配置时以 `lua/config/*.lua` 与 `lazy-lock.json` 为权威来源。
 术语统一：`extras` 指 `lazyvim.plugins.extras.*` 的 `import`；`lazy-lock.json` 为 commit 级锁定；`checker` 指 `lazy.lua` 的更新检查。

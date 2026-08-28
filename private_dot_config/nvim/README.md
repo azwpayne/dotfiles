@@ -2,7 +2,7 @@
 
 A starter template for [LazyVim](https://github.com/LazyVim/LazyVim) — deployed via [chezmoi](https://www.chezmoi.io/) from `private_dot_config/nvim/` → `~/.config/nvim/`.
 
-> **chezmoi 视角**：本文件由源目录 `.chezmoiignore` 的 `**/README.md` 排除、**不**部署到 `~/.config/nvim/README.md`，仅仓库内查阅。仓库级一致性校验（extras 清单 / 44 锁定 / 选项与键位逐行核对）见 [`docs/neovim.md`](../../docs/neovim.md)，二者互补不重复；改动配置以 `lua/config/*.lua` 与 `lazy-lock.json` 为权威。
+> **chezmoi 视角**：本文件由源目录 `.chezmoiignore` 的 `**/README.md` 排除、**不**部署到 `~/.config/nvim/README.md`，仅仓库内查阅。仓库级一致性校验（extras 清单 / 43 锁定 / 选项与键位逐行核对）见 [`docs/neovim.md`](../../docs/neovim.md)，二者互补不重复；改动配置以 `lua/config/*.lua` 与 `lazy-lock.json` 为权威。
 
 ## Overview
 
@@ -12,7 +12,7 @@ setup. This configuration is managed as static files (no templates) and has been
 enhanced with comprehensive comments throughout `lua/config/*.lua`.
 
 - **Target**: Neovim ≥ 0.9 (verified on 0.12)
-- **Manager**: [lazy.nvim](https://github.com/folke/lazy.nvim) with commit-level lock (`lazy-lock.json`, 44 plugins)
+- **Manager**: [lazy.nvim](https://github.com/folke/lazy.nvim) with commit-level lock (`lazy-lock.json`, 43 plugins)
 - **Extras**: 10 extras (9 `lang.*` + 1 `ui.mini-animate`, see `lua/config/lazy.lua`)
 - **Style**: `stylua.toml` — Spaces, width 2, column 120; `catppuccin` as default colorscheme (via `lua/plugins/example.lua`)
 
@@ -25,7 +25,7 @@ enhanced with comprehensive comments throughout `lua/config/*.lua`.
 chezmoi diff
 chezmoi apply
 
-# 2. Start Neovim — first launch bootstraps lazy.nvim and installs 44 plugins (needs network)
+# 2. Start Neovim — first launch bootstraps lazy.nvim and installs 43 plugins (needs network)
 nvim
 # :Lazy sync  — if you add plugins later
 # :checkhealth — verify LSP / treesitter / provider health
@@ -62,7 +62,7 @@ nvim
 │   │   └── autocmds.lua      autocmds (loaded on VeryLazy)
 │   └── plugins/
 │       └── example.lua       example specs (effective: catppuccin / trouble / telescope / pyright / treesitter / mason; nvim-cmp & second lualine spec disabled)
-├── lazy-lock.json            44 plugins locked by commit (reproducible)
+├── lazy-lock.json            43 plugins locked by commit (reproducible)
 ├── lazyvim.json              LazyVim metadata (extras=[], news 11866, version 8 — extras empty is expected, real list is in lazy.lua)
 ├── stylua.toml               Spaces 2 / 120 columns
 ├── .gitignore                ignores tag / log / data
@@ -92,13 +92,13 @@ See [`docs/neovim.md`](../../docs/neovim.md) for the full chezmoi mapping (`dot_
 
 9 language extras + `mini-animate`. LSP / formatting / lint are handled by mason + nvim-lspconfig + conform + nvim-lint; mason prompts to install the server on first open of the relevant filetype. `lazyvim.json` `extras: []` is expected — LazyVim writes that file at runtime; the source of truth is `lazy.lua`.
 
-### Locked Plugins (lazy-lock.json — 44)
+### Locked Plugins (lazy-lock.json — 43)
 
 `LazyVim`, `SchemaStore.nvim`, `blink.cmp`, `bufferline.nvim`, `catppuccin`, `cmake-tools.nvim`,
 `conform.nvim`, `crates.nvim`, `flash.nvim`, `friendly-snippets`, `fzf-lua`, `gitsigns.nvim`,
 `grug-far.nvim`, `lazy.nvim`, `lazydev.nvim`, `lualine.nvim`, `markdown-preview.nvim`,
 `mason-lspconfig.nvim`, `mason.nvim`, `mini.ai`, `mini.animate`, `mini.icons`, `mini.pairs`,
-`neo-tree.nvim`, `noice.nvim`, `nui.nvim`, `nvim-cmp`, `nvim-lint`, `nvim-lspconfig`,
+`neo-tree.nvim`, `noice.nvim`, `nui.nvim`, `nvim-lint`, `nvim-lspconfig`,
 `nvim-treesitter`, `nvim-treesitter-textobjects`, `nvim-ts-autotag`, `persistence.nvim`,
 `plenary.nvim`, `render-markdown.nvim`, `rustaceanvim`, `snacks.nvim`, `telescope.nvim`,
 `todo-comments.nvim`, `tokyonight.nvim`, `trouble.nvim`, `ts-comments.nvim`,
@@ -118,7 +118,7 @@ See [`docs/neovim.md`](../../docs/neovim.md) for the full chezmoi mapping (`dot_
 - **nvim-cmp + cmp-emoji** — **disabled (commented out)**: inert dead config — LazyVim v14 ships blink.cmp and drops nvim-cmp specs unless the `lazyvim.plugins.extras.coding.nvim-cmp` extra is imported, so it never loaded (cmp-emoji is absent from the lock). To enable, import that extra first and run `:Lazy sync`
 - *(commented, inactive)*: gruvbox, mini.starter, dap.python, gitsigns/json extras — keep as templates.
 
-> `lazy-lock.json` still pins `nvim-cmp` / `fzf-lua`, but no spec references them anymore; a future manual `:Lazy sync` / `:Lazy clean` will drop them (committed lock stays 44 entries, reproducible).
+> `lazy-lock.json` still pins `fzf-lua`, but no spec references it anymore; a future manual `:Lazy sync` / `:Lazy clean` will drop it (committed lock stays 43 entries, reproducible).
 
 ### Built-in Settings (lua/config/options.lua)
 
@@ -195,7 +195,7 @@ vim.keymap.set("n", "<leader>sv", "<C-w>v", { desc = "Split window vertically" }
 
 - This README = **repository view** (kept in the source tree; excluded by `.chezmoiignore` `**/README.md`, not deployed to `~/.config/nvim/README.md`) — installation, features, keymaps, settings.
 - [`docs/neovim.md`](../../docs/neovim.md) = **repository view (maintainer)** — source structure, file-by-file mapping, extras provenance, lock verification, autocmd groups, and the `update-all` boundary.
-- Both share the same numbers: **10 extras (9 lang + mini-animate)** and **44 locked plugins** / **6 custom keymaps**; conflicts — `lua/config/*.lua` + `lazy-lock.json` win.
+- Both share the same numbers: **10 extras (9 lang + mini-animate)** and **43 locked plugins** / **6 custom keymaps**; conflicts — `lua/config/*.lua` + `lazy-lock.json` win.
 
 ## License
 
