@@ -87,7 +87,7 @@ git config --get-regexp proxy               # 应为 socks5://127.0.0.1:5376（�
 git config --file ~/.local/share/chezmoi/dot_gitconfig --get-regexp proxy
 
 # fish 配置语法检查
-fish -n ~/.config/fish/config.fish
+fish -n ~/.config/fish/config.fish ~/.config/fish/conf.d/*.fish   # fish -n 支持多文件；conf.d 现含 00_env.fish / fzf.fish
 
 # mise 环境体检
 mise doctor
@@ -121,7 +121,7 @@ rm -f ~/.fzf_prefix_cache && exec zsh
 ### 换了代理端口 / 地址
 
 `dot_gitconfig` 中仅一处引用 `socks5://127.0.0.1:5376`（`http "https://github.com"`，对该 URL 匹配的
-HTTP/HTTPS 远程均生效），已与 `private_dot_ssh/config` 的 `ProxyCommand` 探测端口 `5376` 统一
+HTTP/HTTPS 远程均生效），已与 `private_dot_ssh/private_config` 的 `ProxyCommand` 探测端口 `5376` 统一
 （`nc -z 127.0.0.1 5376`），全局替换即可。
 历史遗留的冗余 `[https …]` / `[ssh "ssh.github.com"]` 段及注释化全局代理段均已清理，无需再处理旧注释。详见 [dev-tools.md](dev-tools.md) 与 [getting-started.md](getting-started.md)。
 
@@ -170,8 +170,9 @@ HTTP/HTTPS 远程均生效），已与 `private_dot_ssh/config` 的 `ProxyComman
 - 仓库文档：`**/README.md`（根级与嵌套，含 `zsh/README.md`、`nvim/README.md`）、`**/LICENSE`（含 `nvim/LICENSE`）、`docs/`
 - 敏感信息：`*token*`、`*secret*`、`*credential*`
 - 构建产物：`node_modules/`、`.pnpm-store/`
+- fish 机器本地状态：`.config/fish/fish_variables`（fish Universal Variables，仅本机）
 
-> 历史修正（2026-08 收口）：旧版曾按源名书写 `**/dot_git` / `**/dot_DS_Store` / `dot_gitconfig`（均不匹配目标名 `.git` / `.DS_Store` / `.gitconfig`，从未生效），且 `**/README.md` 误拼为 `**/REAMDME.md`、缺 `**/LICENSE`——现已全部按目标名改写、删除无效行并补齐。因此 `dot_gitconfig` → `~/.gitconfig` 为**正常部署目标**（旧文档称其被排除、"仅作本地参考快照"系对无效行的误读）；修复后 `chezmoi managed` 目标数 59→55；后续去重又删除了被更宽模式覆盖或已无对应文件的冗余行（根级 `README.md` / `LICENSE`、`docs/**`、`**/.git`、`*client_secret*`、两条 `**.md` 及已不存在的 `REPO-INSIGHT.md`），目标数保持 55 不变。详见 [layout.md](layout.md)。
+> 历史修正（2026-08 收口）：旧版曾按源名书写 `**/dot_git` / `**/dot_DS_Store` / `dot_gitconfig`（均不匹配目标名 `.git` / `.DS_Store` / `.gitconfig`，从未生效），且 `**/README.md` 误拼为 `**/REAMDME.md`、缺 `**/LICENSE`——现已全部按目标名改写、删除无效行并补齐。因此 `dot_gitconfig` → `~/.gitconfig` 为**正常部署目标**（旧文档称其被排除、"仅作本地参考快照"系对无效行的误读）；修复后 `chezmoi managed` 目标数 59→55；后续去重又删除了被更宽模式覆盖或已无对应文件的冗余行（根级 `README.md` / `LICENSE`、`docs/**`、`**/.git`、`*client_secret*`、两条 `**.md` 及已不存在的 `REPO-INSIGHT.md`），目标数保持 55 不变（其后 fish 配置扩容实测曾达 81；将 `.config/fish/fish_variables` 纳入 `.chezmoiignore` 后为 80）。详见 [layout.md](layout.md)。
 
 注意：`docs/` 被忽略意味着文档改动仅在仓库内维护，不会 `apply` 到 `$HOME`。新增文档请同步更新 [layout.md](layout.md) 的索引。
 

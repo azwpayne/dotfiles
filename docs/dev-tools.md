@@ -17,7 +17,7 @@
 | `push.autoSetupRemote` | `true` | 首次 `push` 自动建立上游追踪 |
 | `safe.directory` | `*` | 信任所有目录（容器/挂载盘场景避免 `dubious ownership`） |
 
-> **代理已精简**：当前 `dot_gitconfig` 仅保留一条按域名限定的代理行；历史遗留的注释化全局代理段及冗余的非标准 `[https …]`、`[ssh "ssh.github.com"]` 段均已删除（非标准键会被 git 静默忽略）。SSH 侧代理由 `private_dot_ssh/config` 的自适应 `ProxyCommand` 负责，探测端口同为 `5376`；如需 `git pull` 一律变基，应使用标准键 `pull.rebase = true`（当前未启用）。
+> **代理已精简**：当前 `dot_gitconfig` 仅保留一条按域名限定的代理行；历史遗留的注释化全局代理段及冗余的非标准 `[https …]`、`[ssh "ssh.github.com"]` 段均已删除（非标准键会被 git 静默忽略）。SSH 侧代理由 `private_dot_ssh/private_config` 的自适应 `ProxyCommand` 负责，探测端口同为 `5376`；如需 `git pull` 一律变基，应使用标准键 `pull.rebase = true`（当前未启用）。
 
 全局忽略规则（`dot_gitignore_global` → `~/.gitignore_global`，概要归类，完整清单以源文件为准）：
 
@@ -39,7 +39,7 @@
 - 常用别名：`gh co` = `pr checkout`（若在本地配置）。
 - `pager` / `browser` 留空，跟随环境变量；`spinner` 动画开启。
 - 配合 `private_dot_config/zsh/aliases.zsh` 中的 `gopen`（`gh browse`）在浏览器打开当前仓库。
-- 网络可达性与 `dot_gitconfig` / `private_dot_ssh/config` 共用本机 `127.0.0.1:5376` SOCKS5 代理（见 [getting-started.md](getting-started.md)「弱网环境：bootstrap 前先设代理」），已统一为 `5376`，不再区分 `7890`。
+- 网络可达性与 `dot_gitconfig` / `private_dot_ssh/private_config` 共用本机 `127.0.0.1:5376` SOCKS5 代理（见 [getting-started.md](getting-started.md)「弱网环境：bootstrap 前先设代理」），已统一为 `5376`，不再区分 `7890`。
 
 ## mise — `private_dot_config/mise/config.toml`
 
@@ -141,7 +141,7 @@ mise upgrade             # 升级全部受管工具（被 aliases.zsh 的 update
   "enabled"   : true,
   "shell"     : {"readAccess": "host"},
   "filesystem": {
-    "allowRead" : ["**"],
+    "allowRead" : ["**", "${HOME}/.pi/agent/npm/node_modules/**"],
     "denyRead"  : ["/Users", "/home", "/root", "/etc", "/var", "/tmp", "/private/var", "/private/tmp"],
     "allowWrite": [
       ".",                    "/dev/null",            "/tmp",                 "~/.npm",
@@ -169,7 +169,7 @@ mise upgrade             # 升级全部受管工具（被 aliases.zsh 的 update
 | --- | --- | --- |
 | `enabled` | `true` | 沙箱总开关开启 |
 | `shell.readAccess` | `host` | shell 可读宿主文件系统 |
-| `filesystem.allowRead` | `["**"]` | 全域读取放行（1b535e9 放宽，实际约束靠 `denyRead` 与工具级权限矩阵） |
+| `filesystem.allowRead` | `["**", "${HOME}/.pi/agent/npm/node_modules/**"]` | 全域读取放行（1b535e9 放宽，实际约束靠 `denyRead` 与工具级权限矩阵） |
 | `filesystem.denyRead` | 8 项 | `/Users`、`/home`、`/root`、`/etc`、`/var`、`/tmp`、`/private/var`、`/private/tmp`（大范围 deny，工作区由 `cwd` 白名单放行） |
 | `filesystem.allowWrite` | 7 项 | `.`、`/dev/null`、`/tmp`、`~/.npm`、`~/.cargo/registry`、`~/.cache`、`~/.config/git/config` |
 | `filesystem.denyWrite` | 10 项 | `**/.env`、`**/*.pem`、`**/.env.*`、`~/.ssh`、`**/*.key`、`.pi/sandbox.json`、`~/.bashrc`、`~/.zshrc`、`~/.profile`、`~/.gitconfig` |
@@ -199,7 +199,7 @@ mise upgrade             # 升级全部受管工具（被 aliases.zsh 的 update
 
 - 子代理上限 **8**（更早版本曾为 `16` / `5`）；`toolFilesystemPolicy: sandbox` 复用上节沙箱。
 - 任务级权限 `*`: `ask`、`review`: `allow`——派生子代理前需用户确认（`c6408c0` 将 `*` 由 `deny` 放宽为 `ask`）：防止 agent 未经询问自行派生执行类子代理，同时免询问放行只读审查。
-- **与 `workflows/settings.json` 的关系**：`landstrip.json` 的 `maxSubagents` 限制**子代理工具可派生的子代理总数上限**；`workflows/settings.json` 的 `progressPanelMaxAgents` 限制**工作流进度面板的并发/展示代理数上限**。二者职责不同、相互独立，当前值均为 `8`。详见 [layout.md](layout.md) 与下节。
+- **与 `workflows/settings.json` 的关系**：`landstrip.json` 的 `maxSubagents` 限制**子代理工具可派生的子代理总数上限**；`workflows/settings.json` 的 `progressPanelMaxAgents` 限制**工作流进度面板的并发/展示代理数上限**。二者职责不同、相互独立，当前值分别为 `10`（`progressPanelMaxAgents`）与 `8`（`maxSubagents`）。详见 [layout.md](layout.md) 与下节。
 
 ### workflows/settings.json — 动态工作流设置
 
@@ -208,24 +208,26 @@ mise upgrade             # 升级全部受管工具（被 aliases.zsh 的 update
 ```json
 {
     "defaultConcurrency"    : 8,
-    "defaultAgentRetries"   : 2,
+    "defaultAgentRetries"   : 5,
     "progressPanelMode"     : "compact",
-    "progressPanelMaxAgents": 8,
-    "persistAgentSessions"  : false
+    "progressPanelMaxAgents": 10,
+    "persistAgentSessions"  : false,
+    "allowBudgetCaps"       : true
 }
 ```
 
 | 字段 | 值 | 说明 |
 | --- | --- | --- |
 | `defaultConcurrency` | `8` | 工作流默认并发代理数（曾为 `5`、`10`，现为 `8`） |
-| `defaultAgentRetries` | `2` | 单个代理默认重试次数 |
+| `defaultAgentRetries` | `5` | 单个代理默认重试次数 |
 | `defaultAgentTimeoutMs` | （该键已不存在） | 单代理超时，已从文件中删除 |
 | `defaultTokenBudget` | （该键已不存在） | 单代理 token 预算，已从文件中删除 |
 | `progressPanelMode` | `compact` | 进度面板紧凑模式 |
-| `progressPanelMaxAgents` | `8` | 进度面板最大并发/展示代理数 |
+| `progressPanelMaxAgents` | `10` | 进度面板最大并发/展示代理数 |
 | `persistAgentSessions` | `false` | 不持久化代理会话 |
+| `allowBudgetCaps` | `true` | 允许为工作流代理启用预算上限 |
 
-`progressPanelMaxAgents: 8` 用于 `pi-dynamic-workflows` 的进度面板。它与上节 `pi-subagents` 的
+`progressPanelMaxAgents: 10` 用于 `pi-dynamic-workflows` 的进度面板。它与上节 `pi-subagents` 的
 `maxSubagents: 8` 相互独立：前者限制工作流进度面板的并发/展示代理数上限，
 后者限制子代理工具可派生的子代理总数上限。详见 [layout.md](layout.md)。
 

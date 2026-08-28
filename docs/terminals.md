@@ -16,7 +16,7 @@
 
 | 配置                               | 值                 | 说明                                                                                       |
 | ---------------------------------- | ------------------ | ------------------------------------------------------------------------------------------ |
-| `env`                              | `LANG=zh_CN.UTF-8` | 显式声明中文 UTF-8，避免远端/脚本 locale 回退；与 `dot_zshrc:6` 的 `LANG=en_US.UTF-8` 互补 |
+| `env`                              | `LANG=zh_CN.UTF-8` | 显式声明中文 UTF-8，避免远端/脚本 locale 回退；与 `dot_zshrc:7` 的 `export LANG=zh_CN.UTF-8` 一致 |
 | `command`                          | `/bin/zsh -l`      | 登录 shell 启动；`fish -l` / `tmux new -As main` 已注释备用                                |
 | `window-inherit-working-directory` | `true`             | 新标签页/分屏继承当前目录，保持上下文                                                      |
 | `window-inherit-font-size`         | `true`             | 新 surface 继承字号                                                                        |

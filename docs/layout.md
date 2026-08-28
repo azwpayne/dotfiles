@@ -8,7 +8,7 @@
 | 前缀 | 含义 | 本仓库示例 |
 | --- | --- | --- |
 | `dot_` | 目标名以 `.` 开头（隐藏目录/文件） | `dot_zshrc` → `~/.zshrc` |
-| `private_` | 目标仅所有者可访问：文件 0600、目录 0700 | `private_dot_ssh/config` → `~/.ssh/config` (0600) |
+| `private_` | 目标仅所有者可访问：文件 0600、目录 0700 | `private_dot_ssh/private_config` → `~/.ssh/config` (0600) |
 | `symlink_` | 目标是符号链接，**文件内容即链接指向的路径** | `symlink_docker.fish` 内容为一行 OrbStack 路径 |
 | `empty_` | 目标为空文件（占位保证目录存在） | `private_empty_config.toml` → `~/.codex/config.toml` |
 | （无前缀） | 原样同名复制 | `starship.toml` → `~/.config/starship.toml` |
@@ -34,7 +34,7 @@
 
 | 源文件 | 目标路径 | 说明 |
 | --- | --- | --- |
-| `private_dot_ssh/config` | `~/.ssh/config` (0600) | OrbStack `Include ~/.orbstack/ssh/config` 置顶 + `Host github.com` 走 `ssh.github.com:443` + SOCKS5 自适应（`nc -z 127.0.0.1:5376` 探测，有则 `-X 5 -x 127.0.0.1:5376` 否则直连） |
+| `private_dot_ssh/private_config` | `~/.ssh/config` (0600) | OrbStack `Include ~/.orbstack/ssh/config` 置顶 + `Host github.com` 走 `ssh.github.com:443` + SOCKS5 自适应（`nc -z 127.0.0.1:5376` 探测，有则 `-X 5 -x 127.0.0.1:5376` 否则直连） |
 
 ### ~/.config/zsh/
 
@@ -58,7 +58,7 @@
 
 | 源文件 | 目标路径 | 说明 |
 | --- | --- | --- |
-| `private_dot_config/nvim/**` | `~/.config/nvim/**` | LazyVim 配置（`init.lua` + `lua/config/*` + `lua/plugins/*`，含 `lazy-lock.json` 锁定 44 个插件、`lazyvim.json`（extras 清单当前为空，extras 实际由 `lua/config/lazy.lua` import 引入）、`stylua.toml`） |
+| `private_dot_config/nvim/**` | `~/.config/nvim/**` | LazyVim 配置（`init.lua` + `lua/config/*` + `lua/plugins/*`，含 `lazy-lock.json` 锁定 43 个插件、`lazyvim.json`（extras 清单当前为空，extras 实际由 `lua/config/lazy.lua` import 引入）、`stylua.toml`） |
 | `private_dot_config/nvim/README.md` | —（不部署） | LazyVim 上游模板自带；由 `**/README.md` 排除，仅仓库内查阅（历史排除模式误写为 `**/REAMDME.md` 未生效，已修复） |
 | `private_dot_config/nvim/LICENSE` | —（不部署） | 上游 LazyVim starter 原件（Apache-2.0，与根 LICENSE 同哈希）；由 `**/LICENSE` 排除 |
 | `private_dot_config/nvim/dot_gitignore` | `~/.config/nvim/.gitignore` | 忽略插件数据等运行时目录 |
@@ -72,13 +72,17 @@
 
 | 源文件 | 目标路径 | 说明 |
 | --- | --- | --- |
-| `private_dot_config/private_fish/config.fish` | `~/.config/fish/config.fish` (0644) | 最小交互配置（空壳；所在目录 `private_fish/` 本身为 0700） |
+| `private_dot_config/private_fish/config.fish` | `~/.config/fish/config.fish` (0644) | 交互配置：interactive 时 `starship init fish`（所在目录 `private_fish/` 本身为 0700） |
 | `.../private_completions/symlink_docker.fish` | `~/.config/fish/completions/docker.fish` | 符号链接 → OrbStack 内置补全 |
 | `.../private_completions/symlink_kubectl.fish` | `~/.config/fish/completions/kubectl.fish` | 同上 |
 | `.../private_completions/symlink_orbctl.fish` | `~/.config/fish/completions/orbctl.fish` | 同上 |
-| `.../private_conf.d/.keep`、`.../private_functions/.keep` | 对应 `.keep` | 占位保留空目录结构 |
+| `.../fish_plugins` | `~/.config/fish/fish_plugins` | Fisher 插件清单（15 个：fzf.fish、forgit、bass、done、autopair、sponge、puffer-fish 等） |
+| `.../private_conf.d/00_env.fish`、`.../private_conf.d/fzf.fish` | `~/.config/fish/conf.d/` | `00_env.fish`（LANG/LC_ALL、EDITOR/VISUAL、HOMEBREW_*、kubecolor 补全）+ `fzf.fish`（fzf 插件键位初始化） |
+| `.../private_functions/*`、`.../private_completions/*` | `~/.config/fish/functions/`、`~/.config/fish/completions/` | fzf.fish / fisher 插件函数与补全（`.keep` 占位与 `symlink_docker/kubectl/orbctl.fish` 三条 OrbStack 符号链接随源部署） |
+| `.../themes/.keep` | —（`.keep` 仅保留空目录，不部署） | 主题目录占位 |
+| `.../private_fish_variables` | —（已加入 `.chezmoiignore`，不部署） | fish Universal Variables 机器本地状态 |
 
-> Fish 在本环境中不是登录 shell，仅用于偶尔使用时获得 docker/kubectl/orbctl 补全；
+> Fish 在本环境中不是登录 shell，作为辅助交互 shell：Starship 提示符 + fzf.fish 键位 + fisher 管理的 15 插件，并保留 docker/kubectl/orbctl 补全；
 > Ghostty 显式指定 `command = /bin/zsh -l`；Alacritty 未设置 shell（跟随系统登录 shell）。
 
 ### pi coding agent（四件套 + workflows）
@@ -89,7 +93,7 @@
 | `private_dot_pi/private_agent/sandbox.json` | `~/.pi/agent/sandbox.json` (0644) | 文件系统与网络沙箱策略（`denyRead` 含 `/Users` `/etc` 等、`denyWrite` 含 `**/.env` `~/.ssh` 等、`allowNetwork: false`、`allowLocalBinding: false`、`allowedDomains: *.githubusercontent.com`/`*.github.com`/`github.com`） |
 | `private_dot_pi/private_agent/landstrip.json` | `~/.pi/agent/landstrip.json` (0644) | 子代理上限 `maxSubagents: 8`（`toolFilesystemPolicy: sandbox`，任务权限 `*`: ask、`review`: allow） |
 | `private_dot_pi/private_agent/extensions/pi-permission-system/config.json` | `~/.pi/agent/extensions/pi-permission-system/config.json` (0644) | 工具级权限矩阵（`read/write/edit/bash/path` 细粒度 allow/deny/ask，禁 `sudo`/`rm`/`mv` 等） |
-| `private_dot_pi/workflows/settings.json` | `~/.pi/workflows/settings.json` (0644) | workflow 运行时配置：默认并发 `defaultConcurrency: 8`、进度面板并发/展示上限 `progressPanelMaxAgents: 8`，与 `landstrip.json` 的 `maxSubagents: 8` 职责不同、相互独立 |
+| `private_dot_pi/workflows/settings.json` | `~/.pi/workflows/settings.json` (0644) | workflow 运行时配置：默认并发 `defaultConcurrency: 8`、进度面板并发/展示上限 `progressPanelMaxAgents: 10`，与 `landstrip.json` 的 `maxSubagents: 8` 职责不同、相互独立 |
 | `private_dot_pi/workflows/model-tiers.json` | `~/.pi/workflows/model-tiers.json` (0644) | 三档模型分层：small=`glm-4.7` / medium=`glm-5.3-flash` / big=`glm-5.3:max`（provider 均为 `cc-switch-zhipu-glm`），用于成本分级 |
 
 > 权限实测（stat）：`private_dot_pi`/`private_agent` 目录前缀使 `~/.pi`、`~/.pi/agent` 为 0700，其内文件（含 `extensions/**`）均为 0644；
@@ -109,6 +113,10 @@
 **/LICENSE
 docs/
 **/.DS_Store
+nvim.log
+
+# fish 机器本地状态（不跨机器部署）
+.config/fish/fish_variables
 
 # 敏感信息
 *token*
@@ -130,7 +138,7 @@ node_modules/
 `dot_gitconfig` → `~/.gitconfig` 恢复其本来的正常部署语义；`chezmoi managed`
 目标数由 59 降至 55（不再包含嵌套 README×2、`nvim/LICENSE`）。后续去重又删除了被更宽模式
 覆盖或已无对应文件的冗余行（根级 `README.md` / `LICENSE`、`docs/**`、`**/.git`、`*client_secret*`、
-两条 `**.md` 与已不存在的 `REPO-INSIGHT.md`），`managed` 目标数保持 55 不变。
+两条 `**.md` 与已不存在的 `REPO-INSIGHT.md`），`managed` 目标数保持 55 不变（其后 fish 配置扩容实测曾达 81；将 `.config/fish/fish_variables` 纳入 `.chezmoiignore` 后为 80）。
 
 ## 仓库特性说明
 

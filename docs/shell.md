@@ -37,9 +37,9 @@ zsh -l
 三个模块的内部契约（依赖、函数速查、破坏性命令警告）详见
 [`private_dot_config/zsh/README.md`](../private_dot_config/zsh/README.md)。
 
-> **环境变量说明**：`dot_zshrc:6` 顶部 `export LANG=en_US.UTF-8` 已**生效**，
-> 统一将 locale 固定为 `en_US.UTF-8`（与 Ghostty 中 `LANG=zh_CN.UTF-8` 互补：
-> 终端侧中文、shell 侧英文，避免远端/脚本 locale 回退）。`$EDITOR`/`$VISUAL` 等
+> **环境变量说明**：`dot_zshrc:7` 顶部 `export LANG=zh_CN.UTF-8` 生效
+> （第 6 行的 `en_US.UTF-8` 仅为注释备用），与 Ghostty 的 `LANG=zh_CN.UTF-8` 一致，
+> 统一中文 UTF-8 locale。`$EDITOR`/`$VISUAL` 等
 > 编辑器变量不在此导出，而由 `aliases.zsh` 统一导出（见下文）。
 
 ## Zim 模块清单（dot_zimrc）
@@ -184,10 +184,10 @@ Fish 不是登录 shell：Ghostty 通过 `command = /bin/zsh -l` 启动登录 zs
 
 | 路径（仓库） | 部署后 | 内容 |
 | --- | --- | --- |
-| `private_fish/config.fish` | `~/.config/fish/config.fish` | 仅含空的 `if status is-interactive ... end` 存根 |
-| `private_fish/private_completions/symlink_*.fish` | `~/.config/fish/completions/*.fish` | 三条符号链接指向 OrbStack 内置补全：`docker.fish`、`kubectl.fish`、`orbctl.fish`（`chezmoi symlink_` 条目，源路径 `/Applications/OrbStack.app/.../Resources/completions/fish/*.fish`），OrbStack 升级后补全自动跟随 |
-| `private_fish/private_conf.d/.keep` | `~/.config/fish/conf.d/` | 占位保留结构 |
-| `private_fish/private_functions/.keep` | `~/.config/fish/functions/` | 占位保留结构 |
+| `private_fish/config.fish` | `~/.config/fish/config.fish` | interactive 时 `starship init fish` |
+| `private_fish/private_completions/symlink_*.fish` | `~/.config/fish/completions/*.fish` | 三条符号链接指向 OrbStack 内置补全：`docker.fish`、`kubectl.fish`、`orbctl.fish`（`chezmoi symlink_` 条目，源路径 `/Applications/OrbStack.app/.../Resources/completions/fish/*.fish`），OrbStack 升级后补全自动跟随；另含 fisher / fzf.fish / forgit / sdk 等补全文件随源部署 |
+| `private_fish/private_conf.d/` | `~/.config/fish/conf.d/` | `00_env.fish`（LANG/LC_ALL、EDITOR/VISUAL、HOMEBREW_*、kubecolor 补全）+ `fzf.fish`（fzf 插件键位初始化） |
+| `private_fish/private_functions/` | `~/.config/fish/functions/` | fzf.fish / fisher 插件函数（`fzf_configure_bindings`、`_fzf_*`、`fisher` 等） |
 
-配置刻意保持最小。如需把 Fish 转正为主 shell，需要自行补齐与 zsh 栈等价的
-工具初始化（zoxide/mise/starship/fzf/brew shellenv 等）。
+Fish 侧已初始化 Starship 提示符与 fzf.fish 键位，并通过 `fish_plugins`（15 插件）管理工具集成；
+但仍非登录 shell，未接入 zoxide/mise/brew shellenv 等 zsh 栈初始化。

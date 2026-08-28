@@ -37,7 +37,7 @@ brew install fzf starship zoxide mise fd ripgrep
 ### 弱网环境：bootstrap 前先设代理（可选但推荐）
 
 本仓库引导链共有三次直连 GitHub 的网络动作：`chezmoi init` 拉取本仓库（方式 A）、
-首次启动 `zsh` 时 `zimfw` 下载全部 Zim 模块、首次运行 `nvim` 时 `lazy.nvim` 安装 44 个
+首次启动 `zsh` 时 `zimfw` 下载全部 Zim 模块、首次运行 `nvim` 时 `lazy.nvim` 安装 43 个
 插件。弱网/受限网络环境建议在执行下面任何 bootstrap 步骤**之前**先临时设置代理：
 
 ```bash
@@ -91,12 +91,12 @@ exec zsh   # 重启 shell 使全部配置生效（或重新打开终端）
 
 | 组件 | 行为 | 触发时机 |
 | --- | --- | --- |
-| `fish` / `pi` | `private_dot_config/private_fish/config.fish` 为空模板、`private_dot_pi/**`（pi agent 配置）直接生效，均随 `apply` 写入 `$HOME`；本文档只覆盖 `zsh` 栈，其余见 [layout.md](layout.md) | 首次启动 `fish` / `pi` 时 |
+| `fish` / `pi` | `private_dot_config/private_fish/config.fish`（interactive 时初始化 Starship，插件由 `fish_plugins` 清单管理）、`private_dot_pi/**`（pi agent 配置）直接生效，均随 `apply` 写入 `$HOME`；本文档只覆盖 `zsh` 栈，其余见 [layout.md](layout.md) | 首次启动 `fish` / `pi` 时 |
 | Zim 框架 | `~/.zshrc` 检测 `~/.zim/zimfw.zsh` 缺失时经 `curl` / `wget` 自动下载，随后 `zimfw init` 安装 `dot_zimrc` 中声明的全部模块（`environment` / `git` / `input` / `termtitle` / `utility` / `duration-info` / `git-info` / `prompt-pwd` / `asciiship` / `homebrew` / `site-functions` / `zsh-completions` / `completion` / `fast-syntax-highlighting` / `history-substring` / `autosuggestions` / `fzf-tab`） | 首次启动 `zsh` |
 | `PATH` / `brew` | `command -v brew` 守卫后的 `eval "$(brew shellenv)"` 注入 `/opt/homebrew/bin` 等；`export PATH` **前置** `~/bin:/opt/homebrew/bin:…` 及 `~/.local/bin` 等到 `$PATH` 最前；`~/.cargo/bin` 与 `${HOMEBREW_PREFIX:-/opt/homebrew}/opt/rustup/bin` 仅在目录存在且 PATH 尚未包含时前置（静态路径守卫、重复 source 幂等） | 每次启动 `zsh` |
 | `zoxide` / `mise` / `starship` / `fzf` | `zoxide` / `mise` / `starship` 逐项 `command -v` 守卫后 `eval` 初始化（未装静默跳过）；`fzf` 的键位绑定/补全只在 `fzf.zsh` 内带守卫地 `eval "$(fzf --zsh)"` **一次**（`~/.zshrc` 不再重复） | 每次启动 `zsh` |
 | `zsh` 三模块 | 按序 `source ~/.config/zsh/aliases.zsh` → `fzf.zsh`（含 `fzf` 前缀探测与 `~/.fzf_prefix_cache` 缓存）→ `sdk.zsh`（`pnpm` / `SDKMAN` **惰性加载** / `Go` / `Rust` / `Docker` / `kubectl`，补全走 `~/.cache/zsh/` 缓存 + `zcompile`，均有守卫） | 每次启动 `zsh` |
-| Neovim | 首次运行 `nvim` 时 `lazy.nvim` 自动 `bootstrap` 并按 `lazy-lock.json` 安装 44 个插件（需网络） | 首次运行 `nvim` |
+| Neovim | 首次运行 `nvim` 时 `lazy.nvim` 自动 `bootstrap` 并按 `lazy-lock.json` 安装 43 个插件（需网络） | 首次运行 `nvim` |
 | `mise` 工具链 | `mise activate` 已挂接；按需执行 `mise install` 安装 `~/.config/mise/config.toml` 声明的 `bun` / `deno` / `go` / `node` / `pnpm`（均为 `latest`） | 手动执行 |
 
 > `~/.zshrc` 中 `sdk.zsh` 为无条件 `source`（注释与代码已一致，如需禁用需注释 source 行）；
@@ -120,7 +120,6 @@ exec zsh   # 重启 shell 使全部配置生效（或重新打开终端）
 | `ripgrep` (`rg`) | `frg` 内容搜索、`fd` 缺失时的回退 | `brew install ripgrep` |
 
 > `fd` 未安装时 `fzf.zsh` 自动回退到 `rg --files`；`fzf` 本身缺失时按键绑定与 `f*` 函数均不可用，但不阻断 shell 启动（有 `command -v` 守卫）。
-> 若另行通过 Homebrew 安装了 `fzf-tab`，`fzf.zsh` 会额外 `source` Homebrew 版 `/opt/homebrew/opt/fzf-tab/share/fzf-tab/fzf-tab.zsh`（后加载者生效）。
 
 ### 体验增强（别名 / 函数指向的目标，未安装时对应别名退化）
 
@@ -130,6 +129,7 @@ brew install bat lsd htop fastfetch neovim tmux yazi gh lazygit tldr coreutils \
 ```
 
 - `coreutils` 提供 `nproc`（`makes` / `xargsp` 半核并行依赖它）
+- Fish 侧：`brew install fish fisher`——`~/.config/fish/` 的 15 个插件由 `fish_plugins` 清单管理（`fisher update` 安装/更新）；提示符复用 `starship`、fzf 键位复用 `fzf.fish`（均已在上方依赖中）
 - `bat` / `lsd` / `htop` 分别接管 `cat` / `ls` / `top`；脚本中需要原生行为时用 `command cat` 等
 - `gh` 配合 `~/.ssh/config` 的 `Host github.com → ssh.github.com:443` 与 `dot_gitconfig` 的 `socks5://127.0.0.1:5376` 代理共同保证 GitHub 可达。代理已统一为 `5376`，不再区分 `7890`（详见 [dev-tools.md](dev-tools.md) 中的代理配置说明）。
 
