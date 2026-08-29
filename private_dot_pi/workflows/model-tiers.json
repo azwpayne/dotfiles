@@ -1,7 +1,7 @@
 {
   "tiers": {
-    "small" : "cc-switch-zhipu-glm/glm-4.7",
-    "medium": "cc-switch-zhipu-glm/glm-5.3-flash",
-    "big"   : "cc-switch-zhipu-glm/glm-5.3:max"
+    "small": "cc-switch-open-code-zen/ling-3.0-flash-fin-free",
+    "medium": "cc-switch-open-code-zen/ling-3.0-flash-fin-free",
+    "big": "cc-switch-open-code-zen/nemotron-3-ultra-free"
   }
 }

@@ -10,7 +10,7 @@
 | `dot_` | 目标名以 `.` 开头（隐藏目录/文件） | `dot_zshrc` → `~/.zshrc` |
 | `private_` | 目标仅所有者可访问：文件 0600、目录 0700 | `private_dot_ssh/private_config` → `~/.ssh/config` (0600) |
 | `symlink_` | 目标是符号链接，**文件内容即链接指向的路径** | `symlink_docker.fish` 内容为一行 OrbStack 路径 |
-| `empty_` | 目标为空文件（占位保证目录存在） | `private_empty_config.toml` → `~/.codex/config.toml` |
+| `empty_` | 目标为空文件（占位保证目录存在） | 无实际 `empty_` 前缀文件于本仓库；`private_empty_` 系列仅作占位说明 |
 | （无前缀） | 原样同名复制 | `starship.toml` → `~/.config/starship.toml` |
 
 前缀可叠加，如 `private_dot_config` = 隐藏目录 + 该目录本身权限 0700，`private_dot_ssh` 同理。
@@ -64,7 +64,7 @@
 | `private_dot_config/nvim/dot_gitignore` | `~/.config/nvim/.gitignore` | 忽略插件数据等运行时目录 |
 | `private_dot_config/nvim/dot_neoconf.json` | `~/.config/nvim/.neoconf.json` | neoconf 本地配置 |
 | `private_dot_config/mise/config.toml` | `~/.config/mise/config.toml` | bun/deno/go/node/pnpm = latest |
-| `dot_codex/private_empty_config.toml` | `~/.codex/config.toml` (0600) | 空占位文件，保证 `~/.codex/` 目录存在 |
+| `dot_codex/private_config.toml` | `~/.codex/config.toml` (0600) | cc-switch 本地代理配置文件（`base_url: http://127.0.0.1:15721/v1`），`private_` 前缀对应 `0600` 权限，确保 `~/.codex/` 目录存在且权限正确。不再作为空占位文件。
 
 > `~/.config/gh/config.yml` 与 `hosts.yml` 由 `gh auth login` 在目标机生成，含凭据，**不入库**（见下文“不在仓库内的重要文件”）。
 
@@ -89,12 +89,12 @@
 
 | 源文件 | 目标路径 | 说明 |
 | --- | --- | --- |
-| `private_dot_pi/private_agent/settings.json` | `~/.pi/agent/settings.json` (0644) | 完整字段：`theme: dark`、`lastChangelogVersion: 0.84.3`、`hideThinkingBlock: true`、`defaultProvider: cc-switch-zhipu-glm`、`defaultTools`（7 项：`read`/`write`/`edit`/`bash`/`grep`/`find`/`ls`）、`defaultModel: glm-5.3-flash`、`defaultThinkingLevel: max`、`httpProxy: http://127.0.0.1:5376`、10 个 npm 包（`pi-web-access`/`pi-subagents`/`@quintinshaw/pi-dynamic-workflows`/`@narumitw/pi-btw`/`@narumitw/pi-goal`/`pi-landstrip`/`@gotgenes/pi-permission-system`/`@juicesharp/rpiv-todo`/`@asermax/pi-cc-plugins`/`pi-lens`） |
-| `private_dot_pi/private_agent/sandbox.json` | `~/.pi/agent/sandbox.json` (0644) | 文件系统与网络沙箱策略（`denyRead` 含 `/Users` `/etc` 等、`denyWrite` 含 `**/.env` `~/.ssh` 等、`allowNetwork: false`、`allowLocalBinding: false`、`allowedDomains: *.githubusercontent.com`/`*.github.com`/`github.com`） |
-| `private_dot_pi/private_agent/landstrip.json` | `~/.pi/agent/landstrip.json` (0644) | 子代理上限 `maxSubagents: 8`（`toolFilesystemPolicy: sandbox`，任务权限 `*`: ask、`review`: allow） |
-| `private_dot_pi/private_agent/extensions/pi-permission-system/config.json` | `~/.pi/agent/extensions/pi-permission-system/config.json` (0644) | 工具级权限矩阵（`read/write/edit/bash/path` 细粒度 allow/deny/ask，禁 `sudo`/`rm`/`mv` 等） |
-| `private_dot_pi/workflows/settings.json` | `~/.pi/workflows/settings.json` (0644) | workflow 运行时配置：默认并发 `defaultConcurrency: 8`、进度面板并发/展示上限 `progressPanelMaxAgents: 10`，与 `landstrip.json` 的 `maxSubagents: 8` 职责不同、相互独立 |
-| `private_dot_pi/workflows/model-tiers.json` | `~/.pi/workflows/model-tiers.json` (0644) | 三档模型分层：small=`glm-4.7` / medium=`glm-5.3-flash` / big=`glm-5.3:max`（provider 均为 `cc-switch-zhipu-glm`），用于成本分级 |
+| `private_dot_pi/private_agent/settings.json` | `~/.pi/agent/settings.json` (0644) | pi coding agent 主题、扩展包、默认 provider/tools/model、代理配置 |
+| `private_dot_pi/private_agent/sandbox.json` | `~/.pi/agent/sandbox.json` (0644) | 文件系统与网络沙箱策略（读写 deny 规则、网络策略） |
+| `private_dot_pi/private_agent/landstrip.json` | `~/.pi/agent/landstrip.json` (0644) | 子代理与任务权限配置 |
+| `private_dot_pi/private_agent/extensions/pi-permission-system/config.json` | `~/.pi/agent/extensions/pi-permission-system/config.json` (0644) | 工具级权限矩阵（允许优先：默认 allow，敏感路径/高危命令 deny） |
+| `private_dot_pi/workflows/settings.json` | `~/.pi/workflows/settings.json` (0644) | workflow 运行时配置（并发、进度面板） |
+| `private_dot_pi/workflows/model-tiers.json` | `~/.pi/workflows/model-tiers.json` (0644) | 三档模型分层（成本分级） |
 
 > 权限实测（stat）：`private_dot_pi`/`private_agent` 目录前缀使 `~/.pi`、`~/.pi/agent` 为 0700，其内文件（含 `extensions/**`）均为 0644；
 > `workflows/` 目录无 `private_` 前缀，`~/.pi/workflows` 为 0755。
@@ -138,7 +138,7 @@ node_modules/
 `dot_gitconfig` → `~/.gitconfig` 恢复其本来的正常部署语义；`chezmoi managed`
 目标数由 59 降至 55（不再包含嵌套 README×2、`nvim/LICENSE`）。后续去重又删除了被更宽模式
 覆盖或已无对应文件的冗余行（根级 `README.md` / `LICENSE`、`docs/**`、`**/.git`、`*client_secret*`、
-两条 `**.md` 与已不存在的 `REPO-INSIGHT.md`），`managed` 目标数保持 55 不变（其后 fish 配置扩容实测曾达 81；将 `.config/fish/fish_variables` 纳入 `.chezmoiignore` 后为 80）。
+两条 `**.md` 与已不存在的 `REPO-INSIGHT.md`），`managed` 目标数保持 55 不变（核心 targets 不变），其后 fish 配置扩容实测曾达 81（纳入 `.config/fish/fish_variables` 后为 82，详见布局映射）；随后添加 `.config/fish/fish_variables` 至 `.chezmoiignore` 进一步排除，当前鱼相关 managed 计入后总计 82。
 
 ## 仓库特性说明
 
