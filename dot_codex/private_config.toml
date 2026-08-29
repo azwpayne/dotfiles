@@ -1,0 +1,8 @@
+model_provider = "cc-switch-official"
+
+[model_providers.cc-switch-official]
+name = "OpenAI"
+requires_openai_auth = true
+supports_websockets = false
+wire_api = "responses"
+base_url = "http://127.0.0.1:15721/v1"
