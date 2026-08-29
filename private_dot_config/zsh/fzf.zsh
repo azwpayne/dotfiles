@@ -79,8 +79,8 @@ export FZF_DEFAULT_OPTS="
   --ansi                                                      # 支持颜色编码
   --preview-window=right:50%:wrap                             # 预览窗口默认右侧,50%宽度，自动换行
   --bind='ctrl-/:change-preview-window(down|hidden|)'         # Ctrl+/ 切换预览位置/隐藏
-  --bind='ctrl-o:execute($EDITOR {} &> /dev/tty)'             # Ctrl+O 用编辑器打开（$EDITOR 由 aliases.zsh 导出）
-  --bind='ctrl-e:execute(code {} &> /dev/tty)'                # Ctrl+E 用 VS Code 打开
+  --bind='ctrl-g:execute($EDITOR {} &> /dev/tty)'             # Ctrl+G 用编辑器打开（$EDITOR 由 aliases.zsh 导出）
+  # --bind='ctrl-e:execute(code {} &> /dev/tty)'                # Ctrl+E 用 VS Code 打开
   --bind='ctrl-y:execute-silent(echo {} | pbcopy)+abort'      # Ctrl+Y 复制路径
   --bind='ctrl-p:toggle-preview'                              # Ctrl+P 切换预览
   --bind='ctrl-a:select-all'                                  # Ctrl+A 全选
