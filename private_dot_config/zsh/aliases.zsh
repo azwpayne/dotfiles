@@ -119,7 +119,8 @@ alias nvi='nvim'
 # =============================================================================
 # AI 助手 (Agent-Native)
 # =============================================================================
-alias cla='claude --dangerously-skip-permissions'
+alias cla='claude'
+alias cla-unsafe='claude --dangerously-skip-permissions'
 alias clp='opencode'
 alias clp_cfg='code ${HOME}/.config/opencode'
 alias cla_cfg='code ${HOME}/.claude'
