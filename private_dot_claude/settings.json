@@ -1,0 +1,41 @@
+{
+  "attribution": {"commit": "", "pr": "", "sessionUrl": false},
+  "enabledPlugins": {
+    "claude-hud@claude-hud"           : true,
+    "context7@claude-plugins-official": true,
+    "oh-my-claudecode@omc"            : true
+  },
+  "extraKnownMarketplaces": {
+    "claude-hud": { "source": {"repo": "jarrodwatts/claude-hud", "source": "github"} }
+  },
+  "env": {
+    "ANTHROPIC_AUTH_TOKEN"                : "PROXY_MANAGED",
+    "ANTHROPIC_BASE_URL"                  : "http://127.0.0.1:15721",
+    "ANTHROPIC_DEFAULT_FABLE_MODEL"       : "claude-fable-5[1M]",
+    "ANTHROPIC_DEFAULT_FABLE_MODEL_NAME"  : "fable",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL"       : "claude-haiku-4-5",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME"  : "haiku",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL"        : "claude-opus-4-8[1M]",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL_NAME"   : "opus",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL"      : "claude-sonnet-4-6",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL_NAME" : "sonnet",
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE"     : "50",
+    "CLAUDE_CODE_AUTO_COMPACT_WINDOW"     : "1000000",
+    "CLAUDE_CODE_EFFORT_LEVEL"            : "xhigh",
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
+    "CLAUDE_CODE_SUBAGENT_MODEL"          : "glm-5.3-flash[1M]",
+    "ENABLE_TOOL_SEARCH"                  : "true"
+  },
+  "includeCoAuthoredBy": false,
+  "permissions": {"defaultMode": "auto"},
+  "preferredNotifChannel": "auto",
+  "sandbox": {"enabled": true, "sandbox.allowUnsandboxedCommands": false, "sandbox.failIfUnavailable": false},
+  "statusLine": {
+    "command": "bash -c 'cols=${COLUMNS:-}; case \"$cols\" in \"\"|*[!0-9]*) cols=$(stty size 2>/dev/null </dev/tty | awk '\"'\"'{print $2}'\"'\"');; esac; case \"$cols\" in \"\"|*[!0-9]*) cols=120;; esac; export COLUMNS=$(( cols > 4 ? cols - 4 : 1 )); plugin_dir=$(ls -d \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}\"/plugins/cache/*/claude-hud/*/ 2>/dev/null | awk -F/ '\"'\"'{ print $(NF-1) \"\\t\" $(0) }'\"'\"' | grep -E '\"'\"'^[0-9]+\\.[0-9]+\\.[0-9]+[[:space:]]'\"'\"' | sort -t. -k1,1n -k2,2n -k3,3n -k4,4n | tail -1 | cut -f2-); exec \"/Users/payne/.local/share/mise/installs/bun/latest/bin/bun\" --env-file /dev/null \"${plugin_dir}src/index.ts\"'",
+    "hideVimModeIndicator": false,
+    "padding": 2,
+    "refreshInterval": 5,
+    "type": "command"
+  },
+  "teammateMode": "auto"
+}
