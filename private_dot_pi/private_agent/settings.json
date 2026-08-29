@@ -1,6 +1,6 @@
 {
   "theme"               : "dark",
-  "lastChangelogVersion": "0.84.3",
+  "lastChangelogVersion": "latest",
   "hideThinkingBlock"   : true,
   "packages"            : [
     "npm:@gotgenes/pi-permission-system",
