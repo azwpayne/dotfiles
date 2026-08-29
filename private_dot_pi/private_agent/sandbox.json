@@ -1,22 +1,32 @@
 {
-  "enabled"   : true,
-  "shell"     : {"readAccess": "host"},
+  "enabled": true,
+  "shell": {"readAccess": "host"},
   "filesystem": {
-    "allowRead" : ["**", "${HOME}/.pi/agent/npm/node_modules/**"],
-    "denyRead"  : ["/Users", "/home", "/root", "/etc", "/var", "/tmp", "/private/var", "/private/tmp"],
+    "denyRead": ["/Users", "/home", "/root", "/etc", "/var", "/private/var", "/private/tmp"],
+    "allowRead": [".", "~/.gitconfig", "~/.config/git/config", "/dev/null", "${HOME}/.pi/agent/npm/node_modules/**"],
     "allowWrite": [".", "/dev/null", "/tmp", "~/.npm", "~/.cargo/registry", "~/.cache", "~/.config/git/config"],
-    "denyWrite" : [
-      "**/.env",          "**/*.pem",         "**/.env.*",        "~/.ssh",           "**/*.key",
-      ".pi/sandbox.json", "~/.bashrc",        "~/.zshrc",         "~/.profile",       "~/.gitconfig"
+    "denyWrite": [
+      "**/.env",
+      "**/.env.*",
+      "**/*.pem",
+      "**/*.key",
+      ".pi/sandbox.json",
+      "~/.pi/agent/sandbox.json",
+      "~/.ssh",
+      "~/.bashrc",
+      "~/.zshrc",
+      "~/.profile",
+      "~/.gitconfig",
+      "**/.git"
     ]
   },
-  "network"   : {
-    "allowNetwork"       : false,
-    "allowLocalBinding"  : false,
+  "network": {
+    "allowNetwork": false,
+    "allowLocalBinding": false,
     "allowAllUnixSockets": false,
-    "allowUnixSockets"   : [],
-    "allowedDomains"     : ["*.githubusercontent.com", "*.github.com", "github.com"],
-    "deniedDomains"      : []
+    "allowUnixSockets": [],
+    "allowedDomains": ["github.com", "*.github.com", "*.githubusercontent.com"],
+    "deniedDomains": []
   },
-  "windows"   : {"appContainerMode": "standard", "allowLoopback": false}
+  "windows": {"appContainerMode": "standard", "allowLoopback": false}
 }

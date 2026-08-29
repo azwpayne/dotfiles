@@ -1,3 +1,8 @@
+# Git configuration for chezmoi-managed dotfiles
+# Proxy configuration for GitHub HTTPS traffic
+# All GitHub HTTPS traffic routes through SOCKS5 proxy at 127.0.0.1:5376
+# Proxy is required for online mode; remove these lines for direct connection when offline
+
 [core]
 	editor = 'code'
 	autocrlf = input
@@ -14,13 +19,15 @@
 [init]
 	defaultBranch = main
 
-# NOTE: GitHub HTTPS 仅有此代理 socks5://127.0.0.1:5376，代理离线时无直连回退；
-# 临时恢复直连：git config --global --unset http.https://github.com.proxy
 [http "https://github.com"]
+	proxy = socks5://127.0.0.1:5376
+
+[https "https://github.com"]
 	proxy = socks5://127.0.0.1:5376
 
 [push]
 	default = current
 	autoSetupRemote = true
+
 [safe]
 	directory = *
