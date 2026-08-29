@@ -85,7 +85,7 @@ mise upgrade             # 升级全部受管工具（被 aliases.zsh 的 update
 
 ## pi coding agent — `private_dot_pi/private_agent/`
 
-为 [pi](https://github.com/earendil-works/pi-coding-agent) 编码代理准备的受限运行环境（部署到 `~/.pi/agent/`）。
+为 [pi](https://github.com/earendil-works/pi) 编码代理准备的受限运行环境（部署到 `~/.pi/agent/`）。
 四个文件各司其职：由于 chezmoi 目标名均无 `private_` 前缀，文件应用后为默认权限 `0644`，
 仅父目录因 `private_dot_pi/private_agent` 命名为 `0700`。
 
