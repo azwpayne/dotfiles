@@ -1,6 +1,6 @@
 {
   "theme"               : "dark",
-  "lastChangelogVersion": "latest",
+  "lastChangelogVersion": "0.84.4",
   "hideThinkingBlock"   : true,
   "packages"            : [
     "npm:@gotgenes/pi-permission-system",
@@ -14,9 +14,9 @@
     { "source": "npm:pi-lens", "extensions": ["-dist/index.js"] },
     "npm:@quintinshaw/pi-dynamic-workflows"
   ],
-  "defaultProvider"     : "cc-switch-zhipu-glm",
+  "defaultProvider"     : "cc-switch-open-code-zen",
   "defaultTools"        : ["read", "write", "edit", "bash", "grep", "find", "ls"],
-  "defaultModel"        : "glm-5.3-flash",
+  "defaultModel"        : "nemotron-3.5-Lightning-free",
   "defaultThinkingLevel": "max",
   "httpProxy"           : "http://127.0.0.1:5376"
 }
