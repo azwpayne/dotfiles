@@ -1,9 +1,4 @@
 {
   "toolFilesystemPolicy": "sandbox",
-  "permission": {
-    "task": {
-      "*": "ask",
-      "review": "allow"
-    }
-  }
+  "permission"          : { "task": {"*": "ask", "review": "allow"} }
 }
