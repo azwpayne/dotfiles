@@ -134,12 +134,6 @@ command -v brew     >/dev/null 2>&1 && eval "$(brew shellenv)"
 
 # ---------------------------------------------------------------------------
 # 外部配置加载（Loading-order contract：aliases → fzf → sdk，顺序即语义）
-# - aliases 先于 fzf：fzf.zsh 的 Ctrl-G 绑定在 source 时展开 $EDITOR
-# - sdk 最后：依赖 compinit（Zim 已完成）且其 `k` 别名有意覆盖同名定义
 # - 守卫：PATH 插入均目录存在+去重；工具 init 均 command -v 守卫
 # ---------------------------------------------------------------------------
-for file in ~/.config/zsh/aliases.zsh ~/.config/zsh/fzf.zsh; do source "$file"; done
-
-# sdk.zsh：多语言 SDK 环境与补全（pnpm / SDKMAN 惰性加载 / Go / Rust / Docker / kubectl）
-# 无条件 source，文件内部逐项守卫、缺装静默跳过；如需禁用请注释掉此行
-source ~/.config/zsh/sdk.zsh
+for file in ~/.config/zsh/*.zsh; do source "$file"; done
