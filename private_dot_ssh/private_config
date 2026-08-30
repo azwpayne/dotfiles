@@ -4,8 +4,64 @@
 # Added by OrbStack: 'orb' SSH host for Linux machines
 # This only works if it's at the top of ssh_config (before any Host blocks).
 # This won't be added again if you remove it.
+
+
+# ssh -G dev              # 打印 dev 的最终生效配置（排错神器）
+# ssh -vvv dev            # 详细调试输出，看认证/密钥过程
+# ssh -T git@github.com   # 测试 Git SSH 连通性
+# ssh -O check dev        # 检查复用连接是否存在
+# ssh -O exit dev         # 关闭复用连接
+
 Include ~/.orbstack/ssh/config
 
+# server
+Host dev
+    HostName 192.168.1.100
+    User ubuntu
+    Port 2222
+    IdentityFile ~/.ssh/id_rsa_dev
+    IdentitiesOnly yes
+
+Host tst
+    HostName 192.168.1.101
+    User ubuntu
+    Port 2222
+    IdentityFile ~/.ssh/id_rsa_tst
+    IdentitiesOnly yes
+
+Host ops
+    HostName 192.168.1.101
+    User ubuntu
+    Port 2222
+    IdentityFile ~/.ssh/id_rsa_ops
+    IdentitiesOnly yes
+
+Host sec
+    HostName 192.168.1.101
+    User ubuntu
+    Port 2222
+    IdentityFile ~/.ssh/id_rsa_sec
+    IdentitiesOnly yes
+
+# jump server
+# 直接 ssh inner 即可穿透跳板机。ProxyJump 支持多级：ProxyJump bastion,inner1
+## 跳板机本身
+Host bastion
+    HostName jump.example.com
+    User jumpuser
+    IdentityFile ~/.ssh/id_bastion
+
+## 内网机器，通过 bastion 跳转
+Host inner
+    HostName 10.0.0.5
+    User root
+    IdentityFile ~/.ssh/id_inner
+    ProxyJump bastion
+
+# 多个git账号
+
+
+## private github
 Host github.com
     # ssh.github.com:443 — HTTPS port, traverses firewalls that block 22
     HostName ssh.github.com
@@ -14,3 +70,23 @@ Host github.com
     # Adaptive SOCKS5 proxy (127.0.0.1:5376): if the local proxy is listening, tunnel via SOCKS5;
     # otherwise fall back to a direct connection.
     ProxyCommand bash -c 'if nc -z 127.0.0.1 5376; then nc -X 5 -x 127.0.0.1:5376 %h %p; else nc %h %p; fi'
+
+
+## github work
+Host github-work.com
+    HostName github.com
+    User git
+    # IdentityFile ~/.ssh/id_ed25519_work
+    IdentitiesOnly yes
+
+
+# 对所有主机生效的默认配置（必须放最后）
+Host *
+    ServerAliveInterval 60
+    ServerAliveCountMax 3
+    StrictHostKeyChecking accept-new
+    ControlMaster auto
+    # 使用ControlPath 前需建目录：mkdir -p ~/.ssh/sockets
+    ControlPath ~/.ssh/sockets/%r@%h-%p
+    ControlPersist 600
+
