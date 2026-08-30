@@ -1,13 +1,27 @@
+# =============================================================================
+# ~/.zshrc (chezmoi: dot_zshrc) —— 交互式 shell 主入口
+# =============================================================================
+# Description : Zim 框架安装块 + 个人环境初始化。结构：
+#   ① PATH 收敛（~/bin、Homebrew、~/.local/bin 前置；~/.cargo & rustup 仅当
+#      目录存在且 PATH 尚未包含时前置，重复 source 幂等）
+#   ② 惰性初始化（zoxide/mise/starship 逐项 command -v 守卫；fzf 键位/补全
+#      由 fzf.zsh 内带守卫地 eval 一次，唯一初始化点，避免双重加载）
+#   ③ 外部配置 source（aliases → fzf → sdk，顺序即语义）
+# Guards     : 所有工具初始化均 command -v 守卫，未装静默跳过；PATH 追加均带
+#              目录存在性 + 去重双守卫
+# Loading-order contract: compinit(Zim) -> aliases.zsh -> fzf.zsh -> sdk.zsh
+#   aliases 先于 fzf（后者 Ctrl-G 绑定在 source 时展开 $EDITOR）；
+#   sdk 最后（compdef 依赖 compinit，且其 k 别名有意覆盖同名定义）。
+# Author     : Payne
+# =============================================================================
+
 # Start configuration added by Zim Framework install {{{
 #
 # User configuration sourced by interactive shells
 #
 
-# export LANG=en_US.UTF-8
+# export LANG=en_US.UTF-8          # 注释备用项（默认已切 zh_CN.UTF-8，见下）
 export LANG=zh_CN.UTF-8
-
-# Preferred editor for local and remote sessions
-# [[ -n $SSH_CONNECTION ]] && export EDITOR='vi' || export EDITOR='nvim'
 
 
 # -----------------
@@ -114,14 +128,18 @@ command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
 # `command -v fzf && eval "$(fzf --zsh)"` 初始化（唯一初始化点，避免双重加载）
 command -v brew     >/dev/null 2>&1 && eval "$(brew shellenv)"
 # rustup 工具链 PATH：静态路径替代 `brew --prefix rustup` 子进程调用（省一次启动子进程，
-# 且 rustup 卸载后不再报错）；目录守卫避免注入死路径（~/.cargo/bin 不存在时跳过），
-# 去重守卫避免重复 source 时 PATH 重复累积
+# 且 rustup 卸载后不再报错）；目录守卫避免注入死路径，去重守卫避免重复 source 时累积
 [[ -d "$HOME/.cargo/bin" && "$PATH" != *"$HOME/.cargo/bin"* ]] && export PATH="$HOME/.cargo/bin:$PATH"
 [[ -d "${HOMEBREW_PREFIX:-/opt/homebrew}/opt/rustup/bin" && "$PATH" != *"${HOMEBREW_PREFIX:-/opt/homebrew}/opt/rustup/bin"* ]] && export PATH="${HOMEBREW_PREFIX:-/opt/homebrew}/opt/rustup/bin:$PATH"
 
-# Source external configs（先 aliases 后 fzf：fzf.zsh 的 Ctrl-O 绑定依赖 aliases.zsh 导出的 $EDITOR）
+# ---------------------------------------------------------------------------
+# 外部配置加载（Loading-order contract：aliases → fzf → sdk，顺序即语义）
+# - aliases 先于 fzf：fzf.zsh 的 Ctrl-G 绑定在 source 时展开 $EDITOR
+# - sdk 最后：依赖 compinit（Zim 已完成）且其 `k` 别名有意覆盖同名定义
+# - 守卫：PATH 插入均目录存在+去重；工具 init 均 command -v 守卫
+# ---------------------------------------------------------------------------
 for file in ~/.config/zsh/aliases.zsh ~/.config/zsh/fzf.zsh; do source "$file"; done
 
-# sdk.zsh：多语言 SDK 环境与补全（pnpm / SDKMAN 惰性加载 / Go / Rust / Docker / kubectl），
-# 无条件加载，文件内部逐项守卫、缺装静默跳过；如需禁用请注释掉下面 source 行。
+# sdk.zsh：多语言 SDK 环境与补全（pnpm / SDKMAN 惰性加载 / Go / Rust / Docker / kubectl）
+# 无条件 source，文件内部逐项守卫、缺装静默跳过；如需禁用请注释掉此行
 source ~/.config/zsh/sdk.zsh

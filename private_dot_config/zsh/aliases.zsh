@@ -5,6 +5,9 @@
 #               Kubernetes、编辑器、AI 助手、开发构建等）
 # Usage       : 由 ~/.zshrc source 加载；加载顺序必须为
 #               aliases.zsh -> fzf.zsh -> sdk.zsh（后加载者覆盖同名定义）
+#               aliases 必须最先：其导出的 $EDITOR 在 fzf.zsh 的 Ctrl-G 绑定
+#               中于 source 时展开；sdk.zsh 的 `k` 会覆盖同名定义故最后加载
+# Guards      : 本文件无外部命令强依赖；update-all 内逐项 command -v 守卫
 # Depends     : lsd/bat/htop/fastfetch/yazi/nvim 等，完整清单见 README.md
 # Last Updated: 2026-08-27（auto_update 改为委托 update-all，修复对已删除的
 #               uv_update 等五个 *_update 辅助函数的调用）
@@ -25,15 +28,11 @@ alias zshsource='source ~/.zshrc'                # 重新加载配置
 # 包管理器更新
 # =============================================================================
 
-# 一键全量更新（每步按工具是否可用守卫，缺哪个跳哪个）
-# 注：实际更新逻辑统一委托给本文件下方的 update-all。原先此处直接调用的
-# uv_update / sdk_update / rust_update / tldr_update / brew_update 五个辅助
-# 函数已在 0af1f61 中删除，继续调用只会报 command not found 并误报成功。
+# 一键全量更新（薄包装：可选 onproxy 后委托 update-all，无参即全量）
+# 守卫：onproxy 仅在函数存在时调用；实际更新由 update-all 逐项 command -v 守卫
 auto_update() {
     echo "🚀 开始更新 ..."
-    # 若定义了 onproxy 函数则先切换代理（可选依赖）
     (( $+functions[onproxy] )) && onproxy
-
     update-all
 }
 
@@ -105,10 +104,12 @@ alias kctxs='kubectl config get-contexts'
 
 
 # =============================================================================
-# 编辑器 (Neovim)
+# 编辑器 (Neovim) —— EDITOR 契约
 # =============================================================================
-export EDITOR='nvim'                             # $EDITOR：git/crontab/fzf 等程序读取（必须是环境变量而非 alias）
-export VISUAL='nvim'                             # $VISUAL：部分 GUI 程序优先读取
+# 必须为环境变量（非 alias），供 git/crontab/fzf 的 Ctrl-G 绑定等子进程读取；
+# fzf.zsh 的 ctrl-g:execute($EDITOR ...) 在 source 时展开，故本文件必须先于 fzf.zsh 加载
+export EDITOR='nvim'
+export VISUAL='nvim'
 
 alias v='nvim'
 alias vi='nvim'
@@ -150,12 +151,6 @@ alias pip_tsinghua_mirror='python3 -m pip install -i https://mirrors.tuna.tsingh
 alias uv_resync='rm -rf ${HOME}/.venv ${HOME}/uv.lock && uv sync'
 
 # =============================================================================
-# WezTerm 工作区（已移除）
-# =============================================================================
-# wezterm 未安装，原六个 *Space 工作区别名已删除；
-# 需要时从 git 历史找回。
-
-# =============================================================================
 # Android 逆向工程
 # =============================================================================
 jdx() { nohup jadx-gui "$@" > /dev/null 2>&1 & } # 后台启动 jadx-gui 反编译工具
@@ -176,6 +171,16 @@ function y() {
 	rm -f -- "$tmp"
 }
 
+# ---------------------------------------------------------------------------
+# update-all —— 声明式批量更新（6 目标：brew/sdk/rustup/tldr/uv/mise）
+# 用法：update-all [targets...]  # 无参全量；有参按名过滤
+# 守卫与非直观逻辑：
+#   - tasks 为关联数组，声明式列出命令模板；targets 过滤时校验 Unknown target
+#   - command -v $name 逐项守卫，未安装跳过（黄字 ⚠️）不计入 attempted
+#   - 每目标 stderr 重定向到 mktemp 临时文件（模板需 XXXXXX 才适配 macOS mktemp）；
+#     2>! 强制覆盖：Zim 设 NO_CLOBBER，普通 2> 会对 mktemp 已创建文件报 file exists
+#   - 成功时透传 stderr 警告；失败时取末 5 行作摘要，累计 failed/attempted 计时
+# ---------------------------------------------------------------------------
 function update-all() {
     local -A tasks=(
         brew  "brew update -f && brew upgrade -f --greedy-latest -y && brew cu -y -a && brew cleanup --prune=all"
@@ -210,15 +215,10 @@ function update-all() {
 
         if command -v $name >/dev/null 2>&1; then
             (( attempted++ ))
-            # stderr 重定向到临时文件供失败时提取错误摘要（stdout 正常实时输出）；
-            # 模板结尾 XXXXXX 才能在 macOS/BSD mktemp 下被替换成随机串；
-            # 2>! 强制覆盖——Zim environment 模块 setopt NO_CLOBBER，普通 2> 会对
-            # mktemp 已创建的文件报 "file exists" 而误判目标失败
             local errfile="$(mktemp "${TMPDIR:-/tmp}/update-all.${name}.XXXXXX")"
             local rc=0
             eval "${tasks[$name]}" 2>! "$errfile" || rc=$?
             if (( rc == 0 )); then
-                # 成功路径保持绿色 ✓；stderr 中残留的非空内容（如警告）不丢弃
                 [[ -s "$errfile" ]] && command cat "$errfile" >&2
                 print -P "%F{green}✓ $name done%f"
             else
@@ -253,7 +253,6 @@ function update-all() {
     if (( failed == 0 )); then
         print -P "%B%F{green}✨ All ${attempted} target(s) updated in ${mins}m${secs}s%f%b"
     else
-        # 失败即红：N/M 汇总 + 失败目标清单，并返回非零退出码
         print -P "%B%F{red}✗ ${failed}/${attempted} target(s) failed in ${mins}m${secs}s: ${(j:, :)failed_names}%f%b"
         return 1
     fi

@@ -1,9 +1,11 @@
 # =============================================================================
 # fzf.zsh —— fzf / fzf-tab 配置与交互式函数
 # =============================================================================
-# Description : fzf 路径探测与缓存、全局默认选项、Ctrl-R/Ctrl-T/Alt-C 定制、
-#               以及 frg/fkill/ftm/fl* 等交互式函数
-# Usage       : 由 ~/.zshrc source 加载；必须在 aliases.zsh 之后（依赖其导出的 $EDITOR）
+# Description : fzf 路径探测与缓存、全局默认选项（含 Ctrl-G 编辑器打开等键位）、
+#               Ctrl-R/Ctrl-T/Alt-C 定制，以及 frg/fkill/ftm/fl* 等交互式函数
+# Usage       : 由 ~/.zshrc source 加载；必须在 aliases.zsh 之后（依赖其导出的
+#               $EDITOR——Ctrl-G 绑定在 source 时展开）、在 sdk.zsh 之前
+# Guards      : 前缀探测带缓存与自愈；fzf 初始化与补全均 command -v 守卫
 # Depends     : 必需 fzf、fzf-tab；主力 fd（缺失时回退 rg）；预览用 bat/lsd
 # Last Updated: 2026-08-27（exclude_list 中 .pyc 修正为 \*.pyc：原写法只匹配字面上
 #               名为 .pyc 的文件，字节码 foo.pyc 并未被排除）
@@ -12,12 +14,16 @@
 
 # -----------------------------------------------------------------------------
 # 1. fzf 可执行文件前缀探测（带磁盘缓存，避免每次启动重复探测）
+# 逻辑：优先读 ~/.fzf_prefix_cache；仅当缓存指向的 $prefix/bin/fzf 仍可执行时
+#       才信任，否则删缓存重新探测（自愈，换机/重装无需手工清理）。探测顺序
+#       固定为 Homebrew ARM → Intel → ~/.fzf → /usr，命中后写缓存供下次复用。
+#       PATH 插入同样带去重守卫，重复 source 幂等。
 # -----------------------------------------------------------------------------
 FZF_PREFIX_CACHE="${ZDOTDIR:-${HOME}}/.fzf_prefix_cache"
 
 if [[ -f "$FZF_PREFIX_CACHE" ]]; then
     FZF_PREFIX=$(cat "$FZF_PREFIX_CACHE")
-    # 仅当缓存指向的前缀仍可用时才信任它，否则删掉缓存走重新探测（自愈）
+    # 自愈：缓存失效（fzf 已卸载/移动）则丢弃，触发重新探测
     if [[ ! -x "$FZF_PREFIX/bin/fzf" ]]; then
         rm -f "$FZF_PREFIX_CACHE"
         unset FZF_PREFIX
@@ -32,19 +38,17 @@ if [[ -z "${FZF_PREFIX:-}" ]]; then
     elif [[ -d "$HOME/.fzf/bin" ]]; then
         FZF_PREFIX="$HOME/.fzf"                 # 手动安装路径（git 安装方式）
     elif [[ -x "/usr/bin/fzf" ]]; then
-        FZF_PREFIX="/usr"                       # Linux 发行版仓库安装（注意是可执行文件，用 -x 测试）
+        FZF_PREFIX="/usr"                       # Linux 发行版仓库安装（可执行文件，用 -x 测试）
     fi
-    # 探测成功则写缓存，供后续启动复用
-    if [[ -n "${FZF_PREFIX:-}" ]]; then
-        echo "$FZF_PREFIX" > "$FZF_PREFIX_CACHE"
-    fi
+    [[ -n "${FZF_PREFIX:-}" ]] && echo "$FZF_PREFIX" > "$FZF_PREFIX_CACHE"
 fi
 
+# 仅当探测成功且 PATH 尚未包含时追加，避免死路径与重复累积
 if [[ -n "${FZF_PREFIX:-}" && ! "$PATH" == *"$FZF_PREFIX/bin"* ]]; then
     export PATH="${PATH:+$PATH:}$FZF_PREFIX/bin"
 fi
 
-# 加载 fzf 的按键绑定与补全脚本（fzf 不存在时静默跳过，避免启动报错）
+# 唯一初始化点：fzf 键位/补全（带守卫；dot_zshrc 不再重复 eval，避免双重加载）
 command -v fzf >/dev/null 2>&1 && eval "$(fzf --zsh)"
 
 # -----------------------------------------------------------------------------
@@ -79,8 +83,8 @@ export FZF_DEFAULT_OPTS="
   --ansi                                                      # 支持颜色编码
   --preview-window=right:50%:wrap                             # 预览窗口默认右侧,50%宽度，自动换行
   --bind='ctrl-/:change-preview-window(down|hidden|)'         # Ctrl+/ 切换预览位置/隐藏
-  --bind='ctrl-g:execute($EDITOR {} &> /dev/tty)'             # Ctrl+G 用编辑器打开（$EDITOR 由 aliases.zsh 导出）
-  # --bind='ctrl-e:execute(code {} &> /dev/tty)'                # Ctrl+E 用 VS Code 打开
+  --bind='ctrl-g:execute($EDITOR {} &> /dev/tty)'             # Ctrl-G（激活）：用 $EDITOR 打开选中项（$EDITOR 由 aliases.zsh 导出）
+  # --bind='ctrl-e:execute(code {} &> /dev/tty)'              # Ctrl-E（已停用）：用 VS Code 打开选中项
   --bind='ctrl-y:execute-silent(echo {} | pbcopy)+abort'      # Ctrl+Y 复制路径
   --bind='ctrl-p:toggle-preview'                              # Ctrl+P 切换预览
   --bind='ctrl-a:select-all'                                  # Ctrl+A 全选

@@ -3,8 +3,12 @@
 # =============================================================================
 # Description : pnpm 补全、SDKMAN（惰性加载）、Android NDK、Python(uv/pip)、
 #               Go、Rust(rustup)、Docker/Kubectl 补全缓存与 kubecolor 包装
-# Usage       : 由 ~/.zshrc source 加载；必须在 compinit 之后、aliases.zsh 之后加载
-#               （本文件定义的 k -> kubectl 会覆盖同名定义，顺序即语义）
+# Usage       : 由 ~/.zshrc source 加载；必须在 compinit 之后、aliases.zsh 之后
+#               且为三模块最后加载（本文件定义的 k -> kubectl 会覆盖同名定义，
+#               顺序即语义；内含 compdef 需 compinit 已完成）
+# Guards      : 单项工具均 command -v / 目录存在 + 去重守卫；SDKMAN 惰性桩；
+#               补全缓存按二进制 mtime 失效并 zcompile
+# Loading-order contract: aliases.zsh -> fzf.zsh -> sdk.zsh (sdk last)
 # Last Updated: 2026-08-27（krew bin 的 PATH 追加改为目录存在性 + 去重双守卫，
 #               与 GOBIN 守卫同一惯例）
 # Author      : Payne
@@ -29,16 +33,12 @@ if command -v pnpm &>/dev/null && command -v compdef &>/dev/null; then
 fi
 
 ########## Java / SDKMAN ##########
-# SDKMAN 惰性加载（zsh 惰性桩惯用法）：source sdkman-init.sh 实测约耗时 45ms，
-# 推迟到首次调用 sdk 命令时才执行。
-# 原理：此处只定义 sdk 占位函数；首次调用时 source 真实 init 脚本——其内部会
-# 重新定义 sdk 函数（sdkman-main.sh）并完成 PATH/JAVA_HOME 等注入——随后本次
-# 及后续调用均由真实实现接管。
-# 注意：JAVA_HOME 与各 candidate 的 PATH 注入也随之延迟到首次 sdk 调用；
-# 未安装 SDKMAN（无 sdkman-init.sh）时不定义任何内容，静默跳过。
+# SDKMAN 惰性加载（省约 45ms 启动耗时）：此处仅定义 sdk 占位函数，首次调用
+# 时才 source sdkman-init.sh——其内部重定义 sdk 为真实实现并注入
+# PATH/JAVA_HOME，后续调用即由真实实现接管。未安装 SDKMAN 时不定义任何内容。
+# 注意：JAVA_HOME 与各 candidate 的 PATH 注入也随之延迟到首次 sdk 调用。
 if [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]]; then
     sdk() {
-        # 惰性桩：source 后 sdk 被重新定义为真实实现，再转发本次调用
         source "$HOME/.sdkman/bin/sdkman-init.sh"
         sdk "$@"
     }
@@ -47,7 +47,6 @@ fi
 ########## Android ##########
 # NDK 由 Homebrew cask 安装；目录存在时才导出，避免悬空变量
 [[ -d "/opt/homebrew/share/android-ndk" ]] && export ANDROID_NDK_HOME="/opt/homebrew/share/android-ndk"
-# export PATH="$PATH:$ANDROID_NDK_HOME"
 
 ########## Python ##########
 # Python 环境由 uv 管理；conda 已卸载，相关 init 已移除（见 git 历史）
@@ -58,7 +57,7 @@ fi
 export GOPROXY='https://goproxy.cn,direct'           # 国内模块代理
 export GOPATH="${HOME}/WorkSpaces/project/go"        # 个人 Go 工作区
 export GOBIN="${GOPATH}/bin"
-# 仅当 GOBIN 实际存在时加入 PATH，避免塞入死路径
+# PATH 收敛：仅当 GOBIN 实际存在时加入，避免死路径；去重守卫保证重复 source 幂等
 [[ -d "$GOBIN" ]] && export PATH="$PATH:${GOBIN}"
 
 ########## Rust ##########
@@ -93,7 +92,7 @@ _load_cached_completion() {
     source "$cache_file"
 }
 
-# Docker 补全（未安装 docker CLI 时跳过，避免启动报错；子进程生成结果走缓存）
+# Docker 补全（未安装 docker CLI 时跳过；子进程生成结果走缓存）
 if (( $+commands[docker] )); then
     _load_cached_completion docker
 fi
@@ -106,9 +105,7 @@ fi
 
 # 2. 主命令：优先使用 kubecolor 彩色输出，否则保留原生 kubectl
 if command -v kubecolor &> /dev/null; then
-    # 用函数替代别名，更灵活（可以处理参数）
     kubectl() { kubecolor "$@"; }
-    # 让 kubecolor 继承 kubectl 的补全
     command -v compdef &>/dev/null && compdef kubecolor=kubectl
 fi
 
@@ -119,10 +116,6 @@ if command -v kubectl &> /dev/null; then
     command -v compdef &>/dev/null && compdef k=kubectl
 fi
 
-# 4. krew（kubectl 插件管理器）二进制目录：仅当实际存在且 PATH 尚未包含时才追加，
-#    避免塞入死路径，重复 source（zshsource）时也不会累积重复项（与 GOBIN 守卫同一惯例）
+# 4. krew 二进制目录：同样目录存在 + 去重双守卫，避免死路径与重复累积
 [[ -d "${KREW_ROOT:-$HOME/.krew}/bin" && "$PATH" != *"${KREW_ROOT:-$HOME/.krew}/bin"* ]] && \
     export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
-
-########## 其他 ##########
-# libpq/pgcli 相关路径配置已移除（未使用）；需要时从 git 历史找回。
