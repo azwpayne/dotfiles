@@ -1,7 +1,0 @@
-{
-  "tiers": {
-    "small": "opencode/nemotron-3.5-lightning-free",
-    "medium": "opencode/hy3-free",
-    "big": "opencode/nemotron-3-ultra-free"
-  }
-}

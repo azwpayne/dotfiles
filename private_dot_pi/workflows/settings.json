@@ -1,5 +1,4 @@
 {
-  "defaultConcurrency": 8,
   "defaultAgentRetries": 5,
   "progressPanelMode": "compact",
   "progressPanelMaxAgents": 10,
