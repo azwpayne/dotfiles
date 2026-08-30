@@ -2,192 +2,64 @@
 
 ## 启动链路
 
-交互式 zsh 启动时按以下顺序执行（`~/.zshrc` 即仓库中的 `dot_zshrc`）：
+交互式 zsh 启动时按以下顺序执行（`~/.zshrc` 即仓库中的 `dot_zshrc`）。顺序即语义——同名定义后加载者生效，例如 `k` 别名由 `sdk.zsh` 按需定义，因此 `aliases.zsh` 有意不定义 `k`。
 
-```text
-zsh -l
- └─ ~/.zshrc
-     ├─ ① Zim 引导块：下载 zimfw（如缺失）→ zimfw init → source ~/.zim/init.zsh
-     │     （compinit、语法高亮、自动建议、fzf-tab 均由 Zim 模块在此完成）
-     ├─ ② PATH 追加：~/bin → /opt/homebrew/bin → /opt/homebrew/sbin
-     │     → /usr/local/bin → ~/.local/bin
-     ├─ ③ 工具 eval（逐项 `command -v` 守卫，严格按此顺序，未安装时静默跳过）：
-     │     command -v zoxide   && eval "$(zoxide init zsh)"
-     │     command -v mise     && eval "$(mise activate zsh)"
-     │     command -v starship && eval "$(starship init zsh)"   ← 提示符最终归 Starship
-     │     command -v brew     && eval "$(brew shellenv)"
-     │     [[ -d ~/.cargo/bin && "$PATH" != *"$HOME/.cargo/bin"* ]] && export PATH="$HOME/.cargo/bin:$PATH"
-     │     [[ -d "${HOMEBREW_PREFIX:-/opt/homebrew}/opt/rustup/bin" && …未包含… ]] && export PATH="…/opt/rustup/bin:$PATH"
-     │     （fzf 的 eval 已从此处移除——键位绑定/补全统一由 fzf.zsh 内带守卫的
-     │       `command -v fzf && eval "$(fzf --zsh)"` 初始化一次，消除双重初始化；
-     │       rustup/cargo 为静态路径 + 目录存在性/去重双守卫的前置注入，不再调用
-     │       `brew --prefix` 子进程、重复 source 幂等，需在 brew shellenv 之后）
-     ├─ ④ for file in ~/.config/zsh/aliases.zsh ~/.config/zsh/fzf.zsh; do source "$file"; done
-     │     ├─ aliases.zsh  ← 导出 $EDITOR/$VISUAL，供下一步使用
-     │     └─ fzf.zsh      ← 依赖 $EDITOR 展开 Ctrl-O 绑定；fzf 键位绑定唯一初始化点
-     └─ ⑤ source ~/.config/zsh/sdk.zsh      ← 无条件加载（注释与代码一致，如需禁用需注释 source 行）
-           （内部逐项守卫：SDKMAN 为惰性加载（首次调用 sdk 时才 source init，
-            实测省约 45ms）；kubectl/docker 补全走 ~/.cache/zsh/ 缓存 + zcompile
-            （省约 10ms）；缺装静默跳过）
-```
+1. **Zim 引导**：缺失时下载 zimfw，随后 `zimfw init` 生成并加载 `~/.zim/init.zsh`（含补全、高亮、自动建议等）。
+2. **PATH 注入**：前置 `~/bin`、Homebrew、`/usr/local/bin`、`~/.local/bin` 等，并按目录存在性守卫注入 cargo/rustup 路径。
+3. **工具初始化**：`zoxide` / `mise` / `starship` / `brew` 等按 `command -v` 守卫顺序 `eval` 初始化，未安装静默跳过；`fzf` 键位绑定唯一收敛于 `fzf.zsh`（`~/.zshrc` 不再重复）。
+4. **三模块加载**：依次 `source` `aliases.zsh`（导出 `$EDITOR`/`$VISUAL`）→ `fzf.zsh`（依赖 `$EDITOR` 的 Ctrl-G 绑定）→ `sdk.zsh`（惰性加载 SDKMAN、缓存补全等）。
+5. **SDK 环境**：`sdk.zsh` 无条件加载，内部逐项守卫（SDKMAN 惰性、kubectl/docker 补全缓存）。
 
-**顺序即语义**：同名定义后加载者生效。典型例子是短别名 `k`——`sdk.zsh`
-在 kubectl 存在时定义 `k='kubectl'`（含 `command -v kubectl` 守卫 + `compdef k=kubectl`），
-因此 `aliases.zsh` 有意不定义 `k`。
-三个模块的内部契约（依赖、函数速查、破坏性命令警告）详见
-[`private_dot_config/zsh/README.md`](../private_dot_config/zsh/README.md)。
+完整命令与守卫细节以 `dot_zshrc` 与三模块源文件为准，模块契约详见 [`private_dot_config/zsh/README.md`](../private_dot_config/zsh/README.md)。
 
-> **环境变量说明**：`dot_zshrc:7` 顶部 `export LANG=zh_CN.UTF-8` 生效
-> （第 6 行的 `en_US.UTF-8` 仅为注释备用），与 Ghostty 的 `LANG=zh_CN.UTF-8` 一致，
-> 统一中文 UTF-8 locale。`$EDITOR`/`$VISUAL` 等
-> 编辑器变量不在此导出，而由 `aliases.zsh` 统一导出（见下文）。
+> **环境变量说明**：`dot_zshrc` 顶部的 `export LANG=zh_CN.UTF-8` 生效，与 Ghostty 的 `LANG=zh_CN.UTF-8` 一致，统一中文 UTF-8 locale。`$EDITOR`/`$VISUAL` 由 `aliases.zsh` 导出。
 
 ## Zim 模块清单（dot_zimrc）
 
-与 `dot_zimrc` 逐行核对，结果如下：
+Zim 模块由 `dot_zimrc` 定义，按环境、提示符、补全、收尾四组组织，通过 `zimfw` 加载。核心包括基础环境（`environment`/`utility` 等）、提示符信息（`duration-info`/`git-info`/`prompt-pwd`/`asciiship`）以及补全链（Homebrew 自适应路径、`zsh-completions`、`completion`、`fzf-tab`）。收尾模块为语法高亮、历史子串搜索与自动建议。`asciiship` 实际被 Starship 覆盖，保留仅作信息源。完整清单、加载顺序与注释掉的未启用模块以 `dot_zimrc` 为唯一权威。
 
-| 分组 | 模块 | 作用 |
-| --- | --- | --- |
-| 环境 | `environment` `git` `input` `termtitle` `utility` | 基础选项、git 别名、按键绑定、终端标题、utility 着色（ls/grep/less） |
-| 提示符 | `duration-info` `git-info` `prompt-pwd` `asciiship` | 为 prompt 准备的信息模块 + ASCII 主题（实际被 Starship 覆盖，见下） |
-| 补全 | `zimfw/homebrew` → 条件 `site-functions`（`$HOMEBREW_PREFIX/share/zsh/site-functions` 优先，`/usr/local/share/zsh/site-functions` 兜底 Intel）→ `zsh-users/zsh-completions --fpath src` → `completion` → `Aloxaf/fzf-tab` | Homebrew 补全路径自适应 + 额外补全定义 + compinit + fzf-tab fzf 化补全菜单（位于 completion 之后、高亮之前） |
-| 收尾 | `zdharma-continuum/fast-syntax-highlighting` → `zsh-users/zsh-history-substring-search` → `zsh-users/zsh-autosuggestions` | 必须最后初始化的高亮 / 历史子串搜索 / 自动建议 |
-
-补充说明：
-
-- `ZSH_AUTOSUGGEST_MANUAL_REBIND=1` 在 `dot_zshrc` 中已设置，因 `zsh-autosuggestions` 为末尾模块之一，可提升性能。
-- 历史上的 `ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)`（zsh-users 版 zsh-syntax-highlighting 的开关）已从 `dot_zshrc` 删除：该模块（连同 `zfm` / `fzf`）在 zimrc 中被注释、未加载，实际生效的 `fast-syntax-highlighting` 并不读取此变量，属无效配置。
-
-> ⚠️ **asciiship 实际被覆盖**：`.zshrc` 中 `command -v starship && eval "$(starship init zsh)"`
-> 发生在 Zim 初始化之后，实际生效的提示符是 Starship。`.zimrc` 里的 `asciiship` 及其信息
-> 模块保留着（`duration-info` 等仍可能被其他用途引用），但不会显示为提示符。
-> 如想切回纯 Zim 风格，注释掉 starship 的 eval 即可。
+> 已设置 `ZSH_AUTOSUGGEST_MANUAL_REBIND=1` 以提升末尾模块性能；历史的 `ZSH_HIGHLIGHT_HIGHLIGHTERS` 配置因子模块未启用而删除。
 
 ## Starship 提示符（starship.toml）
 
-- **主题**：Catppuccin Mocha（`palette = 'catppuccin_mocha'`，唯一内置调色板；曾内置的 frappe/latte/macchiato 三套备用调色板属死代码，已删除，净减约 111 行）。
-- **单行 powerline 布局**：format 已不引用 `$line_break`（历史的 `$line_break\` 死引用已删除，`[line_break]` 模块亦为 `disabled = true`），整条提示符渲染为单行，段间用 `` / `` / `` 电源线符号衔接：
+Starship 采用 Catppuccin Mocha 单行 powerline 布局，主题与调色板在 `private_dot_config/starship.toml` 中定义（`palette = 'catppuccin_mocha'`）。`format` 将 OS、用户、目录、git、语言版本、conda、时间、耗时等段以电源线符号衔接为单行，`$line_break` 已移除。单字符提示符 `❯` 依上条命令成败变色，耗时段按阈值显示。各段样式、符号与阈值等细节以 `starship.toml` 为唯一权威，已用 starship 1.26 验证。
 
-```txt
- OS → 用户名 → 目录 → git 分支/状态 → 语言版本(c/rust/golang/nodejs/bun/php/java/kotlin/haskell/python) → conda → 时间 → 耗时 → ❯
-（❯ 绿色=上条命令成功，红色=失败；vim 模式下显示 ❮；耗时段仅在命令超过 starship 默认 2s 阈值时出现）
-```
-
-各段细节（与 `starship.toml` 一一对应）：
-
-| 段 | 配置要点 |
-| --- | --- |
-| `os` | `disabled = false`，`bg:red fg:crust`，含 Windows/Ubuntu/Macos 等 20 个符号映射 |
-| `username` | `show_always = true`，`bg:red fg:crust` |
-| `directory` | `bg:peach fg:crust`，`truncation_length = 3`，`truncation_symbol = …/`，`substitutions` 替换 Documents→󰈙、Downloads→、Music→󰝚、Pictures→、Developer→󰲋 |
-| `git_branch` / `git_status` | 均为 `bg:yellow fg:crust`，符号 `` |
-| 语言段 | `c` `rust` `golang` `nodejs` `bun` `php` `java` `kotlin` `haskell` `python` 均为 `bg:green fg:crust`，各有 Nerd Font 符号；`python` 额外显示 `(#$virtualenv)` |
-| `conda` | `fg:crust bg:sapphire`，符号 `  `，`ignore_base = false` |
-| `time` | `disabled = false`，`bg:lavender fg:crust`，`time_format = "%R"`，符号 `` |
-| `character` | `success_symbol = [❯](bold fg:green)` / `error_symbol = [❯](bold fg:red)`，另有 `vimcmd_*` 变体 |
-| `cmd_duration` | `show_milliseconds = true`，`format = " in $duration "`，`bg:lavender`，`show_notifications = true`，`min_time_to_notify = 45000`（45s 触发系统通知） |
-
-已用 starship 1.26 实测渲染正常。
-
-> 另：`[docker_context]` 已配置样式（`bg:sapphire`，符号 ）但未加入 `format`，
-> 因此默认不显示；需要时在 conda 段后追加 `$docker_context` 即可启用。
+> `[docker_context]` 等已配置但未加入 `format` 的段默认不显示，按需追加即可。
 
 ## fzf 集成要点（fzf.zsh）
 
-> 本节与 `fzf.zsh` 逐行核对：前缀探测、fd 主 / rg 兜底、全局键位、交互函数。
+`private_dot_config/zsh/fzf.zsh` 统一管理 fzf 初始化、全局选项与交互函数，详见源文件与 [`private_dot_config/zsh/README.md`](../private_dot_config/zsh/README.md)。
 
 ### 前缀探测与缓存
 
-探测顺序（与 `fzf.zsh` 第 1 节一致，含具体测试条件）：
-
-1. `/opt/homebrew/opt/fzf`（Apple Silicon，测试 `[[ -d "/opt/homebrew/opt/fzf/bin" ]]`）
-2. `/usr/local/opt/fzf`（Intel，测试 `[[ -d "/usr/local/opt/fzf/bin" ]]`）
-3. `~/.fzf`（git 安装方式，测试 `[[ -d "$HOME/.fzf/bin" ]]`）
-4. `/usr`（Linux 发行版仓库，测试 `[[ -x "/usr/bin/fzf" ]]`）
-
-结果缓存到 `${ZDOTDIR:-$HOME}/.fzf_prefix_cache`（默认即 `~/.fzf_prefix_cache`，
-文件名与 `private_dot_config/zsh/dot_gitignore` 中的忽略项一致）。下次启动若
-`$FZF_PREFIX/bin/fzf` 不可执行，则自动删除缓存并重新探测（自愈）。探测成功
-后若 `$PATH` 未包含 `$FZF_PREFIX/bin` 则追加。最后执行 `command -v fzf >/dev/null 2>&1 && eval "$(fzf --zsh)"`
-加载官方按键绑定与补全（fzf 缺失时静默跳过）——这是全启动链路中 fzf 键位绑定的
-**唯一初始化点**（`~/.zshrc` 不再重复 eval，改键位只需改 fzf.zsh 一处）。
+fzf 前缀按平台自适应探测（Apple Silicon `/opt/homebrew` → Intel `/usr/local` → `~/.fzf` → `/usr`），结果缓存至 `~/.fzf_prefix_cache` 并支持自愈重探；探测后按需追加至 `$PATH`，随后带守卫地 `eval "$(fzf --zsh)"` 初始化键位与补全。该 `eval` 是全链路中 fzf 键位的唯一初始化点。具体测试条件与缓存文件名以 `fzf.zsh` 与 `private_dot_config/zsh/dot_gitignore` 为准。
 
 ### 文件/目录列表命令
 
-| 变量 | 主力（fd 存在时） | 兜底（fd 缺失时） |
-| --- | --- | --- |
-| `FZF_DEFAULT_COMMAND` | `fd --max-depth=5 --type f --hidden --follow --exclude={.git,node_modules,.idea,.venv,.cache,dist,build,*.pyc,.DS_Store,.gitignore,.gitmodules,.gitkeep,.gitlab,.gitlab-ci.yaml,*.zip,*.apk,*.so,.keep}` | `rg --files --hidden --follow --glob '!.git' --glob '!node_modules' --glob '!.venv'` |
-| `FZF_ALT_C_COMMAND` | `fd --max-depth=5 --type d --follow --exclude=...` | `rg --files --null \| xargs -0 dirname \| sort -u` |
-| `FZF_CTRL_T_COMMAND` | 与 `FZF_DEFAULT_COMMAND` 保持一致（置于 fd 回退判断之后，确保回退值同步） | 同左 |
-
-> `exclude_list` 在 `fzf.zsh` 中定义为 `'{.git,node_modules,.idea,.venv,.cache,dist,build,\*.pyc,.DS_Store,.gitignore,.gitmodules,.gitkeep,.gitlab,.gitlab-ci.yaml,\*.zip,\*.apk,\*.so,.keep}'`，
-> `FZF_DEFAULT_COMMAND` / `FZF_ALT_C_COMMAND` 均通过 `--exclude=${exclude_list}` 展开。
-> 其中 `\*.pyc` 的反斜杠转义是必要的：经 `$SHELL -c` 展开后成为 `--exclude=*.pyc`，
-> 匹配所有 Python 字节码文件（旧写法 `.pyc` 只匹配字面上名为 `.pyc` 的文件，已修正）。
+`FZF_DEFAULT_COMMAND` / `FZF_ALT_C_COMMAND` / `FZF_CTRL_T_COMMAND` 的实际命令（含 `fd` 主力与 `rg` 兜底、排除列表）均在 `fzf.zsh` 中定义，通过 `exclude_list` 变量展开。以源文件 `private_dot_config/zsh/fzf.zsh` 为唯一权威。
 
 ### 全局键位与选项
 
-`FZF_DEFAULT_OPTS`（已在 fzf 0.74.3 实测行内 `#` 注释可解析）：
+`FZF_DEFAULT_OPTS`（布局、颜色、全部键位绑定）集中在 `fzf.zsh` 中定义——**键位绑定直接写在源文件里，以 `fzf.zsh` 源码为准**，本节不再逐字抄录。要点：
 
-- 布局：`--height=80% --layout=reverse --border=rounded --cycle --info=inline-right --multi --ansi --preview-window=right:50%:wrap`
-- 绑定：`ctrl-/:change-preview-window` / `ctrl-o:execute($EDITOR {} &> /dev/tty)`（`$EDITOR` 由 `aliases.zsh` 导出，source 时展开） / `ctrl-e:execute(code {} &> /dev/tty)` / `ctrl-y:execute-silent(echo {} | pbcopy)+abort` / `ctrl-p:toggle-preview` / `ctrl-a:select-all` / `ctrl-d:deselect-all` / `ctrl-r:toggle-sort`
-- 颜色：`fg:#bbccdd,fg+:#ddeeff,bg:#334455,preview-bg:#223344,border:#778899`
+- 编辑器打开键位原为 `ctrl-o`，现改为 `ctrl-g`（`ctrl-g:execute($EDITOR {} &> /dev/tty)`，`$EDITOR` 由 `aliases.zsh` 导出）；
+- 原 `ctrl-e:execute(code {} &> /dev/tty)` 的 VS Code 打开绑定已**注释**（仅保留注释行，不再生效）；
 - 保留 Tab/Shift-Tab 默认多选切换行为，不重绑定为纯移动。
 
-专项：
-
-- `FZF_CTRL_R_OPTS`：`--sort --scheme=history --prompt='history>'`（`--scheme=history` 需 fzf 0.35+）
-- `FZF_CTRL_T_OPTS`：`--preview='if [ -d {} ]; then lsd --tree --depth 5 --color=always --icon=always {} | head -50; else bat --color=always --style=header,grid --line-range :100 {}; fi' --prompt='files>' --multi`
-- `FZF_ALT_C_OPTS`：`--preview 'lsd --tree --depth 5 --color=always --icon=always {} | head -50' --prompt='dir>'`
+专项 `FZF_CTRL_R_OPTS` / `FZF_CTRL_T_OPTS` / `FZF_ALT_C_OPTS`（排序、预览、提示语等）亦在同文件中定义，以源文件为准。
 
 ### 交互函数
 
-| 函数 | 用途 | 依赖 |
-| --- | --- | --- |
-| `frg [pattern]` | `rg --line-number --color=always --smart-case` 管道至 fzf，按 `:` 分隔，`bat --style=full --color=always --highlight-line` 预览，回车 `nvim '{1}' +{2}` 定位行号；空结果时自动退出（`--exit-0`） | rg, fzf, bat, nvim |
-| `fkill [signal]` | `ps -ef \| sed 1d \| fzf -m \| awk '{print $2}' \| xargs kill -9`（`sed 1d` 去掉表头行避免误选；信号可选，默认 -9） | fzf |
-| `find_large_files [size]` | `fd -t f -S "+$size" -X du -h {} \| sort -k1hr`，默认 `100M` | fd, du |
-| `ftm [session]` | tmux 会话 fzf 选择/创建/切换（`switch-client` vs `attach-session` 自动判断）；选择列表带 `--height 60% --exit-0`（无会话时自动退出） | tmux, fzf |
-| `flf` | `lsof \| fzf --preview "$LSOF_PREVIEW"` 浏览打开文件 | lsof, fzf |
-| `flkill` | `lsof \| fzf` 选进程提取 PID 后立即 `kill -9`，无二次确认（如需安全请改用不带 -9 的 `kill` 或自行加确认） | lsof, fzf |
-| `flnet` | `lsof -i \| fzf` 仅显示 TCP/UDP 连接 | lsof, fzf |
-| `fluser [user]` | `lsof -u "$user" \| fzf` 按用户过滤（默认 `$USER`） | lsof, fzf |
-
-其中 `LSOF_PREVIEW='pid=$(echo {} \| awk "{print \$2}"); [ -n "$pid" ] && ps -fp "$pid" 2>/dev/null || echo "No PID"'` 为共享预览片段。
+`fzf.zsh` 提供 `frg`（内容搜索预览并跳转）、`fkill`/`find_large_files`/`ftm`（进程/大文件/tmux 会话）以及 `flf`/`flkill`/`flnet`/`fluser`（`lsof` 浏览）等交互函数，函数列表与依赖见源文件 `private_dot_config/zsh/fzf.zsh`。预览共享 `LSOF_PREVIEW` 片段，详见源文件。
 
 ### 包管理更新函数（aliases.zsh）
 
-与 `aliases.zsh` 逐行核对：`auto_update` 与新函数 `update-all` 并存，分工如下。
-
-| 函数 | 所在 | 用途 | 关键实现 |
-| --- | --- | --- | --- |
-| `auto_update` | aliases.zsh | 一键全量更新入口：打印 🚀 横幅，若存在 `onproxy` 函数则先切代理，随后直接委托 `update-all` 执行（覆盖目标与行为一致） | 无参调用 `update-all`（全量 6 目标）；历史上的 `uv_update` 等五个 `*_update` 辅助函数已删除 |
-| `update-all [targets...]` | aliases.zsh | 声明式批量更新（**失败即红**）：关联数组 `tasks` 声明 6 项（`brew` / `sdk` / `rustup` / `tldr` / `uv` / `mise`），支持参数过滤、彩色输出、失败计数与耗时统计 | `local -A tasks=(brew … sdk … rustup … tldr … uv … mise …)`；无参时 `targets=(${(k)tasks})` 全量，传参则只运行指定目标；`command -v $name` 守卫 + `eval "${tasks[$name]}"`（stderr 重定向到临时文件供错误摘要）；目标**成功打印绿色 `✓ done`，失败打印红色 `✗ failed (exit=N)` + stderr 末 5 行错误摘要**；结尾汇总 `N/M target(s) failed`（附失败目标清单与耗时 `${mins}m${secs}s`），任一失败返回非零；未安装目标黄色 `⚠️ not found, skipped` 且不计入 M，全部跳过时提示 `no runnable targets` |
-
-> `update-all` 任务定义（与 `aliases.zsh` 的 `local -A tasks=(…)` 一致）：`brew` 为 `brew update -f && brew upgrade -f --greedy-latest -y && brew cu -y -a && brew cleanup --prune=all`，`sdk` 为 `sdk upgrade && sdk selfupdate && sdk flush`，`rustup` 为 `rustup update && rustup upgrade`，`tldr` 为 `tldr --update`，`uv` 为 `uv tool upgrade --all`，`mise` 为 `mise upgrade`。支持 `update-all brew uv` 仅更新指定目标；未知参数会提示 `Available: …` 并返回 1，未安装目标黄色 `⚠️ not found` 跳过。日常推荐 `update-all`（`auto_update` 仅多一层横幅与可选代理切换）。
+`auto_update` 与 `update-all` 定义于 `private_dot_config/zsh/aliases.zsh`，前者为兼容旧习惯的一键入口（可选 `onproxy` 后委托后者），后者为关联数组驱动的批量更新（支持参数过滤、失败计数与耗时统计）。覆盖目标、任务定义与彩色输出细节均以 `aliases.zsh` 源文件为准，详见 [dev-tools.md](dev-tools.md) 与源文件。
 
 ### fzf-tab
 
-插件本体由 `dot_zimrc` 的 `zmodule Aloxaf/fzf-tab` 经 zimfw 加载（不再由 `fzf.zsh` source，历史的 `[[ -r ]]` 守卫已删除）；`fzf.zsh` 仅保留以下 zstyle 配置：
-
-- `zstyle ':completion:*:git-checkout:*' sort false`
-- `zstyle ':completion:*:descriptions' format '[%d]'`
-- `zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}` / `menu no`
-- `zstyle ':fzf-tab:complete:cd:*' fzf-preview 'lsd -1 --color=always --icon=always $realpath'`
-- `zstyle ':fzf-tab:*' fzf-flags --color=fg:1,fg+:2 --bind=tab:accept` + `use-fzf-default-opts yes` + `switch-group '<' '>'`
+`Aloxaf/fzf-tab` 由 `dot_zimrc` 经 zimfw 加载，`fzf.zsh` 仅保留 `zstyle` 配置（补全排序、描述格式、颜色、`fzf-preview`、`fzf-flags` 等）。完整 `zstyle` 列表以 `fzf.zsh` 为唯一权威。
 
 ## Fish 的角色
 
-Fish 不是登录 shell：Ghostty 通过 `command = /bin/zsh -l` 启动登录 zsh；Alacritty 未设置
-`shell`（相关行均已注释），按系统默认启动非登录 shell。仓库中对应
-`private_dot_config/private_fish/`（chezmoi `private_` 前缀，部署后为 `~/.config/fish/`）：
-
-| 路径（仓库） | 部署后 | 内容 |
-| --- | --- | --- |
-| `private_fish/config.fish` | `~/.config/fish/config.fish` | interactive 时 `starship init fish` |
-| `private_fish/private_completions/symlink_*.fish` | `~/.config/fish/completions/*.fish` | 三条符号链接指向 OrbStack 内置补全：`docker.fish`、`kubectl.fish`、`orbctl.fish`（`chezmoi symlink_` 条目，源路径 `/Applications/OrbStack.app/.../Resources/completions/fish/*.fish`），OrbStack 升级后补全自动跟随；另含 fisher / fzf.fish / forgit / sdk 等补全文件随源部署 |
-| `private_fish/private_conf.d/` | `~/.config/fish/conf.d/` | `00_env.fish`（LANG/LC_ALL、EDITOR/VISUAL、HOMEBREW_*、kubecolor 补全）+ `fzf.fish`（fzf 插件键位初始化） |
-| `private_fish/private_functions/` | `~/.config/fish/functions/` | fzf.fish / fisher 插件函数（`fzf_configure_bindings`、`_fzf_*`、`fisher` 等） |
-
-Fish 侧已初始化 Starship 提示符与 fzf.fish 键位，并通过 `fish_plugins`（15 插件）管理工具集成；
-但仍非登录 shell，未接入 zoxide/mise/brew shellenv 等 zsh 栈初始化。
+Fish 不是登录 shell：Ghostty 通过 `command = /bin/zsh -l` 启动登录 zsh；Alacritty 未设置 `shell`（按系统默认）。仓库中 `private_dot_config/private_fish/`（chezmoi `private_` 前缀，部署后为 `~/.config/fish/`）提供辅助交互环境：`config.fish` 在 interactive 时初始化 Starship，通过 `fish_plugins`（14 插件）管理 fzf.fish 等插件，并通过 `symlink_` 保留 OrbStack 的 docker/kubectl/orbctl 补全。`conf.d` 与 `functions` 目录分别承载环境与函数。Fish 侧已初始化 Starship 与 fzf 键位，但未接入 zoxide/mise/brew 等 zsh 栈，详见 `private_dot_config/private_fish/` 源目录与 [layout.md](layout.md)。

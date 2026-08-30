@@ -10,7 +10,6 @@
 | `dot_` | 目标名以 `.` 开头（隐藏目录/文件） | `dot_zshrc` → `~/.zshrc` |
 | `private_` | 目标仅所有者可访问：文件 0600、目录 0700 | `private_dot_ssh/private_config` → `~/.ssh/config` (0600) |
 | `symlink_` | 目标是符号链接，**文件内容即链接指向的路径** | `symlink_docker.fish` 内容为一行 OrbStack 路径 |
-| `empty_` | 目标为空文件（占位保证目录存在） | 无实际 `empty_` 前缀文件于本仓库；`private_empty_` 系列仅作占位说明 |
 | （无前缀） | 原样同名复制 | `starship.toml` → `~/.config/starship.toml` |
 
 前缀可叠加，如 `private_dot_config` = 隐藏目录 + 该目录本身权限 0700，`private_dot_ssh` 同理。
@@ -63,8 +62,8 @@
 | `private_dot_config/nvim/LICENSE` | —（不部署） | 上游 LazyVim starter 原件（Apache-2.0，与根 LICENSE 同哈希）；由 `**/LICENSE` 排除 |
 | `private_dot_config/nvim/dot_gitignore` | `~/.config/nvim/.gitignore` | 忽略插件数据等运行时目录 |
 | `private_dot_config/nvim/dot_neoconf.json` | `~/.config/nvim/.neoconf.json` | neoconf 本地配置 |
-| `private_dot_config/mise/config.toml` | `~/.config/mise/config.toml` | bun/deno/go/node/pnpm = latest |
-| `dot_codex/private_config.toml` | `~/.codex/config.toml` (0600) | cc-switch 本地代理配置文件（`base_url: http://127.0.0.1:15721/v1`），`private_` 前缀对应 `0600` 权限，确保 `~/.codex/` 目录存在且权限正确。不再作为空占位文件。
+| `private_dot_config/mise/config.toml` | `~/.config/mise/config.toml` | mise 工具链声明（工具与版本见 `private_dot_config/mise/config.toml`） |
+| `dot_codex/private_config.toml` | `~/.codex/config.toml` (0600) | cc-switch 本地代理配置（`private_` 0600，详见 `dot_codex/private_config.toml`，确保目录存在且权限正确） |
 
 > `~/.config/gh/config.yml` 与 `hosts.yml` 由 `gh auth login` 在目标机生成，含凭据，**不入库**（见下文“不在仓库内的重要文件”）。
 
@@ -76,13 +75,13 @@
 | `.../private_completions/symlink_docker.fish` | `~/.config/fish/completions/docker.fish` | 符号链接 → OrbStack 内置补全 |
 | `.../private_completions/symlink_kubectl.fish` | `~/.config/fish/completions/kubectl.fish` | 同上 |
 | `.../private_completions/symlink_orbctl.fish` | `~/.config/fish/completions/orbctl.fish` | 同上 |
-| `.../fish_plugins` | `~/.config/fish/fish_plugins` | Fisher 插件清单（15 个：fzf.fish、forgit、bass、done、autopair、sponge、puffer-fish 等） |
+| `.../fish_plugins` | `~/.config/fish/fish_plugins` | Fisher 插件清单（14 个：fzf.fish、forgit、bass、done、autopair、sponge、puffer-fish 等） |
 | `.../private_conf.d/00_env.fish`、`.../private_conf.d/fzf.fish` | `~/.config/fish/conf.d/` | `00_env.fish`（LANG/LC_ALL、EDITOR/VISUAL、HOMEBREW_*、kubecolor 补全）+ `fzf.fish`（fzf 插件键位初始化） |
 | `.../private_functions/*`、`.../private_completions/*` | `~/.config/fish/functions/`、`~/.config/fish/completions/` | fzf.fish / fisher 插件函数与补全（`.keep` 占位与 `symlink_docker/kubectl/orbctl.fish` 三条 OrbStack 符号链接随源部署） |
 | `.../themes/.keep` | —（`.keep` 仅保留空目录，不部署） | 主题目录占位 |
 | `.../private_fish_variables` | —（已加入 `.chezmoiignore`，不部署） | fish Universal Variables 机器本地状态 |
 
-> Fish 在本环境中不是登录 shell，作为辅助交互 shell：Starship 提示符 + fzf.fish 键位 + fisher 管理的 15 插件，并保留 docker/kubectl/orbctl 补全；
+> Fish 在本环境中不是登录 shell，作为辅助交互 shell：Starship 提示符 + fzf.fish 键位 + fisher 管理的 14 插件，并保留 docker/kubectl/orbctl 补全；
 > Ghostty 显式指定 `command = /bin/zsh -l`；Alacritty 未设置 shell（跟随系统登录 shell）。
 
 ### pi coding agent（四件套 + workflows）
@@ -102,35 +101,9 @@
 ## .chezmoiignore —— 排除部分源文件不参与部署
 
 根目录的 `.chezmoiignore` 本身**不会**被 `chezmoi apply` 到 `$HOME`
-（chezmoi 对该文件名特殊处理），作用是在源目录中**排除**部分文件不参与渲染。实文如下：
+（chezmoi 对该文件名特殊处理），作用是在源目录中**排除**部分文件不参与渲染（按目标名匹配）。完整排除列表以 `.chezmoiignore` 源文件为唯一权威，涵盖本地覆盖与备份（`*.local`/`*.bak`）、仓库文档（`README.md`/`LICENSE`/`docs/`）、敏感词（`*token*`/`*secret*`/`*credential*`）、构建产物（`node_modules/` 等）与 fish 机器本地状态等。
 
-```gitignore
-# 本地覆盖与备份
-*.local
-*.local.*
-*.bak
-**/README.md
-**/LICENSE
-docs/
-**/.DS_Store
-nvim.log
-
-# fish 机器本地状态（不跨机器部署）
-.config/fish/fish_variables
-
-# 敏感信息
-*token*
-*secret*
-*credential*
-
-# 构建产物
-node_modules/
-.pnpm-store/
-```
-
-效果（按目标名匹配）：`chezmoi diff` / `chezmoi apply` 自动跳过根级与任意嵌套的 `README.md`、
-`LICENSE`（含 `zsh/README.md`、`nvim/README.md`、`nvim/LICENSE`）、`docs/`、任意 `.DS_Store`，
-以及匹配 `*.local` / `*.bak` / `*token*` 等敏感与构建产物模式的文件。
+效果：`chezmoi diff` / `chezmoi apply` 自动跳过上述模式匹配的目标，避免污染家目录。
 
 ✅ 历史失配已修复（2026-08 收口）：旧版按**源名**书写了 `**/dot_git` / `**/dot_DS_Store` / `dot_gitconfig`
 （模式按目标名匹配，从不命中 `.git` / `.DS_Store` / `.gitconfig`，均未生效），且 `**/README.md`

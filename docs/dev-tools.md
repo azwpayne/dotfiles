@@ -1,39 +1,18 @@
 # 开发工具链：git / gh / mise / codex / pi agent
 
+> 本文档只做解释性说明，**不耦合**任何代码或配置。凡是源文件已经承载的实际内容（字段值、列表项、权限矩阵等），一律以源文件为唯一权威；跨文档冲突时，一律以源文件为准。下文各节不再逐行抄录文件内容。
+
 ## Git — `dot_gitconfig` → `~/.gitconfig`
 
-> **注意**：`dot_gitconfig` **会**随 `chezmoi apply` 部署为 `~/.gitconfig`（`chezmoi managed` 实测包含 `.gitconfig`）；早期版本 `.chezmoiignore` 中按源文件名书写的 `dot_gitconfig` / `**/dot_git` 行从不匹配任何目标、未生效，现已删除。下表为其字段快照，值与源文件逐行核对一致。
+`dot_gitconfig` 会随 `chezmoi apply` 部署为 `~/.gitconfig`（chezmoi managed 实测包含 `.gitconfig`）。它统一设置编辑器（VS Code）、默认分支 `main`、LFS 四件套、push 行为与全局忽略文件 `~/.gitignore_global`（`~` 由 git 原生展开，无用户名硬编码）。所有实际字段以源文件 `dot_gitconfig` 为唯一权威。
 
-| 配置项 | 值 | 说明 |
-| --- | --- | --- |
-| `core.editor` | `'code'` | 提交信息等由 VS Code 编辑 |
-| `init.defaultBranch` | `main` | 新仓库默认分支 |
-| `core.autocrlf` | `input` | 仅提交时转换为 LF，检出时不转换 |
-| `core.excludesfile` | `~/.gitignore_global` | 全局忽略文件（`~` 由 git 原生展开，无用户名硬编码；见下文） |
-| `filter.lfs` | `smudge` / `clean` / `process` + `required true` | git-lfs 四件套 |
-| `[user]` | `azwpayne` / `paynewu0719@gmail.com` | 个人身份（公开 fork 前注意脱敏） |
-| `http "https://github.com"` | `socks5://127.0.0.1:5376` | 唯一按域名限定的代理；`http.<url>` 段对匹配该 URL 的 HTTP/HTTPS 远程均生效 |
-| `push.default` | `current` | `push` 默认推送当前分支 |
-| `push.autoSetupRemote` | `true` | 首次 `push` 自动建立上游追踪 |
-| `safe.directory` | `*` | 信任所有目录（容器/挂载盘场景避免 `dubious ownership`） |
+> **代理说明**：当前 `dot_gitconfig` 仅保留一条按域名限定的代理行 `[http "https://github.com"]`（socks5://127.0.0.1:5376）；非标准键（如 `[https …]`）会被 git 静默忽略。SSH 侧代理由 `private_dot_ssh/private_config` 的自适应 `ProxyCommand` 负责，探测端口同为 `5376`；如需 `git pull` 一律变基，应使用标准键 `pull.rebase = true`（当前未启用）。早期版本 `.chezmoiignore` 中按源文件名书写的 `dot_gitconfig` / `**/dot_git` 行从不匹配任何目标、未生效，现已删除，本文件正常随 `apply` 部署。
 
-> **代理说明**：当前 `dot_gitconfig` 仅保留一条按域名限定的代理行 `[http "https://github.com"]`；非标准键（如 `[https …]`）会被 git 静默忽略。SSH 侧代理由 `private_dot_ssh/private_config` 的自适应 `ProxyCommand` 负责，探测端口同为 `5376`；如需 `git pull` 一律变基，应使用标准键 `pull.rebase = true`（当前未启用）。
-
-全局忽略规则（`dot_gitignore_global` → `~/.gitignore_global`，概要归类，完整清单以源文件为准）：
-
-- 编辑器临时文件与交换文件：`*~`、`.DS_Store`（无斜杠模式递归匹配任意层级，等价覆盖 `**/.DS_Store`）、`*.swp` / `*.swo` / `*.bak`
-- IDE 目录：`.idea` / `*.iml` / `.vscode`
-- 编译产物与构建目录：`*.aux` / `*.log*` / `.tox` / `dist/` / `build/` / `target/` / `bin/`
-- Python 相关：`__pycache__/`、`*.venv`、`*.cache`
-- Node 依赖：`node_modules/`
-
-与 `dot_gitignore_global` 实际 19 条模式逐行一致（历史上的 `*.git` 笔误行与冗余的
-`**/.DS_Store` 行已删；现存 1 行说明性注释，不计入模式数）。
+全局忽略规则（`dot_gitignore_global` → `~/.gitignore_global`，完整清单以源文件为准）：编辑器临时文件与交换文件（`*~`、`.DS_Store`、`*.swp` 等）、IDE 目录（`.idea` / `*.iml` / `.vscode`）、编译产物与构建目录（`*.aux` / `*.log*` / `dist/` / `build/` / `target/` / `bin/`）、Python 相关（`__pycache__/` / `*.venv` / `*.cache`）与 Node 依赖（`node_modules/`）。具体条目与分类以源文件 `dot_gitignore_global` 为准。
 
 ## GitHub CLI — `gh`
 
-当前仓库未直接托管 `private_dot_config/gh/private_config.yml`（该目录不存在），
-`gh` 配置由目标机执行 `gh auth login` 后生成（`~/.config/gh/hosts.yml` / `config.yml`）：
+当前仓库未直接托管 `private_dot_config/gh/private_config.yml`（该目录不存在），`gh` 配置由目标机执行 `gh auth login` 后生成（`~/.config/gh/hosts.yml` / `config.yml`）：
 
 - 协议 `git_protocol: https` 为默认值；`hosts.yml` 中通常按主机覆盖为 `ssh`。
 - 常用别名：`gh co` = `pr checkout`（若在本地配置）。
@@ -43,25 +22,7 @@
 
 ## mise — `private_dot_config/mise/config.toml`
 
-声明 5 个工具均为 `latest`：**bun · deno · go · node · pnpm**，与源文件逐行一致。
-
-```toml
-[tools]
-bun = "latest"
-deno = "latest"
-go = "latest"
-node = "latest"
-pnpm = "latest"
-```
-
-`dot_zshrc` 已 `eval "$(mise activate zsh)"`，常用命令与实际行为一致：
-
-```bash
-mise ls                  # 查看已安装版本
-mise install             # 安装 config.toml 声明的全部工具
-mise use -g node@lts     # 固定某工具全局版本（会改写 config.toml，记得提交）
-mise upgrade             # 升级全部受管工具（被 aliases.zsh 的 update-all 复用）
-```
+mise 工具链由 `private_dot_config/mise/config.toml` 声明（工具与版本见该文件，当前为若干工具的 `latest`），由 `dot_zshrc` 中的 `eval "$(mise activate zsh)"` 接管 zsh 环境；实际声明以源文件为准。常用操作见 `mise` 文档与 `aliases.zsh` 的 `update-all` 复用。
 
 ### 包管理器更新：`aliases.zsh` 的 `auto_update` 与 `update-all`
 
@@ -69,114 +30,46 @@ mise upgrade             # 升级全部受管工具（被 aliases.zsh 的 update
 
 | 函数 | 位置 | 覆盖目标 | 核心机制 | 适用场景 |
 | --- | --- | --- | --- | --- |
-| `auto_update` | `aliases.zsh:32` | 与 `update-all` 相同（6 项） | 薄包装：打印 🚀 横幅，若定义了 `onproxy` 函数则先切代理，随后**直接委托**同文件下方的 `update-all` 执行（调用时解析） | 兼容旧习惯的一键全量入口 |
-| `update-all` | `aliases.zsh:178` | 6 项：`brew` / `sdk` / `rustup` / `tldr` / `uv` / `mise` | 基于 `local -A tasks` 关联数组；支持 `update-all brew mise` 参数过滤，未传参则 `targets=(${(k)tasks})` 全量；循环内 `command -v $name` 守卫 + 未知目标报错并提示 `Available: ...`；失败计数 `failed`、耗时统计 `start_time/duration`、`print -P` 彩色输出（蓝标题/绿成功/黄跳过/红失败） | 需灵活选择目标、查看耗时与失败统计 |
+| `auto_update` | `aliases.zsh` | 与 `update-all` 相同 | 薄包装：打印横幅后委托 `update-all` 执行，详见源文件 | 兼容旧习惯的一键入口 |
+| `update-all` | `aliases.zsh` | 多项（`brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise` 等，详见源文件） | 关联数组声明任务，支持参数过滤、守卫、失败计数与彩色输出，详见 `aliases.zsh` | 需灵活选择目标、查看统计 |
 
 要点：
 
 - 旧版 `auto_update` 曾顺序守卫调用五个 `*_update` 辅助函数（`uv_update` / `sdk_update` / `rust_update` / `tldr_update` / `brew_update`），它们已在提交 `0af1f61` 中删除；现 `auto_update` 委托 `update-all`，二者覆盖目标完全一致（均含 `mise`）。
-- `update-all` 的 `brew` 任务激进：`brew update -f && brew upgrade -f --greedy-latest -y && brew cu -y -a && brew cleanup --prune=all`（含 `brew cu -y -a`；历史上的 `brew_update` 别名已删除，`brew cu` 现仅存在于 `update-all`）。
+- `update-all` 的 `brew` 任务为激进的全量升级流程（含 `brew cu`），历史上的 `brew_update` 别名已删除，详见 `aliases.zsh` 中 `tasks` 定义。
 
 > 验证：`zsh -n ~/.config/zsh/aliases.zsh` 可覆盖两函数语法；`zsh -ic 'type update-all auto_update'` 确认已加载。
 
 ## Codex — `dot_codex/private_config.toml`
 
-部署目标为 **`~/.codex/config.toml`**（`chezmoi managed` 实测为 `.codex/config.toml`）：`private_` 前缀对应 `0600` 权限，为 cc-switch 本地代理配置文件（`base_url: http://127.0.0.1:15721/v1`），确保 `~/.codex/` 目录存在且权限正确。不再包含 `empty_` 文件相关说明，该配置由 `cc-switch-open-code-zen` provider 管理。
+部署目标为 **`~/.codex/config.toml`**（`chezmoi managed` 实测为 `.codex/config.toml`）：`private_` 前缀对应 `0600` 权限。`dot_codex/private_config.toml` 为真实的 cc-switch 本地代理配置，确保 `~/.codex/` 目录存在且权限正确，实值以源文件 `dot_codex/private_config.toml` 为唯一权威。
 
 ## pi coding agent — `private_dot_pi/private_agent/`
 
-为 [pi](https://github.com/earendil-works/pi) 编码代理准备的受限运行环境（部署到 `~/.pi/agent/`）。
-四个文件各司其职：由于 chezmoi 目标名均无 `private_` 前缀，文件应用后为默认权限 `0644`，
-仅父目录因 `private_dot_pi/private_agent` 命名为 `0700`。
+为 [pi](https://github.com/earendil-works/pi) 编码代理准备的受限运行环境（部署到 `~/.pi/agent/`）。四个文件各司其职：由于 chezmoi 目标名均无 `private_` 前缀，文件应用后为默认权限 `0644`，仅父目录因 `private_dot_pi/private_agent` 命名为 `0700`。以下各文件的实际字段、列表与策略条目，一律以对应源文件为唯一权威。
 
 ### settings.json — 主题与扩展包
 
-与 `private_dot_pi/private_agent/settings.json` 实际内容完全一致（已修正旧文档的过时说明）
-
-| 字段 | 值 | 说明 |
-| --- | --- | --- |
-| `theme` | `dark` | 深色主题 |
-| `lastChangelogVersion` | `0.84.4` | 已同步至最新 pi 版本 |
-| `hideThinkingBlock` | `true` | 隐藏思考块（界面默认不展示 thinking 内容） |
-| `packages` | 10 个条目 | 5 个纯字符串包（`npm:@gotgenes/pi-permission-system`、`npm:pi-landstrip`、`npm:pi-subagents`、`npm:@narumitw/pi-goal`、`npm:@quintinshaw/pi-dynamic-workflows`）+ 5 个带 `extensions` 过滤的对象形式条目（`rpiv-todo`、`pi-cc-plugins`、`pi-btw`、`pi-web-access`、`pi-lens`），顺序同源文件 |
-| `defaultProvider` | `cc-switch-open-code-zen` | 默认 provider |
-| `defaultTools` | 7 项：`read`/`write`/`edit`/`bash`/`grep`/`find`/`ls` | 默认启用工具清单 |
-| `defaultModel` | `muse-spark-1.2-free` | 默认模型 |
-| `defaultThinkingLevel` | `max` | 默认思考强度 |
-| `httpProxy` | http://127.0.0.1:5376 | pi 出站代理，与 git/SSH 同端口 |
-
-> 实值以 `private_dot_pi/private_agent/settings.json` 为唯一权威；跨文档冲突时一律以源文件为准。
+`private_dot_pi/private_agent/settings.json` 配置 pi 的主题、扩展包、默认 provider / tools / model 与出站代理。它声明一组 npm 扩展包（含若干带 `extensions` 过滤的条目），并固定 `defaultProvider`、`defaultTools`、`defaultModel`、`defaultThinkingLevel` 与 `httpProxy`（与 git / SSH 同端口 5376）；实值以 `private_dot_pi/private_agent/settings.json` 为唯一权威。
 
 ### sandbox.json — 文件系统与网络沙箱
 
-与 `private_dot_pi/private_agent/sandbox.json` 实际内容完全一致（无重复列表项）；实值以源文件为唯一权威。
+`private_dot_pi/private_agent/sandbox.json` 定义 agent 的文件系统与网络沙箱策略。沙箱总开关开启后，文件系统采用窄白名单读取（`allowRead`）与大范围 `denyRead` / `denyWrite` 拒绝读写，网络默认关闭（禁网）但允许本地端口绑定与全部 Unix socket，并仅对 github.com 系列域名开放白名单；Windows 容器模式在 macOS 上不生效。所有规则条目以 `private_dot_pi/private_agent/sandbox.json` 为唯一权威。
 
-| 维度 | 配置 | 说明 |
-| --- | --- | --- |
-| `enabled` | `true` | 沙箱总开关开启 |
-| `shell.readAccess` | `host` | shell 可读宿主文件系统 |
-| `filesystem.allowRead` | 5 项 | `.`、`~/.gitconfig`、`~/.config/git/config`、`/dev/null`、`${HOME}/.pi`（窄白名单） |
-| `filesystem.denyRead` | 7 项 | `/Users`、`/home`、`/root`、`/etc`、`/var`、`/private/var`、`/private/tmp`（大范围 deny，工作区由 `cwd` 白名单放行） |
-| `filesystem.allowWrite` | 7 项 | `.`、`/dev/null`、`/tmp`、`~/.npm`、`~/.cargo/registry`、`~/.cache`、`~/.config/git/config` |
-| `filesystem.denyWrite` | 12 项 | `**/.env`、`**/.env.*`、`**/*.pem`、`**/*.key`、`.pi/sandbox.json`、`~/.pi/agent/sandbox.json`、`~/.ssh`、`~/.bashrc`、`~/.zshrc`、`~/.profile`、`~/.gitconfig`、`**/.git` |
-| `network.allowNetwork` | `false` | **网络默认关闭**（禁网策略） |
-| `network.allowLocalBinding` | `true` | 允许本地端口绑定 |
-| `network.allowAllUnixSockets` | `true` | 放行全部 Unix socket |
-| `network.allowUnixSockets` | `[]` | Unix socket 白名单为空 |
-| `network.allowedDomains` | 3 项 | `github.com`、`*.github.com`、`*.githubusercontent.com`——域名白名单 |
-| `network.deniedDomains` | `[]` | 无额外黑名单 |
-| `windows` | `appContainerMode: standard`、`allowLoopback: false` | Windows 平台的沙箱容器模式（macOS 上不生效） |
-
-- **网络默认关闭（禁网策略）**：沙箱内禁止出站网络、本地端口绑定与 Unix socket；`allowLocalBinding: true`、`allowAllUnixSockets: true`；`allowedDomains` 3 项域名白名单仅在网络启用时才作为出站限制生效（当前不生效）；`deniedDomains` 为空。
-- `~/.gitconfig` 仅在 `denyWrite` 中硬拒绝（allow 条目在硬 deny 下本就无法生效）。
+> 网络默认关闭（禁网策略）：沙箱内禁止出站网络，仅放行本地端口绑定与 Unix socket；`allowedDomains` 域名白名单仅在网络启用时作为出站限制生效（当前不生效），`deniedDomains` 为空。
 
 ### landstrip.json — 子代理与任务权限
 
-与 `private_dot_pi/private_agent/landstrip.json` 实际内容一致；实值以源文件为唯一权威。
-
-- 任务级权限 `*`: `ask`、`review`: `allow`——派生子代理前需用户确认（`c6408c0` 将 `*` 由 `deny` 放宽为 `ask`）：防止 agent 未经询问自行派生执行类子代理，同时免询问放行只读审查。
-- **与 `workflows/settings.json` 的关系**：`workflows/settings.json` 的 `progressPanelMaxAgents` 限制**工作流进度面板的并发/展示代理数上限**，`landstrip.json` 的 `toolFilesystemPolicy` 指定沙箱复用。二者职责不同、相互独立。详见 [layout.md](layout.md) 与下节。
+`private_dot_pi/private_agent/landstrip.json` 控制子代理派生的任务级权限：任务级 `*`（`task` 执行类）默认 `ask`、只读 `review` 默认 `allow`，即派生子代理前需用户确认，同时免询问放行只读审查。它与 `workflows/settings.json` 的 `progressPanelMaxAgents` 职责不同、相互独立：后者限制工作流进度面板的并发 / 展示代理数上限，前者指定沙箱复用。详见 [layout.md](layout.md) 与下节。
 
 ### workflows/settings.json — 动态工作流设置
 
-位于 `private_dot_pi/workflows/settings.json`（部署到 `~/.pi/workflows/settings.json`）；实值以源文件为唯一权威。
-
-| 字段 | 值 | 说明 |
-| --- | --- | --- |
-| `defaultConcurrency` | `8` | 工作流默认并发代理数（曾为 `5`、`10`，现为 `8`） |
-| `defaultAgentRetries` | `5` | 单个代理默认重试次数 |
-| `defaultAgentTimeoutMs` | （该键已不存在） | 单代理超时，已从文件中删除 |
-| `defaultTokenBudget` | （该键已不存在） | 单代理 token 预算，已从文件中删除 |
-| `progressPanelMode` | `compact` | 进度面板紧凑模式 |
-| `progressPanelMaxAgents` | `10` | 进度面板最大并发/展示代理数 |
-| `persistAgentSessions` | `false` | 不持久化代理会话 |
-| `allowBudgetCaps` | `true` | 允许为工作流代理启用预算上限 |
-
-`progressPanelMaxAgents: 10` 用于 `pi-dynamic-workflows` 的进度面板，与 `landstrip.json` 的 `toolFilesystemPolicy` 相互独立：前者限制工作流进度面板的并发/展示代理数上限，
-后者指定沙箱复用。详见 [layout.md](layout.md)。
+位于 `private_dot_pi/workflows/settings.json`（部署到 `~/.pi/workflows/settings.json`）。它配置工作流运行时的并发、重试、进度面板与预算上限等行为；实值以 `private_dot_pi/workflows/settings.json` 为唯一权威。`progressPanelMaxAgents` 用于 `pi-dynamic-workflows` 的进度面板，与 `landstrip.json` 的 `toolFilesystemPolicy` 相互独立。详见 [layout.md](layout.md)。
 
 ### workflows/model-tiers.json — 工作流三档模型分层
 
-位于 `private_dot_pi/workflows/model-tiers.json`（部署到 `~/.pi/workflows/model-tiers.json`），与实际文件一致；实值以源文件为唯一权威。
-
-- 三档 `small` / `medium` / `big` 分别绑定 `cc-switch-open-code-zen/ling-3.0-flash-fin-free`、`cc-switch-open-code-zen/ling-3.0-flash-fin-free`、`cc-switch-open-code-zen/nemotron-3-ultra-free`——思考预算随档位递增。
-- 成本分层意图明显：轻量任务下沉到 ling-3.0-flash-fin-free 降本，中档同使用 ling-3.0-flash-fin-free，重档 nemotron-3-ultra-free 拉满思考；主模型 `defaultModel: muse-spark-1.2-free`（settings.json）。
+位于 `private_dot_pi/workflows/model-tiers.json`（部署到 `~/.pi/workflows/model-tiers.json`）。三档 `small` / `medium` / `big` 分别绑定不同模型并随档位递增思考预算，成本分层意图明显：轻量与中档任务下沉到低成本模型，重档拉满思考，主模型由 `settings.json` 的 `defaultModel` 指定。实值以 `private_dot_pi/workflows/model-tiers.json` 为唯一权威。
 
 ### extensions/pi-permission-system/config.json — 工具级权限矩阵
 
-> 与源文件逐行核对一致：`bash` 组内脚本类为 `python3 *` / `node *` 两条 `ask`（文件为无注释的纯 JSON）；不存在任何被整段注释的历史遗留条目，其余命令由 `*` : `allow` 默认兜底。
-
-| 类别 | 策略 |
-| --- | --- |
-| `yoloMode` | `true`——显式全放行开关：所有 `ask` 结果自动批准、不再弹窗（`deny` 条目仍生效） |
-| `*` | `allow`（全局默认放行） |
-| `mcp` | 全部 `allow`（`*` / `mcp_status` / `exa:*`） |
-| `skill` | `allow` |
-| `read` | 默认 `allow`；`deny` → `*.env`、`*.env.*`、`~/.ssh/*`、`~/.aws/*`、`~/.gnupg/*`（`*.env.example` 例外 `allow`） |
-| `write` / `edit` | 默认 `allow`；`deny` → `*.env`、`*.env.*`、`~/.ssh/*`、`~/.aws/*`（注意：`*.env.example` 在 `write` / `edit` 段未单独放行） |
-| `path` | 默认 `allow`；`deny` → `*.env`、`*.env.*`、`*.pem`、`*.key`、`~/.ssh/*`、`/etc/*`、`/var/*`（`*.env.example` 放行） |
-| `external_directory` | 默认 `ask`；`~/.cargo/registry/*`、`~/.npm/*`、`~/.cache/*` 为 `allow` |
-| `bash` | 默认 `*` → `allow`；危险命令 `sudo *` / `mv *` / `rm *` / `unlink *` / `dd if=* of=*` / `mkfs.*` 为 `deny`；脚本类 `python3 *` / `node *` 为 `ask`（文件为纯 JSON，无注释分组、无历史注释条目） |
-
-这套策略的目标：让 agent 能完成日常编码、只读检索与受控编辑，同时杜绝误删、密钥外泄与敏感路径写入；脚本执行类命令（`python3 *` / `node *`）与 `external_directory` 的 `ask` 在 `yoloMode: true` 下被自动放行，实际硬约束仅剩 `deny` 条目。
-`promptMaxRows: 8`，`$schema` 指向 `pi-permission-system` 的 JSON Schema，与源文件一致。
+`private_dot_pi/private_agent/extensions/pi-permission-system/config.json` 定义工具级权限矩阵：默认全局 `allow`，对 `read` / `write` / `edit` / `path` 中的敏感路径（如 `*.env`、`~/.ssh/*`、`~/.aws/*`、`/etc/*`、`/var/*`）与高危 bash 命令（`sudo` / `mv` / `rm` / `dd` / `mkfs.*` 等）硬拒绝（`deny`），脚本类（`python3 *` / `node *`）与 `external_directory` 设为需确认（`ask`）；`yoloMode` 开启时所有 `ask` 自动批准、硬 `deny` 仍生效。其目标是让 agent 完成日常编码与受控编辑，同时杜绝误删、密钥外泄与敏感路径写入；完整矩阵与 `$schema` 指向 pi-permission-system 的 JSON Schema，实值以源文件 `private_dot_pi/private_agent/extensions/pi-permission-system/config.json` 为唯一权威。

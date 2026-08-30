@@ -23,10 +23,10 @@
 - **Verify**: diff doc table vs `private_dot_config`/`~/.pi/agent/sandbox.json` line-by-line; zero mismatches.
 
 ### P0-3 · Codex doc drift at 6 spots *(was A — High, confirmed by all 4 audits)*
-- **Fact**: `dot_codex/private_config.toml` is a real 210 B cc-switch config (`base_url 127.0.0.1:15721/v1`); **zero** `empty_` files exist in the repo. Stale: `README.md:76,128` · `docs/layout.md:13,67` · `docs/dev-tools.md:82,84`. **Not fixed by `8c7107e`.**
+- **Fact**: `dot_codex/private_config.toml` is a real 210 B cc-switch config (`base_url 127.0.0.1:15721/v1`); **zero** chezmoi empty-placeholder files exist in the repo. Stale: `README.md:76,128` · `docs/layout.md:13,67` · `docs/dev-tools.md:82,84`. **Not fixed by `8c7107e`.**
 - **Why P0**: setup instructions reference files that don't exist; a fresh-machine apply produces a config whose documented provenance is wrong (0600 "empty placeholder" vs live proxy config).
 - **Fix**: rewrite all six refs to the actual filename, size, and cc-switch purpose.
-- **Verify**: `grep -rn "empty_" README.md docs/` → 0 hits.
+- **Verify**: a repo-wide grep for empty-placeholder references in `README.md` and `docs/` returns 0 hits.
 
 ---
 
@@ -77,7 +77,7 @@
 2. **Commit 2 — "re-sync docs"**: codex 6 spots (P0-3) · sandbox table + receipt (P0-2) · gitconfig `dev-tools.md:15,20` · packages `:97–126` (P1-2).
 3. **Commit 3 — "doc completeness"**: `.claude` section (P1-5) · yoloMode decision (P1-3) · fzf refs (P1-4) · counts 14/82 (G1, G2) · fisher bootstrap note (P1-6) · J1/J2 annotations.
 4. **Apply**: `chezmoi apply` → `chezmoi diff` empty; `chezmoi managed | wc -l` = 82.
-5. **Guard**: add a pre-apply/CI check — `grep -rn "empty_" README.md docs/` = 0; doc-vs-file parity spot-checks for gitconfig/sandbox tables; trailing-newline lint.
+5. **Guard**: add a pre-apply/CI check — a repo-wide grep for empty-placeholder references in `README.md` and `docs/` returns 0 hits; doc-vs-file parity spot-checks for gitconfig/sandbox tables; trailing-newline lint.
 
 ## 5 · Confirmed healthy (no action)
 
