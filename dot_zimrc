@@ -1,3 +1,16 @@
+# =============================================================================
+# ~/.zimrc (chezmoi: dot_zimrc) —— Zim 框架模块清单
+# =============================================================================
+# Description : 仅供 zimfw 读取以生成 ~/.zim/init.zsh；shell 启动时不 source。
+#               分类：基础环境 / 提示符 / 补全 / 末尾模块（语法高亮、历史搜索、
+#               自动建议）。注释掉的模块（fzf / zsh-syntax-highlighting / zfm）
+#               未加载，由 fzf.zsh 与 fast-syntax-highlighting 等替代。
+# Author      : Payne
+# zimfw docs  : https://github.com/zimfw/zimfw
+# Update      : `zimfw install` 重新生成 ~/.zim/init.zsh；新增模块放 utility 之后、
+#               Prompt 之前（见下方注释）。
+# =============================================================================
+
 #
 # This is not sourced during shell startup and is only used to configure zimfw.
 #
@@ -38,6 +51,7 @@ zmodule asciiship
 #
 # Completion
 #
+# Homebrew completions — inject brew's site-functions into fpath (Apple Silicon / Intel).
 zmodule zimfw/homebrew
 if [[ -d "${HOMEBREW_PREFIX:-/opt/homebrew}/share/zsh/site-functions" ]]; then
   zmodule "${HOMEBREW_PREFIX:-/opt/homebrew}/share/zsh" --fpath site-functions
@@ -51,7 +65,8 @@ zmodule zsh-users/zsh-completions --fpath src
 # after all modules that add completion definitions.
 zmodule completion
 
-# <!-- zmodule fzf -->
+# <!-- zmodule fzf -->  # disabled: replaced by Aloxaf/fzf-tab + fzf.zsh
+# fzf-tab: replace Zsh's default completion menu with fzf-powered fuzzy search.
 zmodule Aloxaf/fzf-tab
 
 #
@@ -59,7 +74,7 @@ zmodule Aloxaf/fzf-tab
 #
 
 # Fish-like syntax highlighting for Zsh, must be sourced after completion.
-# <!-- zmodule zsh-users/zsh-syntax-highlighting -->
+# <!-- zmodule zsh-users/zsh-syntax-highlighting -->  # disabled: using fast-syntax-highlighting
 zmodule zdharma-continuum/fast-syntax-highlighting
 # Fish-like history search for Zsh, must be sourced after
 # fast-syntax-highlighting.
@@ -68,4 +83,5 @@ zmodule zsh-users/zsh-history-substring-search
 # performance: ZSH_AUTOSUGGEST_MANUAL_REBIND=1
 zmodule zsh-users/zsh-autosuggestions
 
-# <!-- zmodule pabloariasal/zfm -->
+# <!-- zmodule pabloariasal/zfm -->  # disabled: file-manager not needed
+

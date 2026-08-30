@@ -1,22 +1,21 @@
-# Alacritty Configuration File
-# Configuration for Alacritty, a GPU-accelerated terminal emulator.
-# For more information, see the Alacritty documentation:
-# config-alacritty: https://alacritty.org/config-alacritty.html
-# see also: https://alacritty.org/config-alacritty-bindings.html
-# see also: https://alacritty.org/cmd-alacritty-msg.html
-# see also: https://www.kevnu.com/zh/posts/18
+# Alacritty Configuration File (chezmoi: private_dot_config/alacritty/alacritty.toml -> ~/.config/alacritty/alacritty.toml)
+# GPU-accelerated terminal. Theme: Dracula (this file only — ghostty & starship use Catppuccin Mocha).
+# `private_dot_config` ensures parent dir 0700 on deploy.
+# Docs: https://alacritty.org/config-alacritty.html | bindings: .../config-alacritty-bindings.html
+# Reference: https://www.kevnu.com/zh/posts/18
 
 [env]
-TERM = "xterm-256color"
+TERM = "xterm-256color"  # ensure 256-color + truecolor in tmux/ssh
 
 [font]
 size = 15
+# Requires JetBrainsMono Nerd Font Mono installed (via Homebrew `font-jetbrains-mono-nerd-font`).
 normal = { family = "JetBrainsMono Nerd Font Mono", style = "Regular" }
 bold = { family = "JetBrainsMono Nerd Font Mono", style = "Bold" }
 italic = { family = "JetBrainsMono Nerd Font Mono", style = "Italic" }
 bold_italic = { family = "JetBrainsMono Nerd Font Mono", style = "Bold Italic" }
 
-# Note: this palette is Dracula, while ghostty uses 'Catppuccin Mocha' and starship uses palette catppuccin_mocha
+# Palette: Dracula — ghostty & starship use Catppuccin Mocha (intentional split).
 [colors]
 primary = { background = '0x282a36', foreground = '0xf8f8f2' }
 cursor = { background = '0x44475a', foreground = '0xf8f8f2' }
@@ -25,27 +24,17 @@ bright = { black = '0x4d4d4d', red = '0xff6e67', green = '0x5af78e', yellow = '0
 dim = { black = '0x21222c', red = '0xff5555', green = '0x50fa7b', yellow = '0xf1fa8c', blue = '0xbd93f9', magenta = '0xff79c6', cyan = '0x8be9fd', white = '0xbfbfbf' }
 
 [window]
-blur = true
-option_as_alt = "OnlyRight"
-# dimensions = { columns = 120, lines = 35 }
-# decorations = "Buttonless"
+blur = true                         # macOS translucent blur behind window
+option_as_alt = "OnlyRight"         # left Option stays for input (e.g. umlauts), right Option = Alt/Meta
+# dimensions = { columns = 120, lines = 35 }  # example: fixed startup size (disabled)
+# decorations = "Buttonless"                  # example: hide traffic lights (disabled)
 startup_mode = "Fullscreen"
 
 [selection]
-save_to_clipboard = true
-
-[terminal]
-# # shell configuration for Alacritty with tmux
-# shell = { program = "/opt/homebrew/bin/fish", args = [
-#  "-c",
-#  "tmux attach || tmux new -t $(date '+%H%M%S_%Y%m%d')",
-# ] }
-# shell = { program = "/bin/zsh", args = ["-l"] }
-# shell = { program = "/opt/homebrew/bin/fish", args = ["-l"] }
+save_to_clipboard = true  # copy selection directly to system clipboard
 
 [keyboard]
-# Key bindings for Alacritty
-# referrer: https://github.com/theniceboy/.config/blob/master/alacritty/alacritty.yml
+# Key bindings — see https://github.com/theniceboy/.config/blob/master/alacritty/alacritty.yml
 bindings = [
   # { key = "Return", mods = "Command", action = "ToggleSimpleFullscreen" },
   { mods = "Command", key = "Enter", action = "ToggleFullscreen" },
@@ -53,10 +42,6 @@ bindings = [
   # { key = "F", mods = "Function", action = "ToggleFullscreen" },
   # { key = "N", mods = "Alt", action = "ReceiveChar" },
   # { key = "P", mods = "Alt", action = "ReceiveChar" },
-  { mods = "Command", key = "t", action = "None" },
-  { mods = "Command", key = "n", action = "None" },
+  { mods = "Command", key = "t", action = "None" },  # disable: let shell/tmux handle new tab
+  { mods = "Command", key = "n", action = "None" },  # disable: let shell/tmux handle new window
 ]
-
-# [scrolling]
-# history = 0
-# multiplier = 3

@@ -1,3 +1,11 @@
+# ============================================
+# Starship prompt (chezmoi: private_dot_config/starship.toml -> ~/.config/starship.toml, dir 0700)
+# Theme: Catppuccin Mocha — uses starship's built-in `catppuccin_mocha` preset.
+# Palette roles: crust (segment bg), plus red, peach, yellow, green, sapphire, lavender.
+# The inline [palettes.catppuccin_mocha] override duplicated the built-in and was removed.
+# Layout: single-line powerline $os → $character (see `format`); `line_break.disabled = true`.
+# ============================================
+
 "$schema" = 'https://starship.rs/config-schema.json'
 
 format = """
@@ -134,7 +142,7 @@ symbol = ""
 style = "bg:green"
 format = '[[ $symbol( $version)(\(#$virtualenv\)) ](fg:crust bg:green)]($style)'
 
-# 未生效：docker_context 未列入顶部 format，永远不会渲染；如需启用须先加入 format
+# Inactive: docker_context not in top-level `format`, never renders. Add `$docker_context` to `format` to enable.
 [docker_context]
 symbol = ""
 style = "bg:sapphire"
@@ -144,7 +152,7 @@ format = '[[ $symbol( $context) ](fg:crust bg:sapphire)]($style)'
 symbol = "  "
 style = "fg:crust bg:sapphire"
 format = '[$symbol$environment ]($style)'
-ignore_base = false
+ignore_base = false  # show `base` env as well (set true to hide)
 
 [time]
 disabled = false
@@ -153,7 +161,7 @@ style = "bg:lavender"
 format = '[[  $time ](fg:crust bg:lavender)]($style)'
 
 [line_break]
-disabled = true
+disabled = true  # single-line layout; set false for two-line prompt
 
 [character]
 disabled = false
@@ -170,32 +178,4 @@ format = " in $duration "
 style = "bg:lavender"
 disabled = false
 show_notifications = true
-min_time_to_notify = 45000
-
-[palettes.catppuccin_mocha]
-rosewater = "#f5e0dc"
-flamingo = "#f2cdcd"
-pink = "#f5c2e7"
-mauve = "#cba6f7"
-red = "#f38ba8"
-maroon = "#eba0ac"
-peach = "#fab387"
-yellow = "#f9e2af"
-green = "#a6e3a1"
-teal = "#94e2d5"
-sky = "#89dceb"
-sapphire = "#74c7ec"
-blue = "#89b4fa"
-lavender = "#b4befe"
-text = "#cdd6f4"
-subtext1 = "#bac2de"
-subtext0 = "#a6adc8"
-overlay2 = "#9399b2"
-overlay1 = "#7f849c"
-overlay0 = "#6c7086"
-surface2 = "#585b70"
-surface1 = "#45475a"
-surface0 = "#313244"
-base = "#1e1e2e"
-mantle = "#181825"
-crust = "#11111b"
+min_time_to_notify = 45000  # 45s — also triggers OS notification

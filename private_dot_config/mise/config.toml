@@ -1,3 +1,8 @@
+# mise global tool versions (chezmoi: private_dot_config/mise/config.toml -> ~/.config/mise/config.toml, dir 0700)
+# Each entry tracks the latest stable release ("latest"); pin to a specific
+# version (e.g. node = "20") to lock it instead of always tracking latest.
+# `mise use -g <tool>@<version>` updates this file; `mise install` syncs.
+
 [tools]
 bun = "latest"
 deno = "latest"

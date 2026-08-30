@@ -1,5 +1,6 @@
 # ============================================
-# Ghostty Terminal - Complete Configuration
+# Ghostty Terminal - Complete Configuration (chezmoi: private_dot_config/ghostty/config -> ~/.config/ghostty/config, dir 0700)
+# Theme/palette: Catppuccin Mocha (dark) — see "Theme and Colors" section.
 # ============================================
 # File: ~/.config/ghostty/config
 # Reload: Cmd+Shift+, (macOS)
@@ -26,8 +27,10 @@ adjust-cell-width = -1
 adjust-cell-height = 2
 
 # --- Theme and Colors ---
-# Catppuccin with automatic light/dark switching
+# Palette/theme: Catppuccin Mocha (dark). The macOS window chrome follows the
+# system appearance via `window-theme = auto` (set further below).
 theme = Catppuccin Mocha
+# Alternative palettes (uncomment to switch):
 # theme = Dracula+
 # theme = "Warm Neon"
 
@@ -71,7 +74,7 @@ window-inherit-font-size = true
 mouse-hide-while-typing = true
 clipboard-read = allow
 clipboard-write = allow
-copy-on-select = clipboard
+copy-on-select = clipboard  # auto-copy selection to system clipboard
 
 # --- Quick Terminal (Quake-style dropdown) ---
 # 注意：quick-terminal-screen / animation-duration 统一在文件末尾赋值（历史重复键已去重）
@@ -89,13 +92,13 @@ clipboard-trim-trailing-spaces = true
 
 
 # --- Keybindings ---
-# Tabs
+# Tabs: Cmd+T new, Cmd+Shift+Arrow prev/next, Cmd+W close
 keybind = cmd+t=new_tab
 keybind = cmd+shift+left=previous_tab
 keybind = cmd+shift+right=next_tab
 keybind = cmd+w=close_surface
 
-# Splits
+# Splits: Cmd+D right, Cmd+Shift+D down, Cmd+Alt+Arrows navigate
 keybind = cmd+d=new_split:right
 keybind = cmd+shift+d=new_split:down
 keybind = cmd+alt+left=goto_split:left
@@ -105,17 +108,17 @@ keybind = cmd+alt+down=goto_split:bottom
 
 
 macos-option-as-alt = right
-# macos-option-as-alt = true
+# macos-option-as-alt = true  # alternative: both Options as Alt
 
-# Font size
+# Font size: Cmd+Plus/Minus/Zero
 keybind = cmd+plus=increase_font_size:1
 keybind = cmd+minus=decrease_font_size:1
 keybind = cmd+zero=reset_font_size
 
-# Quick terminal global hotkey
+# Quick terminal global hotkey (Ctrl+` toggles dropdown)
 keybind = global:ctrl+grave_accent=toggle_quick_terminal
 
-# Splits management
+# Splits management: equalize / zoom
 keybind = cmd+shift+e=equalize_splits
 keybind = cmd+shift+f=toggle_split_zoom
 

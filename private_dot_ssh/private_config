@@ -1,10 +1,16 @@
+# SSH client config (chezmoi: private_dot_ssh/private_config -> ~/.ssh/config, 0600)
+# `private_` prefix ensures 0600 permissions (required by ssh; 0644 is rejected).
+# OrbStack Include must stay at top before any Host block to provide `orb` hosts.
 # Added by OrbStack: 'orb' SSH host for Linux machines
 # This only works if it's at the top of ssh_config (before any Host blocks).
 # This won't be added again if you remove it.
 Include ~/.orbstack/ssh/config
 
 Host github.com
+    # ssh.github.com:443 — HTTPS port, traverses firewalls that block 22
     HostName ssh.github.com
     User git
     Port 443
+    # Adaptive SOCKS5 proxy (127.0.0.1:5376): if the local proxy is listening, tunnel via SOCKS5;
+    # otherwise fall back to a direct connection.
     ProxyCommand bash -c 'if nc -z 127.0.0.1 5376; then nc -X 5 -x 127.0.0.1:5376 %h %p; else nc %h %p; fi'

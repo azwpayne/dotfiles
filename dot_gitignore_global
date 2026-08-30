@@ -1,22 +1,40 @@
-*~
+# Global gitignore (chezmoi: dot_gitignore_global -> ~/.gitignore_global)
+# Loaded via `core.excludesfile` in dot_gitconfig; applies to all repos.
+# Keep project-specific ignores in repo-local .gitignore. Categories below.
+
+# --- OS / backups ---
 .DS_Store
-.idea
-*.iml
+*~
 *.swp
 *.swo
 *.bak
+
+# --- Editors / IDEs ---
+.vscode
+.idea
+*.iml
+
+# --- Logs / LaTeX intermediates ---
 *.aux
 *.log*
-.vscode
+
+# --- Python / virtualenvs ---
 *.venv
 __pycache__/
+.tox
+
+# --- Node / caches ---
 node_modules/
 *.cache
-# *.git 笔误行已删（原意无注释可考，疑为 *.orig/*.patch 等合并残留；如确需请显式写明）
+
+# --- Build outputs ---
 dist/
 build/
 target/
 bin/
-.tox
 
+# --- Claude Code ---
 **/.claude/.cc-writes/
+
+# Note: `*.git` typo line removed (was ambiguous — likely *.orig/*.patch merge residue).
+# If you need to ignore git internals, use an explicit pattern with a comment.

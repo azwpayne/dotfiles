@@ -1,8 +1,14 @@
+# Codex config (chezmoi: dot_codex/private_config.toml -> ~/.codex/config.toml, 0600)
+# `private_` prefix ensures 0600 permissions (no group/other read) on deploy.
+# Proxy: routes through local cc-switch at 127.0.0.1:15721 (OpenAI-compatible).
+# No secrets committed — auth via `requires_openai_auth` prompt / env.
+# `wire_api = "responses"` selects OpenAI Responses API; websockets disabled.
+
 model_provider = "cc-switch-official"
 
 [model_providers.cc-switch-official]
 name = "OpenAI"
-requires_openai_auth = true
-supports_websockets = false
-wire_api = "responses"
-base_url = "http://127.0.0.1:15721/v1"
+requires_openai_auth = true  # prompts for OPENAI_API_KEY / `codex auth`
+supports_websockets = false   # use HTTP streaming only
+wire_api = "responses"        # OpenAI Responses API (vs Chat Completions)
+base_url = "http://127.0.0.1:15721/v1"  # local cc-switch proxy; adjust if port differs
