@@ -1,59 +1,37 @@
--- Options Configuration
--- This file contains user-configurable options for the Neovim setup.
--- Modify these settings to customize your editor behavior.
+-- ~/.config/nvim/lua/config/options.lua
+-- Global editor options. Loaded *after* LazyVim's defaults, so values here
+-- override LazyVim where they overlap. See `:h <option>` for details.
+-- Only overrides and additions are set here; LazyVim handles the rest.
 
---
--- General appearance and behavior
-vim.opt.clipboard = "unnamedplus"             -- Use system clipboard
--- Enables the system clipboard so Neovim can copy/paste to/from the system clipboard.
+-- Clipboard: share yank/paste with OS (requires clipboard provider: pbcopy/xclip).
+vim.opt.clipboard = "unnamedplus"
 
-vim.opt.completeopt = "menu,menuone,noselect" -- Better completion experience
--- Improves the completion experience by setting better menu options:
--- - menu: Show completion menu
--- - menuone: Show menu even when there's only one match
--- - noselect: Don't automatically select the first match
+-- Completion: show menu even for a single item, don't auto-select first entry.
+-- Lets blink.cmp control selection explicitly (noselect + menuone).
+vim.opt.completeopt = "menu,menuone,noselect"
 
---
--- Line numbers and display settings
--- Set relative line numbers for easier navigation
-vim.opt.number = true                         -- Show absolute line number
-vim.opt.relativenumber = true                 -- Show relative line numbers
--- Displays both the absolute line number of the current line and relative
--- line numbers for other lines, making it easier to jump to specific lines.
+-- Line numbers: absolute on current line + relative elsewhere for fast motions (e.g. 5j).
+vim.opt.number = true
+vim.opt.relativenumber = true
 
---
--- Set tab and indentation settings
-vim.opt.tabstop = 4                           -- Number of spaces that a <Tab> in the file counts for
-vim.opt.shiftwidth = 4                        -- Number of spaces to use for each step of (auto)indent
-vim.opt.expandtab = true                      -- Use spaces instead of tabs
-vim.opt.smartindent = true                    -- Use smart indentation
-vim.opt.autoindent = true                     -- Use auto indentation
-vim.opt.wrap = false                          -- Disable line wrapping
-vim.opt.scrolloff = 8                         -- Keep 8 lines visible when scrolling
--- Ensures at least 8 lines are visible above and below the cursor when scrolling,
--- making it easier to maintain context within the file.
+-- Indentation: 4-space spaces, no hard tabs. Global default; overrides per-filetype
+-- can be added in autocmds.lua if a language needs a different width.
+vim.opt.tabstop = 4 -- display width of <Tab>
+vim.opt.shiftwidth = 4 -- size of >> / << and autoindent step
+vim.opt.expandtab = true -- insert spaces instead of <Tab>
+vim.opt.smartindent = true -- C-like smart indent (autoindent's smarter cousin)
+vim.opt.autoindent = true -- copy indent from current line on new line
 
---
--- Search settings
--- Improve search functionality and user experience
-vim.opt.ignorecase = true                     -- Ignore case when searching
-vim.opt.smartcase = true                      -- Override ignorecase if search contains uppercase letters
-vim.opt.hlsearch = true                       -- Highlight search results
-vim.opt.incsearch = true                      -- Show search results as you type
-vim.opt.inccommand = "nosplit"                -- Show the effects of a command incrementally
-vim.opt.showmatch = true                      -- Show matching brackets when text indicator is over them
--- These settings work together to provide a powerful search experience:
--- - ignorecase/smartcase: Smart case-insensitive searching
--- - hlsearch: Highlights all search results in the file
--- - incsearch: Moves the cursor to the match as you type, showing incremental results
--- - showmatch: Briefly jumps to matching bracket when the cursor is over them
+-- Display & scrolling
+vim.opt.wrap = false -- no soft wrap; use `gq` or `:set wrap` per-buffer if needed
+vim.opt.scrolloff = 8 -- keep 8 lines above/below cursor for context while scrolling
+vim.opt.termguicolors = true -- 24-bit RGB required for tokyonight/catppuccin
+vim.opt.colorcolumn = "100" -- ruler at 100 cols as line-length guide
 
---
--- Color scheme and visual settings
-vim.opt.termguicolors = true                  -- Enable 24-bit RGB colors in the terminal
--- Enables true color support (24-bit RGB) which is required for many colorschemes
--- to display colors correctly in the terminal.
-
-vim.opt.colorcolumn = "100"                   -- Line length marker at 100 columns
--- Highlights column 100 to serve as a visual marker for line length limits,
--- helping to keep code within a reasonable width.
+-- Search: case-insensitive unless pattern contains uppercase; highlight + live preview.
+vim.opt.ignorecase = true
+vim.opt.smartcase = true -- overrides ignorecase when search contains uppercase
+vim.opt.hlsearch = true -- highlight all matches (clear with <leader><space>)
+vim.opt.incsearch = true -- show matches incrementally while typing
+vim.opt.inccommand = "nosplit" -- live preview of :s/// in buffer (no split window)
+vim.opt.showmatch = true -- briefly jump to matching bracket when cursor is on one

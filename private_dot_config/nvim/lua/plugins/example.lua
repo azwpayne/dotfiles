@@ -1,3 +1,8 @@
+-- ~/.config/nvim/lua/plugins/example.lua
+-- Every file under lua/plugins/ is auto-loaded by lazy.nvim; returned tables are merged.
+-- Active specs below DO take effect (template guard `if true then return {} end` is disabled).
+-- Commented blocks are inert examples — uncomment to enable.
+
 -- starter comment kept only for history: unlike the pristine template, several specs below DO take effect (guard is commented out)
 -- stylua: ignore
 -- if true then return {} end
@@ -144,7 +149,7 @@ return {
     -- ============================================================================
     -- Add more treesitter parsers
     -- ============================================================================
-    -- Ensure these parsers are installed for syntax highlighting
+    -- Treesitter parsers (single spec — includes tsx/typescript; duplicate spec was removed)
     {
         "nvim-treesitter/nvim-treesitter",
         opts = {
@@ -167,17 +172,9 @@ return {
         },
     },
 
-    -- Extend default treesitter config with additional parsers
-    {
-        "nvim-treesitter/nvim-treesitter",
-        opts = function(_, opts)
-            -- Add tsx and typescript to ensure_installed
-            vim.list_extend(opts.ensure_installed, {
-                "tsx",
-                "typescript",
-            })
-        end,
-    },
+    -- NOTE: Former second treesitter spec that re-added tsx/typescript was merged
+    -- into the single spec above (which already lists tsx + typescript). Keeping one
+    -- spec avoids duplicate vim.list_extend work and lazy.nvim merge overhead.
 
     -- ============================================================================
     -- Configure lualine with custom sections

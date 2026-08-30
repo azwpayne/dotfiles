@@ -1,59 +1,40 @@
--- Autocmd Configuration
--- This file contains custom autocmds for the Neovim setup.
--- Autocmds are automatically loaded on the VeryLazy event.
+-- ~/.config/nvim/lua/config/autocmds.lua
+-- Custom autocmds loaded on the VeryLazy event (after LazyVim defaults).
+-- LazyVim already defines its own autocmds; this file only adds user overrides.
+-- Each autocmd uses a dedicated augroup with { clear = true } so reloading
+-- the config does not duplicate handlers.
 
---
--- Highlight on yank (copy); TextYankPost fires for any-mode yanks (normal yy included), not just visual
--- When text is yanked, briefly highlight it using the IncSearch highlight group
--- to provide visual feedback that the yank was registered.
--- A timeout of 300ms ensures the highlight doesn't persist too long.
---
-
-vim.api.nvim_create_autocmd('TextYankPost', {
-    callback = function()
-        vim.highlight.on_yank({ timeout = 300, higroup = 'IncSearch' })
-    end
+-- Highlight yanked text briefly for visual feedback.
+-- TextYankPost fires for any yank (including normal-mode `yy`), not just visual.
+vim.api.nvim_create_autocmd("TextYankPost", {
+  group = vim.api.nvim_create_augroup("user_yank_highlight", { clear = true }),
+  desc = "Highlight yanked text with IncSearch (300ms)",
+  callback = function()
+    vim.highlight.on_yank({ timeout = 300, higroup = "IncSearch" })
+  end,
 })
 
---
--- Resize splits when window is resized
--- Creates an augroup called "ResizeWindows" that will be cleared before use.
--- On VimResized event (fires when window is resized), equalize all tabs
--- to ensure splits maintain proper proportions after resizing.
---
-
-
+-- Keep splits proportional when the terminal window is resized.
 vim.api.nvim_create_autocmd("VimResized", {
-    group = vim.api.nvim_create_augroup("ResizeWindows", { clear = true }),
-    pattern = "*",
-    callback = function()
-        vim.cmd("tabdo wincmd =")
-    end
+  group = vim.api.nvim_create_augroup("user_resize_splits", { clear = true }),
+  desc = "Equalize all splits on VimResized",
+  callback = function()
+    vim.cmd("tabdo wincmd =")
+  end,
 })
 
---
--- Highlight cursor line only in normal mode (not while inserting)
--- Toggles cursorline highlighting during insert/exit insert mode.
--- When entering insert mode, cursorline is disabled; when leaving, it's re-enabled.
--- This prevents the cursor line from being highlighted while typing.
+-- Show cursorline only in Normal mode; hide it while typing.
+-- LazyVim enables cursorline by default; this toggles it off on InsertEnter.
 vim.api.nvim_create_autocmd({ "InsertEnter", "InsertLeave" }, {
-    group = vim.api.nvim_create_augroup("HighlightCursorLine", { clear = true }),
-    pattern = "*",
-    callback = function(ev)
-        vim.opt.cursorline = (ev.event == "InsertLeave")
-    end
+  group = vim.api.nvim_create_augroup("user_cursorline_toggle", { clear = true }),
+  desc = "Hide cursorline in Insert mode, restore in Normal mode",
+  callback = function(ev)
+    vim.opt.cursorline = ev.event == "InsertLeave"
+  end,
 })
 
---
--- Set tab and indentation settings for Python files
--- Apply Python-specific indentation when FileType is "python".
--- Sets tabstop to 4 spaces, shiftwidth to 4, and uses expandtab for spaces.
-vim.api.nvim_create_autocmd("FileType", {
-    group = vim.api.nvim_create_augroup("FileTypeSettings", { clear = true }),
-    pattern = "python",
-    callback = function()
-        vim.opt_local.tabstop = 4
-        vim.opt_local.shiftwidth = 4
-        vim.opt_local.expandtab = true
-    end
-})
+-- NOTE: Python indentation (tabstop=4 / shiftwidth=4 / expandtab) is already
+-- set globally in lua/config/options.lua and applies to every filetype.
+-- A dedicated FileType autocmd for `python` would be redundant unless you
+-- need a per-filetype override (e.g. different width). Add it here only
+-- when you diverge from the global default.

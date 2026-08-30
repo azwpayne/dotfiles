@@ -1,86 +1,67 @@
--- Lazy.nvim Configuration
--- This file configures lazy.nvim, the Neovim plugin manager.
--- It sets up plugin loading, defaults, installation, and update checking.
+-- ~/.config/nvim/lua/config/lazy.lua
+-- Bootstrap lazy.nvim and configure all plugins via LazyVim.
+-- Entry point required by init.lua (`require("config.lazy")`).
 
--- Bootstrap lazy.nvim if not already installed
+-- Bootstrap lazy.nvim into stdpath("data")/lazy/lazy.nvim if missing.
+-- Uses shallow, blobless clone of the stable branch for speed.
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
-    local lazyrepo = "https://github.com/folke/lazy.nvim.git"
-    local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
-    if vim.v.shell_error ~= 0 then
-        vim.api.nvim_echo({
-            { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
-            { out,                            "WarningMsg" },
-            { "\nPress any key to exit..." },
-        }, true, {})
-        vim.fn.getchar()
-        os.exit(1)
-    end
+  local lazyrepo = "https://github.com/folke/lazy.nvim.git"
+  local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
+  if vim.v.shell_error ~= 0 then
+    vim.api.nvim_echo({
+      { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
+      { out, "WarningMsg" },
+      { "\nPress any key to exit..." },
+    }, true, {})
+    vim.fn.getchar()
+    os.exit(1)
+  end
 end
 vim.opt.rtp:prepend(lazypath)
 
--- Plugin specification setup
 require("lazy").setup({
-    -- Specify plugins to load
-    spec = {
-        -- Add LazyVim and import its default plugins
-        { "LazyVim/LazyVim",                                import = "lazyvim.plugins" },
-        { import = "lazyvim.plugins.extras.lang.typescript" },
-        { import = "lazyvim.plugins.extras.lang.json" },
-        { import = "lazyvim.plugins.extras.lang.python" },
-        { import = "lazyvim.plugins.extras.lang.rust" },
-        { import = "lazyvim.plugins.extras.lang.go" },
-        { import = "lazyvim.plugins.extras.lang.cmake" },
-        { import = "lazyvim.plugins.extras.lang.docker" },
-        { import = "lazyvim.plugins.extras.lang.yaml" },
-        { import = "lazyvim.plugins.extras.lang.markdown" },
-        { import = "lazyvim.plugins.extras.ui.mini-animate" },
-        -- Import/override with your custom plugins
-        { import = "plugins" },
-    },
+  spec = {
+    -- LazyVim core + default plugins
+    { "LazyVim/LazyVim", import = "lazyvim.plugins" },
+    -- Language & UI extras (source of truth; lazyvim.json `extras: []` is runtime metadata).
+    { import = "lazyvim.plugins.extras.lang.typescript" },
+    { import = "lazyvim.plugins.extras.lang.json" },
+    { import = "lazyvim.plugins.extras.lang.python" },
+    { import = "lazyvim.plugins.extras.lang.rust" },
+    { import = "lazyvim.plugins.extras.lang.go" },
+    { import = "lazyvim.plugins.extras.lang.cmake" },
+    { import = "lazyvim.plugins.extras.lang.docker" },
+    { import = "lazyvim.plugins.extras.lang.yaml" },
+    { import = "lazyvim.plugins.extras.lang.markdown" },
+    { import = "lazyvim.plugins.extras.ui.mini-animate" },
+    -- Custom specs from lua/plugins/*.lua
+    { import = "plugins" },
+  },
 
-    -- Default settings for all plugins
-    defaults = {
-        -- By default, only LazyVim plugins will be lazy-loaded.
-        -- Your custom plugins will load during startup.
-        -- Set to `true` to have all custom plugins lazy-loaded by default.
-        lazy = false,
-        -- It's recommended to leave version=false for now, since a lot the plugin
-        -- that support versioning, have outdated releases, which may break your
-        -- Neovim install.
-        version = false, -- always use the latest git commit
-        -- version = "*", -- try installing the latest stable version for plugins
-        -- that support semver
-    },
+  defaults = {
+    lazy = false, -- custom plugins load at startup; set true to lazy-load all by default
+    version = false, -- always latest git commit; version tags are often stale
+  },
 
-    -- Plugin installation settings
-    install = {
-        -- Automatically install colorschemes when LazyVim starts
-        colorscheme = { "tokyonight", "habamax" },
-    },
+  install = {
+    colorscheme = { "tokyonight", "habamax" }, -- fallback during first install before plugins load
+  },
 
-    -- Plugin update checking
-    checker = {
-        -- Enable or disable automatic plugin update checking
-        enabled = true,
-        -- Notify on update (set to false to disable notifications)
-        notify = false,
-    }, -- automatically check for plugin updates
+  checker = {
+    enabled = true, -- auto-check for plugin updates
+    notify = false, -- silent; see :Lazy check manually
+  },
 
-    -- Performance settings
-    performance = {
-        -- Disable some built-in RTP plugins for improved startup speed
-        rtp = {
-            disabled_plugins = {
-                -- "gzip",         -- Compression plugin
-                -- "matchit",      -- Matchit plugin for :%s
-                -- "matchparen",   -- Match paren highlighting
-                -- "netrwPlugin",  -- Netrw plugin
-                "tarPlugin",
-                "tohtml",
-                "tutor",
-                "zipPlugin",
-            },
-        },
+  performance = {
+    rtp = {
+      disabled_plugins = {
+        -- Kept enabled: gzip, matchit, matchparen, netrwPlugin (needed by plugins/editing).
+        "tarPlugin",
+        "tohtml",
+        "tutor",
+        "zipPlugin",
+      },
     },
+  },
 })
