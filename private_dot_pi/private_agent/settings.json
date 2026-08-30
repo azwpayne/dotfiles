@@ -14,9 +14,9 @@
     { "source": "npm:pi-lens", "extensions": [ "-dist/index.js" ] },
     "npm:@quintinshaw/pi-dynamic-workflows"
   ],
-  "defaultProvider": "cc-switch-open-code-zen",
+  "defaultProvider": "opencode",
   "defaultTools": [ "read", "write", "edit", "bash", "grep", "find", "ls" ],
-  "defaultModel": "muse-spark-1.2-free",
+  "defaultModel": "muse-spark-1.2-contributor-free",
   "defaultThinkingLevel": "max",
   "httpProxy": "http://127.0.0.1:5376"
 }

@@ -1,29 +1,63 @@
 {
-  "enabled"   : true,
-  "shell"     : {"readAccess": "host"},
+  "enabled": true,
+  "shell": {
+    "readAccess": "host"
+  },
   "filesystem": {
-    "denyRead"  : ["/Users", "/home", "/root", "/etc", "/var", "/private/var", "/private/tmp"],
-    "allowRead" : [
+    "denyRead": [
+      "/Users",
+      "/home",
+      "/root",
+      "/etc",
+      "/var",
+      "/private/var",
+      "/private/tmp"
+    ],
+    "allowRead": [
       ".",
       "~/.gitconfig",
       "~/.config/git/config",
       "/dev/null",
-      "${HOME}/.pi"
+      "~/.pi"
     ],
-    "allowWrite": [".", "/dev/null", "/tmp", "~/.npm", "~/.cargo/registry", "~/.cache", "~/.config/git/config"],
-    "denyWrite" : [
-      "**/.env",                  "**/.env.*",                "**/*.pem",                 "**/*.key",
-      ".pi/sandbox.json",         "~/.pi/agent/sandbox.json", "~/.ssh",                   "~/.bashrc",
-      "~/.zshrc",                 "~/.profile",               "~/.gitconfig",             "**/.git"
+    "allowWrite": [
+      ".",
+      "/dev/null",
+      "/tmp",
+      "~/.npm",
+      "~/.cargo/registry",
+      "~/.cache",
+      "~/.config/git/config"
+    ],
+    "denyWrite": [
+      "**/.env",
+      "**/.env.*",
+      "**/*.pem",
+      "**/*.key",
+      ".pi/sandbox.json",
+      "~/.pi/agent/sandbox.json",
+      "~/.ssh",
+      "~/.bashrc",
+      "~/.zshrc",
+      "~/.profile",
+      "~/.gitconfig",
+      "**/.git"
     ]
   },
-  "network"   : {
-    "allowNetwork"       : false,
-    "allowLocalBinding"  : true,
+  "network": {
+    "allowNetwork": false,
+    "allowLocalBinding": true,
     "allowAllUnixSockets": true,
-    "allowUnixSockets"   : [],
-    "allowedDomains"     : ["github.com", "*.github.com", "*.githubusercontent.com"],
-    "deniedDomains"      : []
+    "allowUnixSockets": [],
+    "allowedDomains": [
+      "github.com",
+      "*.github.com",
+      "*.githubusercontent.com"
+    ],
+    "deniedDomains": []
   },
-  "windows"   : {"appContainerMode": "standard", "allowLoopback": false}
+  "windows": {
+    "appContainerMode": "standard",
+    "allowLoopback": false
+  }
 }

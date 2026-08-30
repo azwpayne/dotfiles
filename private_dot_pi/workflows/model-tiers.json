@@ -1,7 +1,7 @@
 {
   "tiers": {
-    "small": "cc-switch-open-code-zen/ling-3.0-flash-fin-free",
-    "medium": "cc-switch-open-code-zen/ling-3.0-flash-fin-free",
-    "big": "cc-switch-open-code-zen/nemotron-3-ultra-free"
+    "small": "opencode/nemotron-3.5-lightning-free",
+    "medium": "opencode/hy3-free",
+    "big": "opencode/nemotron-3-ultra-free"
   }
 }
