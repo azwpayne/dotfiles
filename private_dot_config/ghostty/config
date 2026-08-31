@@ -74,7 +74,7 @@ window-inherit-font-size = true
 mouse-hide-while-typing = true
 clipboard-read = allow
 clipboard-write = allow
-copy-on-select = clipboard  # auto-copy selection to system clipboard
+copy-on-select = true  # auto-copy selection to system clipboard
 
 # --- Quick Terminal (Quake-style dropdown) ---
 # 注意：quick-terminal-screen / animation-duration 统一在文件末尾赋值（历史重复键已去重）
