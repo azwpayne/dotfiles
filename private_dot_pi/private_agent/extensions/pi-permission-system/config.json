@@ -44,8 +44,8 @@
       "unlink *": "deny",
       "dd if=* of=*": "deny",
       "mkfs.*": "deny",
-      "python3 *": "ask",
-      "node *": "ask"
+      "python3 *": "allow",
+      "node *": "allow"
     },
     "path": {
       "*": "allow",
@@ -59,12 +59,12 @@
       "/var/*": "deny"
     },
     "external_directory": {
-      "*": "ask",
+      "*": "allow",
       "~/.cargo/registry/*": "allow",
       "~/.npm/*": "allow",
       "~/.cache/*": "allow"
     }
   },
   "debugLog": false,
-  "permissionReviewLog": false
+  "permissionReviewLog": true
 }

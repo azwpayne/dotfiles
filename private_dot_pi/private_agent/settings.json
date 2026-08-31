@@ -38,7 +38,7 @@
       ]
     },
     "npm:@quintinshaw/pi-dynamic-workflows",
-    "npm:@narumitw/pi-statusline"
+    "npm:pi-background-tasks@latest"
   ],
   "defaultProvider": "opencode",
   "defaultTools": [

@@ -1,7 +1,9 @@
 {
+  "defaultConcurrency": 8,
   "defaultAgentRetries": 5,
   "progressPanelMode": "compact",
   "progressPanelMaxAgents": 10,
+  "keywordTriggerWord": "ultracode",
   "persistAgentSessions": false,
   "allowBudgetCaps": true
 }
