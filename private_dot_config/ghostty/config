@@ -8,8 +8,8 @@
 
 env = LANG=zh_CN.UTF-8
 
-command = /bin/zsh -l
-# command = /opt/homebrew/bin/fish -l
+# command = /bin/zsh -l
+command = /opt/homebrew/bin/fish -l
 # command = /opt/homebrew/bin/tmux new -As main
 
 #--- Typography ---
@@ -20,7 +20,7 @@ font-size = 15
 # 精细调整字重与渲染（macOS 独有优化）
 font-thicken = true
 font-thicken-strength = 1
-alpha-blending = linear
+alpha-blending = linear 
 
 # 微调字符间距（-1 到 2 之间，依字体而定）
 adjust-cell-width = -1
@@ -66,6 +66,7 @@ cursor-color = #ff0000
 mouse-scroll-multiplier = 1.0
 
 # 工作目录继承，保持上下文连贯
+working-directory = ~/workspaces
 window-inherit-working-directory = true
 window-inherit-font-size = true
 
@@ -74,7 +75,7 @@ window-inherit-font-size = true
 mouse-hide-while-typing = true
 clipboard-read = allow
 clipboard-write = allow
-copy-on-select = true  # auto-copy selection to system clipboard
+copy-on-select = clipboard
 
 # --- Quick Terminal (Quake-style dropdown) ---
 # 注意：quick-terminal-screen / animation-duration 统一在文件末尾赋值（历史重复键已去重）
@@ -89,6 +90,7 @@ clipboard-trim-trailing-spaces = true
 # --- Shell Integration ---
 # shell-integration = detect
 # shell-integration-features = no-cursor
+shell-integration-features = no-cursor
 
 
 # --- Keybindings ---

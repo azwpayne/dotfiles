@@ -15,4 +15,5 @@ if status is-interactive
     # `type -q` guard makes this a no-op on machines without starship,
     # keeping non-interactive / CI startup fast.
     type -q starship; and starship init fish | source
+    type -q zoxide; and zoxide init fish | source
 end

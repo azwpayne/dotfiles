@@ -6,9 +6,24 @@
 
 [env]
 TERM = "xterm-256color"  # ensure 256-color + truecolor in tmux/ssh
+COLORTERM = "truecolor"
+LANG = "zh_CN.UTF-8"
+LC_ALL = "zh_CN.UTF-8"
+
+[terminal]
+# # shell configuration for Alacritty with tmux
+shell = { program = "/opt/homebrew/bin/fish", args = [
+  "-c",
+  "tmux attach || tmux new -t main",
+] }
+# shell = { program = "/bin/zsh", args = ["-l"] }
+# shell = { program = "/opt/homebrew/bin/fish", args = ["-l"] }
+
 
 [font]
 size = 15
+
+
 # Requires JetBrainsMono Nerd Font Mono installed (via Homebrew `font-jetbrains-mono-nerd-font`).
 normal = { family = "JetBrainsMono Nerd Font Mono", style = "Regular" }
 bold = { family = "JetBrainsMono Nerd Font Mono", style = "Bold" }
@@ -17,18 +32,29 @@ bold_italic = { family = "JetBrainsMono Nerd Font Mono", style = "Bold Italic" }
 
 # Palette: Dracula — ghostty & starship use Catppuccin Mocha (intentional split).
 [colors]
-primary = { background = '0x282a36', foreground = '0xf8f8f2' }
-cursor = { background = '0x44475a', foreground = '0xf8f8f2' }
-normal = { black = '0x21222c', red = '0xff5555', green = '0x50fa7b', yellow = '0xf1fa8c', blue = '0xbd93f9', magenta = '0xff79c6', cyan = '0x8be9fd', white = '0xbfbfbf' }
-bright = { black = '0x4d4d4d', red = '0xff6e67', green = '0x5af78e', yellow = '0xf4f99d', blue = '0xcaa9fa', magenta = '0xff92d0', cyan = '0x9aedfe', white = '0xe6e6e6' }
-dim = { black = '0x21222c', red = '0xff5555', green = '0x50fa7b', yellow = '0xf1fa8c', blue = '0xbd93f9', magenta = '0xff79c6', cyan = '0x8be9fd', white = '0xbfbfbf' }
+# primary = { background = '0x282a36', foreground = '0xf8f8f2' }
+# cursor = { background = '0x44475a', foreground = '0xf8f8f2' }
+# normal = { black = '0x21222c', red = '0xff5555', green = '0x50fa7b', yellow = '0xf1fa8c', blue = '0xbd93f9', magenta = '0xff79c6', cyan = '0x8be9fd', white = '0xbfbfbf' }
+# bright = { black = '0x4d4d4d', red = '0xff6e67', green = '0x5af78e', yellow = '0xf4f99d', blue = '0xcaa9fa', magenta = '0xff92d0', cyan = '0x9aedfe', white = '0xe6e6e6' }
+# dim = { black = '0x21222c', red = '0xff5555', green = '0x50fa7b', yellow = '0xf1fa8c', blue = '0xbd93f9', magenta = '0xff79c6', cyan = '0x8be9fd', white = '0xbfbfbf' }
+
+primary = { background = "#1e1e2e", foreground = "#cdd6f4" }
+normal = { black = "#45475a", red = "#f38ba8", green = "#a6e3a1", yellow = "#f9e2af", blue = "#89b4fa", magenta = "#cba6f7", cyan = "#94e2d5", white = "#bac2de" }
+bright = { black = "#585b70", red = "#f38ba8", green = "#a6e3a1", yellow = "#f9e2af", blue = "#89b4fa", magenta = "#cba6f7", cyan = "#94e2d5", white = "#a6adc8" }
+
 
 [window]
+resize_increments = true 
+
+padding = { x = 10, y = 10 }
+# opacity = 0.85
 blur = true                         # macOS translucent blur behind window
 option_as_alt = "OnlyRight"         # left Option stays for input (e.g. umlauts), right Option = Alt/Meta
 # dimensions = { columns = 120, lines = 35 }  # example: fixed startup size (disabled)
+decorations = "none"
 # decorations = "Buttonless"                  # example: hide traffic lights (disabled)
 startup_mode = "Fullscreen"
+dynamic_title = true
 
 [selection]
 save_to_clipboard = true  # copy selection directly to system clipboard

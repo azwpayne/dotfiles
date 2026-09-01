@@ -14,4 +14,8 @@ private_dot_config/private_fish/private_completions/*
 !private_dot_config/private_fish/private_completions/symlink_*.fish
 private_dot_config/private_fish/private_conf.d/*
 !private_dot_config/private_fish/private_conf.d/.keep
-!private_dot_config/private_fish/private_conf.d/00_env.fish
+!private_dot_config/private_fish/private_conf.d/0*\.fish
+
+# chezmoi local state (not tracked)
+chezmoistate.boltdb
+*.boltdb
