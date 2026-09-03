@@ -170,7 +170,7 @@ chezmoi diff                         # 应用后应为空（或仅剩有意保�
 chezmoi ignored                      # 确认 docs/、README.md 等在忽略列表
 
 # shell 栈
-zsh -n ~/.config/zsh/.zshrc ~/.config/zsh/*.zsh ~/.config/zsh/.zimrc # 语法检查无报错（~/.zshrc 为符号链接亦可）
+for f in ~/.config/zsh/.zshrc ~/.config/zsh/*.zsh ~/.config/zsh/.zimrc; do zsh -n "$f" || exit 1; done # 语法检查无报错；逐文件（zsh -n 多文件传参时只查首个，实测）
 zsh -ic 'exit'                       # 干净启动无报错
 zsh -ic 'type k; echo $EDITOR'       # k -> kubectl（kubecolor 包装）；EDITOR=nvim
                                      # 〔未装 kubectl 则跳过：type k 报 not found 属预期〕

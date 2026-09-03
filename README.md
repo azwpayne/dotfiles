@@ -75,9 +75,12 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 ├── symlink_dot_zshrc.tmpl             →  ~/.zshrc  (→ ~/.config/zsh/.zshrc)  模板符号链接，内容为 {{ .chezmoi.homeDir }}/.config/zsh/.zshrc
 ├── symlink_dot_zimrc.tmpl             →  ~/.zimrc  (→ ~/.config/zsh/.zimrc)  同上（XDG 收敛，兼容 ~/.zshrc 路径）
 ├── dot_gitconfig                      →  ~/.gitconfig                 用户信息 / 代理 / LFS / push 行为
-├── dot_gitignore_global               →  ~/.gitignore_global          全局忽略规则
+├── dot_gitignore_global               →  ~/.gitignore_global          全局忽略规则（构建产物根锚定，无 bin/）
+├── dot_tmux.conf                      →  ~/.tmux.conf                  tmux 配置（Fish 登录 shell、tpm 插件、Catppuccin Mocha 状态栏）
 ├── dot_codex/
 │   └── private_config.toml            →  ~/.codex/config.toml         cc-switch 本地代理配置（0600，详见 dot_codex/private_config.toml）
+├── private_dot_claude/
+│   └── settings.json                  →  ~/.claude/settings.json       Claude Code 设置（0600；statusLine bun 动态解析/插件/环境）
 ├── private_dot_config/
 │   ├── zsh/                           →  ~/.config/zsh/               ★ 三模块 zsh 配置 + 入口文件（含独立 README，不部署）
 │   │   ├── dot_zshrc                  →  ~/.config/zsh/.zshrc         Zsh 入口：Zim 引导 + 工具 eval + 模块加载（symlink 目标，真实文件）

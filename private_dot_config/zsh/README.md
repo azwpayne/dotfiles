@@ -21,7 +21,7 @@
 ``~/.config/zsh/.zshrc`（兼容路径 `~/.zshrc`）按 **compinit（Zim 框架）→ `aliases.zsh` → `fzf.zsh` → `sdk.zsh`** 的顺序 source 本仓库文件。**顺序即语义**，重排会静默改变行为：
 
 - `aliases.zsh` 必须先于 `fzf.zsh`（后者 Ctrl-G 绑定在 source 时展开 `$EDITOR`）；
-- `sdk.zsh` 必须在 compinit 之后且最后加载（内含 `compdef` 且其 `k` 别名有意覆盖同名定义）。
+- `sdk.zsh` 必须在 compinit 之后且最后加载（内含 `compdef` 注册，需 compinit 已完成；`k` 别名仅在此定义，`aliases.zsh` 有意不重复）。
 
 精确的 `source` 语句与守卫说明见 `private_dot_config/zsh/dot_zshrc` 底部加载块与各文件头部的 `Usage` 注释，本文不复述代码清单。
 

@@ -57,8 +57,8 @@ git -C ~/.local/share/chezmoi add -A && git -C ~/.local/share/chezmoi commit -m 
 
 ```bash
 # zsh 模块（语法 + 干净启动 + 关键定义）
-zsh -n ~/.config/zsh/{aliases,fzf,sdk}.zsh  # 覆盖 aliases.zsh 中的 auto_update / update-all（含关联数组、耗时统计）语法
-zsh -n ~/.config/zsh/.zshrc ~/.config/zsh/.zimrc  # 亦可 zsh -n ~/.zshrc（符号链接）
+for f in ~/.config/zsh/{aliases,fzf,sdk}.zsh ~/.config/zsh/.zshrc ~/.config/zsh/.zimrc; do zsh -n "$f" || exit 1; done
+# 逐文件校验（实测 zsh -n 多文件传参时只查首个）；覆盖 aliases.zsh 中的 auto_update / update-all（含关联数组、耗时统计）语法
 zsh -ic 'exit'                              # 干净启动无报错
 zsh -ic 'type ls df du; echo $EDITOR'       # 关键别名/变量（EDITOR=nvim）
 zsh -ic 'type auto_update update-all'       # 验证更新函数已加载（update-all 支持参数过滤、失败计数与耗时统计）
@@ -152,7 +152,7 @@ HTTP/HTTPS 远程均生效），已与 `private_dot_ssh/private_config` 的 `Pro
 
 ### Go / Python 路径强绑定个人环境
 
-- `GOPATH=~/WorkSpaces/project/go`、`GOPROXY=https://goproxy.cn,direct`（`private_dot_config/zsh/sdk.zsh`）
+- `GOPATH=~/.local/share/go`、`GOPROXY=https://goproxy.cn,direct`（`private_dot_config/zsh/sdk.zsh`，与 fish `00_env.fish` 统一）
 - `pip` 清华镜像别名（`private_dot_config/zsh/aliases.zsh` 的 `pip_tsinghua_mirror`）、`uv` 镜像开关注释（`sdk.zsh`）
 
 新机器路径不一致时按需调整源文件后 `chezmoi diff` → `apply`。详见 [shell.md](shell.md) 与 `sdk.zsh` 注释。

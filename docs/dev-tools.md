@@ -10,7 +10,7 @@
 
 > **代理说明**：当前 `dot_gitconfig` 仅保留一条按域名限定的代理行 `[http "https://github.com"]`（socks5://127.0.0.1:5376）；非标准键（如 `[https …]`）会被 git 静默忽略。SSH 侧代理由 `private_dot_ssh/private_config` 的自适应 `ProxyCommand` 负责，探测端口同为 `5376`；如需 `git pull` 一律变基，应使用标准键 `pull.rebase = true`（当前未启用）。早期版本 `.chezmoiignore` 中按源文件名书写的 `dot_gitconfig` / `**/dot_git` 行从不匹配任何目标、未生效，现已删除，本文件正常随 `apply` 部署。
 
-全局忽略规则（`dot_gitignore_global` → `~/.gitignore_global`，完整清单以源文件为准）：编辑器临时文件与交换文件（`*~`、`.DS_Store`、`*.swp` 等）、IDE 目录（`.idea` / `*.iml` / `.vscode`）、编译产物与构建目录（`*.aux` / `*.log*` / `dist/` / `build/` / `target/` / `bin/`）、Python 相关（`__pycache__/` / `*.venv` / `*.cache`）与 Node 依赖（`node_modules/`）。具体条目与分类以源文件 `dot_gitignore_global` 为准。
+全局忽略规则（`dot_gitignore_global` → `~/.gitignore_global`，完整清单以源文件为准）：编辑器临时文件与交换文件（`*~`、`.DS_Store`、`*.swp` 等）、IDE 目录（`.idea` / `*.iml` / `.vscode`）、构建产物（`*.aux` / `*.log*` 及根锚定的 `/dist/` / `/build/` / `/target/`；`bin/` 已移除以免误伤正常入库的同名目录）、Python 相关（`__pycache__/` / `*.venv` / `*.cache`）与 Node 依赖（`node_modules/`）。具体条目与分类以源文件 `dot_gitignore_global` 为准。
 
 ## GitHub CLI — `gh`
 
@@ -66,7 +66,7 @@ mise 工具链由 `private_dot_config/mise/config.toml` 声明（工具与版本
 
 ### workflows/settings.json — 动态工作流设置
 
-位于 `private_dot_pi/workflows/settings.json`（部署到 `~/.pi/workflows/settings.json`）。它配置工作流运行时的并发、重试、进度面板与预算上限等行为；实值以 `private_dot_pi/workflows/settings.json` 为唯一权威。`progressPanelMaxAgents` 用于 `pi-dynamic-workflows` 的进度面板，与 `landstrip.json` 的 `toolFilesystemPolicy` 相互独立。详见 [layout.md](layout.md)。
+位于 `private_dot_pi/workflows/settings.json`（部署到 `~/.pi/workflows/settings.json`）。它配置工作流运行时的并发、重试、进度面板与会话持久化等行为；实值以 `private_dot_pi/workflows/settings.json` 为唯一权威。`progressPanelMaxAgents` 用于 `pi-dynamic-workflows` 的进度面板，与 `landstrip.json` 的 `toolFilesystemPolicy` 相互独立。详见 [layout.md](layout.md)。
 
 ### workflows/model-tiers.json — 工作流三档模型分层
 
