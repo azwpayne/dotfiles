@@ -7,8 +7,9 @@
 #               $EDITOR——Ctrl-G 绑定在 source 时展开）、在 sdk.zsh 之前
 # Guards      : 前缀探测带缓存与自愈；fzf 初始化与补全均 command -v 守卫
 # Depends     : 必需 fzf、fzf-tab；主力 fd（缺失时回退 rg）；预览用 bat/lsd
-# Last Updated: 2026-09-04（PATH 追加改为冒号定界去重，与 dot_zshrc 惯例
-#               一致；FZF_PREFIX 探测注释收敛）
+# Last Updated: 2026-09-04（大规模工作流审计：fd 排除清单改为 source 时展开的
+#               逐项 --exclude 参数，不再依赖执行端 shell 的花括号展开；
+#               PATH 追加冒号定界去重与 FZF_PREFIX 探测注释保持不变）
 # Author      : Payne
 # =============================================================================
 
@@ -54,10 +55,37 @@ command -v fzf >/dev/null 2>&1 && eval "$(fzf --zsh)"
 # -----------------------------------------------------------------------------
 # 2. 文件/目录列表命令（fd 为主，rg 兜底）
 # -----------------------------------------------------------------------------
-exclude_list='{.git,node_modules,.idea,.venv,.cache,dist,build,\*.pyc,.DS_Store,.gitignore,.gitmodules,.gitkeep,.gitlab,.gitlab-ci.yaml,\*.zip,\*.apk,\*.so,.keep}'
+# fd 排除清单：在 source 时展开为逐项 --exclude 参数的最终字符串，
+# 不再依赖执行端 shell 的花括号展开（原 {a,b,...} 写法经 $SHELL -c 执行，
+# 若 $SHELL 为 fish/dash 等无逗号花括号展开的 shell，会整体退化为单个
+# 字面量模式，所有排除项同时失效）；值一律单引号包裹，任何 sh 语义下
+# （含 fish）都原样传给 fd，glob 不会被执行端 shell 二次展开
+typeset -a _fzf_fd_exclude_args
+_fzf_fd_exclude_args=(
+    "--exclude='.git'"
+    "--exclude='node_modules'"
+    "--exclude='.idea'"
+    "--exclude='.venv'"
+    "--exclude='.cache'"
+    "--exclude='dist'"
+    "--exclude='build'"
+    "--exclude='*.pyc'"
+    "--exclude='.DS_Store'"
+    "--exclude='.gitignore'"
+    "--exclude='.gitmodules'"
+    "--exclude='.gitkeep'"
+    "--exclude='.gitlab'"
+    "--exclude='.gitlab-ci.yaml'"
+    "--exclude='*.zip'"
+    "--exclude='*.apk'"
+    "--exclude='*.so'"
+    "--exclude='.keep'"
+)
+exclude_list="${(j: :)_fzf_fd_exclude_args}"
+unset _fzf_fd_exclude_args
 
-export FZF_DEFAULT_COMMAND="fd --max-depth=5 --type f --hidden --follow --exclude=${exclude_list}"
-export FZF_ALT_C_COMMAND="fd --max-depth=5 --type d --follow --exclude=${exclude_list}"
+export FZF_DEFAULT_COMMAND="fd --max-depth=5 --type f --hidden --follow ${exclude_list}"
+export FZF_ALT_C_COMMAND="fd --max-depth=5 --type d --follow ${exclude_list}"
 
 # 备选：如果未安装 fd，回退到 rg（但效果稍差）
 if ! command -v fd &> /dev/null; then
