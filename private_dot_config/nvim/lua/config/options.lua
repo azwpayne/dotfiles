@@ -1,4 +1,13 @@
--- ~/.config/nvim/lua/config/options.lua
+-- =============================================================================
+-- options.lua — 全局编辑器选项 (chezmoi: lua/config/options.lua)
+-- =============================================================================
+-- Description : 覆盖 LazyVim 默认的全局 vim.opt（仅增量覆盖，其余沿用上游）。
+--               分组：剪贴板、补全、行号、缩进、显示滚动、搜索、真彩与标尺。
+-- Usage       : 在 LazyVim defaults 之后加载，值在此覆盖同名项；`:h <option>`
+-- Guards      : 无外部依赖；所有选项幂等，重复加载安全
+-- Last Updated: 2026-09-04 — 补全文件头、分组注释、收敛 100 列与 tab 4 说明
+-- Author      : Payne
+-- =============================================================================
 -- Global editor options. Loaded *after* LazyVim's defaults, so values here
 -- override LazyVim where they overlap. See `:h <option>` for details.
 -- Only overrides and additions are set here; LazyVim handles the rest.

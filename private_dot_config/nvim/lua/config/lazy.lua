@@ -1,5 +1,14 @@
--- ~/.config/nvim/lua/config/lazy.lua
--- Bootstrap lazy.nvim and configure all plugins via LazyVim.
+-- =============================================================================
+-- lazy.lua — LazyVim 引导与插件编排 (chezmoi: lua/config/lazy.lua)
+-- =============================================================================
+-- Description : Bootstrap lazy.nvim (shallow, blobless, stable) + LazyVim
+--               core + 10 extras (9 lang + mini-animate) + 本地 plugins/*
+--               spec。install 回退与 checker 静默检查。
+-- Usage       : 由 init.lua `require("config.lazy")` 加载；首次启动自动 clone
+-- Guards      : vim.uv / vim.loop 双兼容，fs_stat 判空，shell_error 守卫 + 清理
+-- Last Updated: 2026-09-04 — 补全文件头、安装回退与性能禁用插件注释收敛
+-- Author      : Payne
+-- =============================================================================
 -- Entry point required by init.lua (`require("config.lazy")`).
 
 -- Bootstrap lazy.nvim into stdpath("data")/lazy/lazy.nvim if missing.

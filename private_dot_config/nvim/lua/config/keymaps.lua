@@ -1,4 +1,13 @@
--- ~/.config/nvim/lua/config/keymaps.lua
+-- =============================================================================
+-- keymaps.lua — 自定义键位 (chezmoi: lua/config/keymaps.lua)
+-- =============================================================================
+-- Description : 在 LazyVim 默认之后加载，可直接覆盖上游键位；全部带 desc 供
+--               which-key 与 :map 查询，使用 vim.keymap.set（noremap+silent）。
+-- Usage       : Leader 为 <Space>（LazyVim 默认）；按 <leader> 等待 which-key
+-- Guards      : 无；键位定义幂等，重复加载覆盖同名映射
+-- Last Updated: 2026-09-04 — 补全文件头、分组注释、收敛 desc 约束说明
+-- Author      : Payne
+-- =============================================================================
 -- Custom keymaps loaded *after* LazyVim defaults, so you can override LazyVim here.
 -- All mappings include `desc` for which-key and `:map`. Uses vim.keymap.set
 -- (noremap + silent by default).
