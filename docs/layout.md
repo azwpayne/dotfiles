@@ -24,8 +24,10 @@
 
 | 源文件 | 目标路径 | 说明 |
 | --- | --- | --- |
-| `dot_zshrc` | `~/.zshrc` | Zim 引导、PATH、工具 eval（zoxide/mise/starship/fzf/brew）、模块加载入口（aliases→fzf→sdk） |
-| `dot_zimrc` | `~/.zimrc` | Zim 模块清单（仅供 zimfw 读取，非 shell 启动时 source） |
+| `symlink_dot_zshrc.tmpl` | `~/.zshrc` → `~/.config/zsh/.zshrc` | 模板符号链接（内容为 `{{ .chezmoi.homeDir }}/.config/zsh/.zshrc`，XDG 收敛，兼容 ~/.zshrc 路径） |
+| `symlink_dot_zimrc.tmpl` | `~/.zimrc` → `~/.config/zsh/.zimrc` | 同上（Zim 读取 ~/.zimrc 符号链接，真实文件在 ~/.config/zsh） |
+| `private_dot_config/zsh/dot_zshrc` | `~/.config/zsh/.zshrc` | Zsh 入口：Zim 引导、PATH、工具 eval（zoxide/mise/starship/fzf/brew）、模块加载入口（aliases→fzf→sdk）—— 真实文件，symlink 目标 |
+| `private_dot_config/zsh/dot_zimrc` | `~/.config/zsh/.zimrc` | Zim 模块清单（仅供 zimfw 读取，非 shell 启动时 source）—— 真实文件 |
 | `dot_gitconfig` | `~/.gitconfig` | 用户/代理（github.com 走 socks5://127.0.0.1:5376）/LFS/push 行为；`core.excludesfile = ~/.gitignore_global`（`~` 由 git 原生展开，无用户名硬编码）。旧版 `.chezmoiignore` 中按源名书写的 `dot_gitconfig` 行从不匹配任何目标、未生效，现该行已删除，本文件正常随 `apply` 部署 |
 | `dot_gitignore_global` | `~/.gitignore_global` | 全局忽略（.DS_Store、IDE、日志等） |
 
@@ -35,11 +37,13 @@
 | --- | --- | --- |
 | `private_dot_ssh/private_config` | `~/.ssh/config` (0600) | OrbStack `Include ~/.orbstack/ssh/config` 置顶 + `Host github.com` 走 `ssh.github.com:443` + SOCKS5 自适应（`nc -z 127.0.0.1:5376` 探测，有则 `-X 5 -x 127.0.0.1:5376` 否则直连） |
 
-### ~/.config/zsh/
+### ~/.config/zsh/（XDG 收敛：入口 + 三模块）
 
 | 源文件 | 目标路径 | 说明 |
 | --- | --- | --- |
-| `private_dot_config/zsh/aliases.zsh` | `~/.config/zsh/aliases.zsh` | 别名与通用函数（`update-all`、`auto_update`、`y`、`ruff_auto` 等）；`update-all` 为关联数组 6 目标 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise`，支持传参过滤、失败计数与耗时统计；`auto_update` 为兼容旧习惯的一键入口（可选 `onproxy` 切代理后直接委托 `update-all`，覆盖目标一致，均含 `mise`） |
+| `private_dot_config/zsh/dot_zshrc` | `~/.config/zsh/.zshrc` | Zsh 入口：Zim 引导、PATH、工具 eval（zoxide/mise/starship/fzf/brew）、模块加载入口（aliases→fzf→sdk）—— 与 `symlink_dot_zshrc.tmpl` 配合 |
+| `private_dot_config/zsh/dot_zimrc` | `~/.config/zsh/.zimrc` | Zim 模块清单（仅供 zimfw 读取，非 shell 启动时 source）—— 与 `symlink_dot_zimrc.tmpl` 配合 |
+| `private_dot_config/zsh/aliases.zsh` | `~/.config/zsh/aliases.zsh` | 别名与通用函数（`update-all`、`auto_update`、`y`、`ruff_auto` 等）；`update-all` 为关联数组 6 目标 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise`，支持传参过滤、失败计数与耗时统计；`auto_update` 为兼容旧习惯的一键入口（可选 `onproxy` 切代理后直接委托 `update-all`，覆盖目标一致，均含 `mise`）；新增 `chezc/chezdf/chezap` 三别名 |
 | `private_dot_config/zsh/fzf.zsh` | `~/.config/zsh/fzf.zsh` | fzf 前缀探测/缓存、全局选项、Ctrl-R/T/Alt-C 及 `frg`/`fkill`/`ftm`/`fl*` 函数 |
 | `private_dot_config/zsh/sdk.zsh` | `~/.config/zsh/sdk.zsh` | SDK 环境与补全（pnpm/SDKMAN(可选)/Android NDK/Python(uv)/Go/Rust/Docker/kubectl+kubecolor） |
 | `private_dot_config/zsh/dot_gitignore` | `~/.config/zsh/.gitignore` | 忽略运行时产物（`*.zwc`、`.fzf_prefix_cache`、`.DS_Store`） |
@@ -111,18 +115,16 @@
 `dot_gitconfig` → `~/.gitconfig` 恢复其本来的正常部署语义；`chezmoi managed`
 目标数由 59 降至 55（不再包含嵌套 README×2、`nvim/LICENSE`）。后续去重又删除了被更宽模式
 覆盖或已无对应文件的冗余行（根级 `README.md` / `LICENSE`、`docs/**`、`**/.git`、`*client_secret*`、
-两条 `**.md` 与已不存在的 `REPO-INSIGHT.md`），`managed` 目标数保持 55 不变（核心 targets 不变），其后 fish 配置扩容实测曾达 81（纳入 `.config/fish/fish_variables` 后为 82，详见布局映射）；随后添加 `.config/fish/fish_variables` 至 `.chezmoiignore` 进一步排除，当前鱼相关 managed 计入后总计 82。
+两条 `**.md` 与已不存在的 `REPO-INSIGHT.md`），`managed` 目标数保持 55 不变（核心 targets 不变），其后 fish 配置扩容实测曾达 81（纳入 `.config/fish/fish_variables` 后为 82，详见布局映射）；2026-09 zsh XDG 收敛（`dot_zshrc/dot_zimrc` → `private_dot_config/zsh/dot_*` + 2 条 `symlink_*.tmpl`）后核心升至 57，当前总计 `chezmoi managed | wc -l` 为 86（核心 57 + fish 等 29）。
 
 ## 仓库特性说明
 
-- **纯静态、无模板/脚本**：没有 `*.tmpl` 模板、`.chezmoidata.*` 数据、`run_*` 脚本；
-  唯一例外是上述 `.chezmoiignore`（排除而非生成，原因见上）。所有机器 `chezmoi apply` 拿到同一套内容；
-  如需按机器差异化，再引入模板即可。
+- **极简模板**：仅有的 `*.tmpl` 是 `symlink_dot_zshrc.tmpl` / `symlink_dot_zimrc.tmpl`（各一行 `{{ .chezmoi.homeDir }}/.config/zsh/...`，将 `~/.zshrc` 收敛至 XDG）—— 其余全部为静态文件，无 `.chezmoidata.*` 数据、无 `run_*` 脚本。所有机器 `chezmoi apply` 拿到同一套内容；如需进一步按机器差异化，可在现有模板基础上扩展。
 - **运行时产物不入库**：`~/.config/zsh/.gitignore` 和 `~/.config/nvim/.gitignore`
   分别忽略 `*.zwc`、`.fzf_prefix_cache` 及插件数据目录。
 - **仅服务于仓库管理、不部署的文件**：根目录的 `.gitignore` 与 `.chezmoiignore` 被 chezmoi 默认忽略（源目录中点开头文件不参与 apply）；根级 `README.md`、`LICENSE`、`docs/`（本文档所在）以及全部嵌套 `README.md` / `LICENSE`（如 `zsh/README.md`、`nvim/README.md`、`nvim/LICENSE`）被 `.chezmoiignore` 排除。
 - **不在仓库内的重要文件**：
   - `~/.config/gh/hosts.yml` / `config.yml`——由 `gh auth login` 生成，含凭据，切勿加入仓库；
-  - `~/.zim/`——由 zimfw 自动管理（`dot_zimrc` 仅为其配置）；
+  - `~/.zim/`——由 zimfw 自动管理（`~/.config/zsh/.zimrc` 仅为其配置，`~/.zimrc` 为符号链接）；
   - `~/.ssh/` 除 `config` 外的密钥——不在仓库内，`.chezmoiignore` 的 `*secret*`/`*token*` 等模式可防止误入库；
   - Neovim 插件本体（`~/.local/share/nvim/`）——由 lazy.nvim 按 `lazy-lock.json` 安装。

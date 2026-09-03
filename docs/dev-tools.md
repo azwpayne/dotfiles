@@ -22,7 +22,7 @@
 
 ## mise — `private_dot_config/mise/config.toml`
 
-mise 工具链由 `private_dot_config/mise/config.toml` 声明（工具与版本见该文件，当前为若干工具的 `latest`），由 `dot_zshrc` 中的 `eval "$(mise activate zsh)"` 接管 zsh 环境；实际声明以源文件为准。常用操作见 `mise` 文档与 `aliases.zsh` 的 `update-all` 复用。
+mise 工具链由 `private_dot_config/mise/config.toml` 声明（工具与版本见该文件，当前为若干工具的 `latest`），由 `private_dot_config/zsh/dot_zshrc` 中的 `eval "$(mise activate zsh)"` 接管 zsh 环境；实际声明以源文件为准。常用操作见 `mise` 文档与 `aliases.zsh` 的 `update-all` 复用。
 
 ### 包管理器更新：`aliases.zsh` 的 `auto_update` 与 `update-all`
 

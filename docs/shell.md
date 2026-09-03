@@ -2,7 +2,7 @@
 
 ## 启动链路
 
-交互式 zsh 启动时按以下顺序执行（`~/.zshrc` 即仓库中的 `dot_zshrc`）。顺序即语义——同名定义后加载者生效，例如 `k` 别名由 `sdk.zsh` 按需定义，因此 `aliases.zsh` 有意不定义 `k`。
+交互式 zsh 启动时按以下顺序执行（`~/.zshrc` 经 `symlink_dot_zshrc.tmpl` 指向 `~/.config/zsh/.zshrc`，源码为 `private_dot_config/zsh/dot_zshrc`）。顺序即语义——同名定义后加载者生效，例如 `k` 别名由 `sdk.zsh` 按需定义，因此 `aliases.zsh` 有意不定义 `k`。
 
 1. **Zim 引导**：缺失时下载 zimfw，随后 `zimfw init` 生成并加载 `~/.zim/init.zsh`（含补全、高亮、自动建议等）。
 2. **PATH 注入**：前置 `~/bin`、Homebrew、`/usr/local/bin`、`~/.local/bin` 等，并按目录存在性守卫注入 cargo/rustup 路径。
@@ -10,13 +10,13 @@
 4. **三模块加载**：依次 `source` `aliases.zsh`（导出 `$EDITOR`/`$VISUAL`）→ `fzf.zsh`（依赖 `$EDITOR` 的 Ctrl-G 绑定）→ `sdk.zsh`（惰性加载 SDKMAN、缓存补全等）。
 5. **SDK 环境**：`sdk.zsh` 无条件加载，内部逐项守卫（SDKMAN 惰性、kubectl/docker 补全缓存）。
 
-完整命令与守卫细节以 `dot_zshrc` 与三模块源文件为准，模块契约详见 [`private_dot_config/zsh/README.md`](../private_dot_config/zsh/README.md)。
+完整命令与守卫细节以 `private_dot_config/zsh/dot_zshrc` 与三模块源文件为准，模块契约详见 [`private_dot_config/zsh/README.md`](../private_dot_config/zsh/README.md)。
 
-> **环境变量说明**：`dot_zshrc` 顶部的 `export LANG=zh_CN.UTF-8` 生效，与 Ghostty 的 `LANG=zh_CN.UTF-8` 一致，统一中文 UTF-8 locale。`$EDITOR`/`$VISUAL` 由 `aliases.zsh` 导出。
+> **环境变量说明**：`private_dot_config/zsh/dot_zshrc` 顶部的 `export LANG=zh_CN.UTF-8` 生效，与 Ghostty 的 `LANG=zh_CN.UTF-8` 一致，统一中文 UTF-8 locale。`$EDITOR`/`$VISUAL` 由 `aliases.zsh` 导出。
 
-## Zim 模块清单（dot_zimrc）
+## Zim 模块清单（private_dot_config/zsh/dot_zimrc）
 
-Zim 模块由 `dot_zimrc` 定义，按环境、提示符、补全、收尾四组组织，通过 `zimfw` 加载。核心包括基础环境（`environment`/`utility` 等）、提示符信息（`duration-info`/`git-info`/`prompt-pwd`/`asciiship`）以及补全链（Homebrew 自适应路径、`zsh-completions`、`completion`、`fzf-tab`）。收尾模块为语法高亮、历史子串搜索与自动建议。`asciiship` 实际被 Starship 覆盖，保留仅作信息源。完整清单、加载顺序与注释掉的未启用模块以 `dot_zimrc` 为唯一权威。
+Zim 模块由 `private_dot_config/zsh/dot_zimrc`（经 `symlink_dot_zimrc.tmpl` 部署为 `~/.zimrc` → `~/.config/zsh/.zimrc`）定义，按环境、提示符、补全、收尾四组组织，通过 `zimfw` 加载。核心包括基础环境（`environment`/`utility` 等）、提示符信息（`duration-info`/`git-info`/`prompt-pwd`/`asciiship`）以及补全链（Homebrew 自适应路径、`zsh-completions`、`completion`、`fzf-tab`）。收尾模块为语法高亮、历史子串搜索与自动建议。`asciiship` 实际被 Starship 覆盖，保留仅作信息源。完整清单、加载顺序与注释掉的未启用模块以 `dot_zimrc` 源码为唯一权威。
 
 > 已设置 `ZSH_AUTOSUGGEST_MANUAL_REBIND=1` 以提升末尾模块性能；历史的 `ZSH_HIGHLIGHT_HIGHLIGHTERS` 配置因子模块未启用而删除。
 
@@ -58,7 +58,7 @@ fzf 前缀按平台自适应探测（Apple Silicon `/opt/homebrew` → Intel `/u
 
 ### fzf-tab
 
-`Aloxaf/fzf-tab` 由 `dot_zimrc` 经 zimfw 加载，`fzf.zsh` 仅保留 `zstyle` 配置（补全排序、描述格式、颜色、`fzf-preview`、`fzf-flags` 等）。完整 `zstyle` 列表以 `fzf.zsh` 为唯一权威。
+`Aloxaf/fzf-tab` 由 `private_dot_config/zsh/dot_zimrc` 经 zimfw 加载，`fzf.zsh` 仅保留 `zstyle` 配置（补全排序、描述格式、颜色、`fzf-preview`、`fzf-flags` 等）。完整 `zstyle` 列表以 `fzf.zsh` 为唯一权威。
 
 ## Fish 的角色
 

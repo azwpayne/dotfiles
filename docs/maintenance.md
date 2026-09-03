@@ -6,9 +6,10 @@
 
 ```bash
 # 1. 编辑源文件（chezmoi edit 会直接打开源目录中的对应文件）
-chezmoi edit ~/.zshrc
+chezmoi edit ~/.zshrc          # 实际源文件为 private_dot_config/zsh/dot_zshrc，经 symlink 指向
+chezmoi edit ~/.config/zsh/.zshrc  # 同上（XDG 路径）
 # 或直接：
-$EDITOR ~/.local/share/chezmoi/dot_zshrc
+$EDITOR ~/.local/share/chezmoi/private_dot_config/zsh/dot_zshrc
 # 其他示例：
 chezmoi edit ~/.config/nvim/lua/config/options.lua
 
@@ -38,9 +39,9 @@ git -C ~/.local/share/chezmoi add -A && git -C ~/.local/share/chezmoi commit -m 
 | `chezmoi doctor` | 环境体检 |
 | `chezmoi status` | 简要漂移概览（等价 `git status` 视角） |
 | `chezmoi ignored` | 查看被 `.chezmoiignore` 排除的文件 |
-| `zimfw update` | 更新 Zim 插件（`zsh`，改动 `dot_zimrc` 后按需执行） |
+| `zimfw update` | 更新 Zim 插件（`zsh`，改动 `private_dot_config/zsh/dot_zimrc` 后按需执行） |
 | `zimfw upgrade` | 升级 `zimfw` 自身（`zsh`） |
-| `zimfw init` | 重建 `${ZIM_HOME}/init.zsh`（改动 `~/.zimrc` 后需要，`dot_zshrc` 会按 `-nt` 时间戳自动重建） |
+| `zimfw init` | 重建 `${ZIM_HOME}/init.zsh`（改动 `~/.config/zsh/.zimrc` 后需要，`dot_zshrc` 会按 `-nt` 时间戳自动重建） |
 | `zimfw info` | 查看 `zimfw` 版本与模块信息 |
 | `auto_update` | 一键全量更新入口：若定义了 `onproxy` 函数则先切代理，随后直接委托 `update-all` 执行（覆盖目标一致）；定义于 `private_dot_config/zsh/aliases.zsh`，详见 [dev-tools.md](dev-tools.md) |
 | `update-all [targets...]` | 关联数组驱动的批量更新，支持参数选择目标（如 `update-all brew mise`）、带失败计数与耗时统计；覆盖 `brew` / `sdk` / `rustup` / `tldr` / `uv` / `mise` 共 6 项（**已覆盖 `mise`**，与 `auto_update` 的核心差异）；定义于 `aliases.zsh`，详见 [dev-tools.md](dev-tools.md) |
@@ -54,13 +55,13 @@ git -C ~/.local/share/chezmoi add -A && git -C ~/.local/share/chezmoi commit -m 
 ```bash
 # zsh 模块（语法 + 干净启动 + 关键定义）
 zsh -n ~/.config/zsh/{aliases,fzf,sdk}.zsh  # 覆盖 aliases.zsh 中的 auto_update / update-all（含关联数组、耗时统计）语法
-zsh -n ~/.zshrc
+zsh -n ~/.config/zsh/.zshrc ~/.config/zsh/.zimrc  # 亦可 zsh -n ~/.zshrc（符号链接）
 zsh -ic 'exit'                              # 干净启动无报错
 zsh -ic 'type ls df du; echo $EDITOR'       # 关键别名/变量（EDITOR=nvim）
 zsh -ic 'type auto_update update-all'       # 验证更新函数已加载（update-all 支持参数过滤、失败计数与耗时统计）
 # 注意：短别名 k 定义在 sdk.zsh 且仅当 kubectl 可用时才存在，无 kubectl 的机器上属预期缺失
 
-# Zim 插件管理器（改动 ~/.zimrc 后；重启 shell 时 dot_zshrc 会按 -nt 时间戳自动重建 init.zsh）
+# Zim 插件管理器（改动 ~/.config/zsh/.zimrc 后；重启 shell 时 dot_zshrc 会按 -nt 时间戳自动重建 init.zsh）
 zsh -ic 'zimfw info'                        # 查看 zimfw 版本
 zsh -ic 'zimfw update'                      # 更新插件
 zsh -ic 'zimfw init'                        # 手动重建 init.zsh

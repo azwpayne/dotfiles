@@ -3,9 +3,11 @@
 基于 [chezmoi](https://www.chezmoi.io/) 管理的 macOS（Apple Silicon）个人开发环境配置。
 
 本仓库是 chezmoi 的**源目录**（source directory，位于 `~/.local/share/chezmoi`），
-通过 `chezmoi apply` 将文件渲染到 `$HOME` 下对应位置。全部为静态文件——没有模板、
-没有脚本，所见即所得；通过 `.chezmoiignore` 将根级与嵌套的 `README.md` / `LICENSE`、`docs/`、
-`*.local` / `*.bak` 等仅供仓库查阅或本地覆盖的文件排除在部署之外，避免污染目标 HOME 目录。
+通过 `chezmoi apply` 将文件渲染到 `$HOME` 下对应位置。主体为静态文件，仅有的模板是
+`symlink_dot_zshrc.tmpl` / `symlink_dot_zimrc.tmpl`（各一行，将 `~/.zshrc`/`~/.zimrc` 指向
+`~/.config/zsh/` 的 XDG 收敛），其余所见即所得；通过 `.chezmoiignore` 将根级与嵌套的
+`README.md` / `LICENSE`、`docs/`、`*.local` / `*.bak` 等仅供仓库查阅或本地覆盖的文件排除在
+部署之外，避免污染目标 HOME 目录。
 
 ## ✨ 特性总览
 
@@ -68,14 +70,16 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 ~/.local/share/chezmoi                    应用到 $HOME
 ├── .chezmoiignore                     →  (不部署) 过滤根级与嵌套 README.md / LICENSE、docs/ 与 *.local / *.bak / *token* 等，避免污染家目录
 ├── .gitignore                         →  (git 侧) 忽略 .vscode / .git / node_modules / **/.DS_Store / *.log 等
-├── dot_zshrc                          →  ~/.zshrc                     Zsh 入口：Zim 引导 + 工具 eval + 模块加载
-├── dot_zimrc                          →  ~/.zimrc                     Zim 模块清单
+├── symlink_dot_zshrc.tmpl             →  ~/.zshrc  (→ ~/.config/zsh/.zshrc)  模板符号链接，内容为 {{ .chezmoi.homeDir }}/.config/zsh/.zshrc
+├── symlink_dot_zimrc.tmpl             →  ~/.zimrc  (→ ~/.config/zsh/.zimrc)  同上（XDG 收敛，兼容 ~/.zshrc 路径）
 ├── dot_gitconfig                      →  ~/.gitconfig                 用户信息 / 代理 / LFS / push 行为
 ├── dot_gitignore_global               →  ~/.gitignore_global          全局忽略规则
 ├── dot_codex/
 │   └── private_config.toml            →  ~/.codex/config.toml         cc-switch 本地代理配置（0600，详见 dot_codex/private_config.toml）
 ├── private_dot_config/
-│   ├── zsh/                           →  ~/.config/zsh/               ★ 三模块 zsh 配置（含独立 README，不部署）
+│   ├── zsh/                           →  ~/.config/zsh/               ★ 三模块 zsh 配置 + 入口文件（含独立 README，不部署）
+│   │   ├── dot_zshrc                  →  ~/.config/zsh/.zshrc         Zsh 入口：Zim 引导 + 工具 eval + 模块加载（symlink 目标，真实文件）
+│   │   ├── dot_zimrc                  →  ~/.config/zsh/.zimrc         Zim 模块清单（仅供 zimfw 读取，symlink 目标）
 │   │   ├── aliases.zsh                →  ~/.config/zsh/aliases.zsh
 │   │   ├── fzf.zsh                    →  ~/.config/zsh/fzf.zsh
 │   │   ├── sdk.zsh                    →  ~/.config/zsh/sdk.zsh
@@ -104,7 +108,7 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
         └── model-tiers.json           →  ~/.pi/workflows/model-tiers.json 三档模型分层（成本分级）
 ```
 
-> 根级 `README.md` / `LICENSE` / `docs/` 与全部嵌套 `README.md` / `LICENSE`（含 `zsh/README.md`、`nvim/README.md`、`nvim/LICENSE`）均由 `.chezmoiignore`（`**/README.md`、`**/LICENSE` 等按目标名书写的模式）排除、不部署；历史上的 `**/REAMDME.md` 拼写失配与 `dot_git`/`dot_DS_Store`/`dot_gitconfig` 源名失配已修复，`managed` 目标数随鱼 shell 配置扩容曾达 81（纳入 `.config/fish/fish_variables` 后为 82，详见 [layout.md](layout.md) 目标映射）；核心 chezmoi 目标保持 55 不变（不含 fish 相关），后续去重又清理了被更宽模式覆盖的冗余行，目标数不再单调变化。
+> 根级 `README.md` / `LICENSE` / `docs/` 与全部嵌套 `README.md` / `LICENSE`（含 `zsh/README.md`、`nvim/README.md`、`nvim/LICENSE`）均由 `.chezmoiignore`（`**/README.md`、`**/LICENSE` 等按目标名书写的模式）排除、不部署；历史上的 `**/REAMDME.md` 拼写失配与 `dot_git`/`dot_DS_Store`/`dot_gitconfig` 源名失配已修复。`managed` 目标数演进：核心 55 → zsh 收敛后 57（`dot_zshrc/dot_zimrc` → `private_dot_config/zsh/dot_*` + 2 条 `symlink_*.tmpl`），鱼 shell 扩容后曾达 81（纳入 `.config/fish/fish_variables` 后为 82）；当前 `chezmoi managed | wc -l` 为 86（核心 57 + fish 等 29），详见 [layout.md](layout.md) 目标映射；后续去重又清理了被更宽模式覆盖的冗余行，目标数不再单调变化。
 
 ## 📚 文档索引
 

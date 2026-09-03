@@ -19,13 +19,13 @@ brew install --cask font-jetbrains-mono-nerd-font   # Ghostty / Alacritty / Neov
 brew install git-lfs && git lfs install
 
 # —— 启动必需工具（首次启动 zsh 即被使用，建议随本节一并装；完整清单与说明见 §4）——
-#    fzf-tab 无需手动安装：由 zimfw 首次启动时按 dot_zimrc 自动拉取
+#    fzf-tab 无需手动安装：由 zimfw 首次启动时按 private_dot_config/zsh/dot_zimrc 自动拉取
 brew install fzf starship zoxide mise fd ripgrep
 ```
 
 > **为什么要在 `apply` 之前**：`apply` 后一般会立即 `exec zsh` 首次启动（Zim 拉模块、
 > 各工具初始化、补全加载），上述前置若缺装会导致功能明显退化甚至 git 全局断链。
-> 守卫化说明：`~/.zshrc` 中 `zoxide` / `mise` / `starship` / `brew` 的 `eval` 均带
+> 守卫化说明：`~/.config/zsh/.zshrc`（经 symlink 兼容 `~/.zshrc`）中 `zoxide` / `mise` / `starship` / `brew` 的 `eval` 均带
 > `command -v` 守卫，rustup/cargo 的 PATH 注入为目录存在性 + 去重双守卫（静态路径，
 > 不再调用 `brew --prefix` 子进程），fzf 初始化统一收敛到 `fzf.zsh`（带守卫），
 > 缺装时全部**静默跳过、不再报 `command not found`**——因此其余体验增强类工具
@@ -92,14 +92,14 @@ exec zsh   # 重启 shell 使全部配置生效（或重新打开终端）
 | 组件 | 行为 | 触发时机 |
 | --- | --- | --- |
 | `fish` / `pi` | `private_dot_config/private_fish/config.fish`（interactive 时初始化 Starship，插件由 `fish_plugins` 清单管理）、`private_dot_pi/**`（pi agent 配置）直接生效，均随 `apply` 写入 `$HOME`；本文档只覆盖 `zsh` 栈，其余见 [layout.md](layout.md) | 首次启动 `fish` / `pi` 时 |
-| Zim 框架 | `~/.zshrc` 检测 `~/.zim/zimfw.zsh` 缺失时自动下载并 `zimfw init` 安装 `dot_zimrc` 中声明的全部模块（详见 `dot_zimrc`） | 首次启动 `zsh` |
-| `PATH` / `brew` | 按 `dot_zshrc` 中守卫逻辑注入 Homebrew 与本地路径（前置 `~/bin` 等，cargo/rustup 按目录存在性守卫，详见 `dot_zshrc`） | 每次启动 `zsh` |
+| Zim 框架 | `~/.config/zsh/.zshrc` 检测 `~/.zim/zimfw.zsh` 缺失时自动下载并 `zimfw init` 安装 `dot_zimrc` 中声明的全部模块（详见 `private_dot_config/zsh/dot_zimrc`） | 首次启动 `zsh` |
+| `PATH` / `brew` | 按 `dot_zshrc` 中守卫逻辑注入 Homebrew 与本地路径（前置 `~/bin` 等，cargo/rustup 按目录存在性守卫，详见 `private_dot_config/zsh/dot_zshrc`） | 每次启动 `zsh` |
 | `zoxide` / `mise` / `starship` / `fzf` | 按 `command -v` 守卫 `eval` 初始化，未安装静默跳过；`fzf` 键位绑定唯一收敛于 `fzf.zsh`（详见 `dot_zshrc` 与 `fzf.zsh`） | 每次启动 `zsh` |
 | `zsh` 三模块 | 按序 `source ~/.config/zsh/aliases.zsh` → `fzf.zsh`（含 `fzf` 前缀探测与 `~/.fzf_prefix_cache` 缓存）→ `sdk.zsh`（`pnpm` / `SDKMAN` **惰性加载** / `Go` / `Rust` / `Docker` / `kubectl`，补全走 `~/.cache/zsh/` 缓存 + `zcompile`，均有守卫） | 每次启动 `zsh` |
 | Neovim | 首次运行 `nvim` 时 `lazy.nvim` 自动 `bootstrap` 并按 `lazy-lock.json` 安装 43 个插件（需网络） | 首次运行 `nvim` |
 | `mise` 工具链 | `mise activate` 已挂接；按需执行 `mise install` 安装 `private_dot_config/mise/config.toml` 声明的工具（详见该文件） | 手动执行 |
 
-> `~/.zshrc` 中 `sdk.zsh` 为无条件 `source`（注释与代码已一致，如需禁用需注释 source 行）；
+> `~/.config/zsh/.zshrc` 中 `sdk.zsh` 为无条件 `source`（注释与代码已一致，如需禁用需注释 source 行）；
 > `SDKMAN` 为惰性加载——首次调用 `sdk` 时才真正 source init 并注入 PATH（Java 等
 > candidate 的可用性随之延迟到首次 `sdk` 调用）；`fzf` 键位绑定只在 `fzf.zsh` 内
 > `eval "$(fzf --zsh)"` 一次，`~/.zshrc` 不再重复。详见 [shell.md](shell.md)。
@@ -112,7 +112,7 @@ exec zsh   # 重启 shell 使全部配置生效（或重新打开终端）
 | --- | --- | --- |
 | `git-lfs` | Git LFS filter——`dot_gitconfig` 配置 `[filter "lfs"] required = true`，缺失时**全机所有仓库**的 clone/push 直接失败（硬性中断，非静默退化） | `brew install git-lfs && git lfs install` |
 | `fzf` | `Ctrl-R` / `Ctrl-T` / `Alt-C` 及所有 `f*` 函数（`frg` / `fkill` / `ftm` / `fl*`） | `brew install fzf` |
-| `fzf-tab` | 补全菜单模糊化（Zim 模块 `Aloxaf/fzf-tab`） | 无需手动安装，由 `zimfw` 按 `dot_zimrc` 的 `zmodule Aloxaf/fzf-tab` 首次启动时自动安装并加载 |
+| `fzf-tab` | 补全菜单模糊化（Zim 模块 `Aloxaf/fzf-tab`） | 无需手动安装，由 `zimfw` 按 `private_dot_config/zsh/dot_zimrc` 的 `zmodule Aloxaf/fzf-tab` 首次启动时自动安装并加载 |
 | `starship` | 提示符（`starship.toml` Catppuccin Mocha） | `brew install starship` |
 | `zoxide` | `z` 目录跳转 | `brew install zoxide` |
 | `mise` | 运行时管理（`bun` / `deno` / `go` / `node` / `pnpm`） | `brew install mise` |
@@ -167,7 +167,7 @@ chezmoi diff                         # 应用后应为空（或仅剩有意保�
 chezmoi ignored                      # 确认 docs/、README.md 等在忽略列表
 
 # shell 栈
-zsh -n ~/.zshrc ~/.config/zsh/*.zsh # 语法检查无报错
+zsh -n ~/.config/zsh/.zshrc ~/.config/zsh/*.zsh ~/.config/zsh/.zimrc # 语法检查无报错（~/.zshrc 为符号链接亦可）
 zsh -ic 'exit'                       # 干净启动无报错
 zsh -ic 'type k; echo $EDITOR'       # k -> kubectl（kubecolor 包装）；EDITOR=nvim
                                      # 〔未装 kubectl 则跳过：type k 报 not found 属预期〕
