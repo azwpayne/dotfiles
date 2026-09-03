@@ -1,21 +1,34 @@
-# 本地覆盖与备份
+# =============================================================================
+# .chezmoiignore — 排除部分源文件不参与 chezmoi apply 部署
+# =============================================================================
+# Description : 按目标名匹配（非源名）；`chezmoi diff/apply` 自动跳过匹配项，
+#               避免仓库文档/本地覆盖/敏感词污染 $HOME。
+# Usage       : `chezmoi ignored` 查看被排除列表；`chezmoi managed` 不含此处条目
+# Last Updated: 2026-09-03 — 分组注释、收敛 fish 本地状态与敏感词说明
+# =============================================================================
+
+# 本地覆盖与备份（机器特定覆盖，不跨机同步）
 *.local
 *.local.*
 *.bak
-**/README.md
-**/LICENSE
-docs/
+
+# OS 与编辑器运行时产物
 **/.DS_Store
 nvim.log
 
-# fish 机器本地状态（不跨机器部署）
+# 仓库文档与许可（仅仓库内查阅，不部署到 $HOME）
+**/README.md
+**/LICENSE
+docs/
+
+# fish 机器本地状态（Universal Variables，仅本机；仓库仅提交 fish_plugins 与手写配置）
 .config/fish/fish_variables
 
-# 敏感信息
+# 敏感与凭据（防误入库；含 token/secret/credential 字样的文件一律排除）
 *token*
 *secret*
 *credential*
 
-# 构建产物
+# 构建产物与依赖（体积大 / 可重建）
 node_modules/
 .pnpm-store/

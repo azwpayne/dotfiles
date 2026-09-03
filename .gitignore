@@ -1,12 +1,25 @@
+# =============================================================================
+# .gitignore — Git 侧忽略（与 .chezmoiignore 职责分离）
+# =============================================================================
+# Description : Git 不跟踪的文件；`.chezmoiignore` 负责 chezmoi 部署排除，
+#               本文件负责 Git 提交排除。二者模式语法相似但生效域不同。
+# Last Updated: 2026-09-03 — 分组注释、收敛 fish/chezmoi 产物说明
+# =============================================================================
+
+# --- OS / IDE / 日志 ---
 **/.vscode
 **/.git
 **/.idea
 **/node_modules
 **/.DS_Store
 *.log
+
+# --- Coding agent 运行时（本地状态，不入库）---
 .pi/
 
-# fisher 生成的插件文件与 fish 机器本地状态（由 fisher 在目标机安装管理，仓库仅提交 fish_plugins 与用户自写配置）
+# --- Fish — Fisher 生成与机器本地状态 ---
+# Fisher 在目标机按 fish_plugins 清单生成函数/补全；仓库仅提交用户手写的
+# 00_*.fish / fzf.fish / fish_plugins 与 symlink_* ，其余由 .keep 占位。
 private_dot_config/private_fish/private_fish_variables
 private_dot_config/private_fish/private_functions/*
 !private_dot_config/private_fish/private_functions/.keep
@@ -16,6 +29,6 @@ private_dot_config/private_fish/private_conf.d/*
 !private_dot_config/private_fish/private_conf.d/.keep
 !private_dot_config/private_fish/private_conf.d/0*\.fish
 
-# chezmoi local state (not tracked)
+# --- chezmoi 本地状态 ---
 chezmoistate.boltdb
 *.boltdb
