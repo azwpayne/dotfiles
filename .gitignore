@@ -3,7 +3,8 @@
 # =============================================================================
 # Description : Git 不跟踪的文件；`.chezmoiignore` 负责 chezmoi 部署排除，
 #               本文件负责 Git 提交排除。二者模式语法相似但生效域不同。
-# Last Updated: 2026-09-04 — 分组注释校验、Fisher 生成物与 .keep 占位说明收敛
+# Last Updated: 2026-09-04 — 新增 fzf.fish 否定模式（原 0*\.fish 永不匹配它，
+#               导致自诒“仓库已提交”的文件实际未入库，fresh clone 会丢失）
 # =============================================================================
 
 # --- OS / IDE / 日志 ---
@@ -20,6 +21,9 @@
 # --- Fish — Fisher 生成与机器本地状态 ---
 # Fisher 在目标机按 fish_plugins 清单生成函数/补全；仓库仅提交用户手写的
 # 00_*.fish / fzf.fish / fish_plugins 与 symlink_* ，其余由 .keep 占位。
+# 注意：patrickf1/fzf.fish 插件自身也安装 conf.d/fzf.fish，fisher update
+# 可能覆盖部署目标，下次 chezmoi apply 会再写回 —— 两工具对该路径存在
+# 所有权竞争，属已知取舍（保留 chezmoi 为最终真相源）。
 private_dot_config/private_fish/private_fish_variables
 private_dot_config/private_fish/private_functions/*
 !private_dot_config/private_fish/private_functions/.keep
@@ -28,6 +32,7 @@ private_dot_config/private_fish/private_completions/*
 private_dot_config/private_fish/private_conf.d/*
 !private_dot_config/private_fish/private_conf.d/.keep
 !private_dot_config/private_fish/private_conf.d/0*\.fish
+!private_dot_config/private_fish/private_conf.d/fzf.fish
 
 # --- chezmoi 本地状态 ---
 chezmoistate.boltdb
