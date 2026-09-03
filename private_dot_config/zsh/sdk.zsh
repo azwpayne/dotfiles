@@ -4,13 +4,14 @@
 # Description : pnpm 补全、SDKMAN（惰性加载）、Android NDK、Python(uv/pip)、
 #               Go、Rust(rustup)、Docker/Kubectl 补全缓存与 kubecolor 包装
 # Usage       : 由 ~/.zshrc source 加载；必须在 compinit 之后、aliases.zsh 之后
-#               且为三模块最后加载（本文件定义的 k -> kubectl 会覆盖同名定义，
-#               顺序即语义；内含 compdef 需 compinit 已完成）
+#               且为三模块最后加载（内含 compdef 注册，需 compinit 已完成；
+#               顺序即语义）
 # Guards      : 单项工具均 command -v / 目录存在 + 去重守卫；SDKMAN 惰性桩；
 #               补全缓存按二进制 mtime 失效并 zcompile
 # Loading-order contract: aliases.zsh -> fzf.zsh -> sdk.zsh (sdk last)
-# Last Updated: 2026-09-04（GOBIN 追加补冒号定界去重，与 krew 一致；收敛
-#               brew 前缀与 _load_cached_completion 注释）
+# Last Updated: 2026-09-04（大规模工作流审计：krew 去重守卫改为与 GOBIN 一致的
+#               冒号定界匹配，消除子串误判；GOPATH 统一 ~/.local/share/go；
+#               修正头注中已过时的 k 覆盖说明——aliases.zsh 已不定义 k）
 # Author      : Payne
 # =============================================================================
 
@@ -119,6 +120,7 @@ if command -v kubectl &> /dev/null; then
     command -v compdef &>/dev/null && compdef k=kubectl
 fi
 
-# 4. krew 二进制目录：同样目录存在 + 去重双守卫，避免死路径与重复累积
-[[ -d "${KREW_ROOT:-$HOME/.krew}/bin" && "$PATH" != *"${KREW_ROOT:-$HOME/.krew}/bin"* ]] && \
+# 4. krew 二进制目录：同样目录存在 + 去重双守卫（冒号定界，与 GOBIN/dot_zshrc
+#    惯例一致；原裸子串匹配对同级路径名可能误判）
+[[ -d "${KREW_ROOT:-$HOME/.krew}/bin" && ":$PATH:" != *":${KREW_ROOT:-$HOME/.krew}/bin:"* ]] && \
     export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"

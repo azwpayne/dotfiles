@@ -4,9 +4,9 @@
 # Description : 个人 zsh 别名/函数集合（系统应用、包管理更新、目录跳转、
 #               Kubernetes、编辑器、AI 助手、开发构建等）
 # Usage       : 由 ~/.zshrc source 加载；加载顺序必须为
-#               aliases.zsh -> fzf.zsh -> sdk.zsh（后加载者覆盖同名定义）
+#               aliases.zsh -> fzf.zsh -> sdk.zsh
 #               aliases 必须最先：其导出的 $EDITOR 在 fzf.zsh 的 Ctrl-G 绑定
-#               中于 source 时展开；sdk.zsh 的 `k` 会覆盖同名定义故最后加载
+#               中于 source 时展开；sdk.zsh 最后因其 compdef 注册需 compinit
 # Guards      : 本文件无外部命令强依赖；update-all 内逐项 command -v 守卫
 # Depends     : lsd/bat/htop/fastfetch/yazi/nvim 等，完整清单见 README.md
 # Last Updated: 2026-09-04（y() 引入 trap 清理、增强注释；PATH 去重与 Zim
