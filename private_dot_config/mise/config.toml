@@ -1,11 +1,13 @@
 # mise global tool versions (chezmoi: private_dot_config/mise/config.toml -> ~/.config/mise/config.toml, dir 0700)
-# Each entry tracks the latest stable release ("latest"); pin to a specific
-# version (e.g. node = "20") to lock it instead of always tracking latest.
-# `mise use -g <tool>@<version>` updates this file; `mise install` syncs.
+# `mise use -g <tool>@<version>` 更新本文件；`mise install` 同步安装。
+# 每个条目跟踪最新稳定版 ("latest")；如需锁定版本可改为具体版本号 (如 node = "20")。
+# 工具清单与安装说明见 docs/dev-tools.md 与 aliases.zsh 的 update-all。
+# Last Updated: 2026-09-03 — 补全工具用途注释，收敛最新版策略说明
+# Author: Payne
 
 [tools]
-bun = "latest"
-deno = "latest"
-go = "latest"
-node = "latest"
-pnpm = "latest"
+bun = "latest"   # JS 运行时与包管理 (Bun)
+deno = "latest"  # JS/TS 运行时 (Deno)
+go = "latest"    # Go 工具链 (GOPATH 见 zsh/sdk.zsh 与 fish/00_env.fish)
+node = "latest"  # Node.js LTS (pnpm 依赖其)
+pnpm = "latest"  # JS 包管理器 (高效磁盘利用)
