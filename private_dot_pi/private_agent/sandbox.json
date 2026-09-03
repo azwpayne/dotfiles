@@ -1,7 +1,7 @@
 {
   "enabled": true,
   "shell": {
-    "readAccess": "host"
+    "readAccess": "policy"
   },
   "filesystem": {
     "denyRead": [
@@ -9,6 +9,7 @@
       "/home",
       "/root",
       "/etc",
+      "/private/etc",
       "/var",
       "/private/var",
       "/private/tmp"
