@@ -55,7 +55,9 @@ fi
 
 ########## Golang ##########
 export GOPROXY='https://goproxy.cn,direct'           # 国内模块代理
-export GOPATH="${HOME}/WorkSpaces/project/go"        # 个人 Go 工作区
+# GOPATH 统一为 ~/.local/share/go（与 fish 00_env.fish 完全一致；XDG 风格，
+# 曾用 ~/WorkSpaces/project/go 与 fish 侧冲突为两个不同的工作区）
+export GOPATH="${HOME}/.local/share/go"
 export GOBIN="${GOPATH}/bin"
 # PATH 收敛：仅当 GOBIN 实际存在且尚未在 PATH 时加入，避免死路径与重复累积
 # 去重守卫使用冒号定界（":$PATH:"），与 dot_zshrc / krew 处的双守卫惯例一致
