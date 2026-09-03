@@ -5,7 +5,8 @@
 #               自适应 SOCKS5 ProxyCommand (5376 探活, 失败直连) + Host * 默认
 # Usage       : `ssh -G dev` 排错, `ssh -T git@github.com` 测连通性
 # Guards      : 0600 必需 (0644 被 ssh 拒绝), ProxyCommand bash -c 探活
-# Last Updated: 2026-09-04 — 补全文件头、Guard 与 ProxyCommand 5376 统一说明
+# Last Updated: 2026-09-04 — 大规模工作流审计：github-work 块改为显式模板
+#               （原 IdentitiesOnly 无密钥可谈且绕过 443+SOCKS5 路由，实际不可用）
 # Author      : Payne
 # =============================================================================
 # SSH client config (chezmoi: private_dot_ssh/private_config -> ~/.ssh/config, 0600)
@@ -82,12 +83,19 @@ Host github.com
     ProxyCommand bash -c 'if nc -z 127.0.0.1 5376; then nc -X 5 -x 127.0.0.1:5376 %h %p; else nc %h %p; fi'
 
 
-## github work
-Host github-work.com
-    HostName github.com
-    User git
-    # IdentityFile ~/.ssh/id_ed25519_work
-    IdentitiesOnly yes
+## github work（模板，当前未启用）
+## 原块：HostName github.com + IdentitiesOnly yes 但未配 IdentityFile ——
+## IdentitiesOnly 会禁用所有默认密钥，导致该主机实际上无法认证；且直连
+## github.com:22 绕过了上面 github.com 块的 ssh.github.com:443 + SOCKS5 路由。
+## 启用步骤：生成独立工作密钥（ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_work）、
+## 加入 ssh-agent 并上传公钥后，取消下列整块注释：
+# Host github-work.com
+#     HostName ssh.github.com
+#     User git
+#     Port 443
+#     IdentityFile ~/.ssh/id_ed25519_work
+#     IdentitiesOnly yes
+#     ProxyCommand bash -c 'if nc -z 127.0.0.1 5376; then nc -X 5 -x 127.0.0.1:5376 %h %p; else nc %h %p; fi'
 
 
 # 对所有主机生效的默认配置（必须放最后）
