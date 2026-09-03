@@ -9,8 +9,8 @@
 #               中于 source 时展开；sdk.zsh 的 `k` 会覆盖同名定义故最后加载
 # Guards      : 本文件无外部命令强依赖；update-all 内逐项 command -v 守卫
 # Depends     : lsd/bat/htop/fastfetch/yazi/nvim 等，完整清单见 README.md
-# Last Updated: 2026-08-27（auto_update 改为委托 update-all，修复对已删除的
-#               uv_update 等五个 *_update 辅助函数的调用）
+# Last Updated: 2026-09-03（新增 chezc/chezdf/chezap 三别名，修正 chezc 注释；
+#               fishconfig 归入编辑器组，与 zshconfig 并列）
 # Author      : Payne
 # =============================================================================
 
@@ -21,6 +21,12 @@ alias finder='open .'                            # Finder 打开当前目录
 alias iterm_ghostty='open -a ghostty "$PWD"'     # Ghostty 打开当前目录（单引号保证运行时取 $PWD）
 alias iterm='open -a iTerm "$PWD"'               # iTerm 打开当前目录
 
+alias chezc='code ${HOME}/.local/share/chezmoi'  # 编辑 chezmoi 源目录 (~/.local/share/chezmoi)
+alias chezdf='chezmoi diff'                      # 预览 chezmoi 变更 (apply 前必跑)
+alias chezap='chezmoi apply -v'                 # 应用 chezmoi 变更 (verbose)
+
+# --- 编辑器快捷入口 (按 XDG 路径分组) ---
+alias fishconfig='code ${HOME}/.config/fish'     # 编辑 fish 配置 (~/.config/fish)
 alias zshconfig='code ~/.zshrc'                  # 编辑 ~/.zshrc
 alias zshsource='source ~/.zshrc'                # 重新加载配置
 
