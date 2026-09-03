@@ -12,8 +12,9 @@
 # Loading-order contract: compinit(Zim) -> aliases.zsh -> fzf.zsh -> sdk.zsh
 #   aliases 先于 fzf（后者 Ctrl-G 绑定在 source 时展开 $EDITOR）；
 #   sdk 最后（compdef 依赖 compinit，且其 k 别名有意覆盖同名定义）。
-# Last Updated: 2026-09-04 — 硬化 Zim 下载回退与失败清理、细化 PATH 去重
-#               为逐目录冒号定界 + typeset -U、收敛外部加载为 (N) null_glob
+# Last Updated: 2026-09-04 — 大规模工作流审计修复：PATH 优先级语义修正
+#               （列表改逆序，~/bin 真正最高）、删除与 Zim homebrew 模块重复的
+#               brew shellenv eval、zimfw/init.zsh source 增加存在性守卫
 # Author     : Payne
 # =============================================================================
 
@@ -121,19 +122,22 @@ if [[ ! -s ${ZIM_HOME}/zimfw.zsh ]]; then
   fi
 fi
 # Install missing modules, and update ${ZIM_HOME}/init.zsh if missing or outdated.
+# 守卫：下载失败（zimfw.zsh 缺失/空）时跳过 source，避免每次启动报错
 if [[ ! ${ZIM_HOME}/init.zsh -nt ${ZIM_CONFIG_FILE:-${ZDOTDIR:-${HOME}}/.zimrc} ]]; then
-  source ${ZIM_HOME}/zimfw.zsh init
+  [[ -s ${ZIM_HOME}/zimfw.zsh ]] && source ${ZIM_HOME}/zimfw.zsh init
 fi
-# Initialize modules.
-source ${ZIM_HOME}/init.zsh
+# Initialize modules（init.zsh 尚未生成时跳过，待下次 zimfw 成功后再初始化）
+[[ -s ${ZIM_HOME}/init.zsh ]] && source ${ZIM_HOME}/init.zsh
 # }}} End configuration added by Zim Framework install
 
 
 
 # PATH 去重：zsh 的 typeset -U 保证 path 数组唯一（自动去重，保留首次出现）
 typeset -U path PATH
-# PATH 收敛（按优先级前置，首项最先命中；逐目录冒号定界去重，避免粗粒度子串误判）
-for _p in "$HOME/bin" "/opt/homebrew/bin" "/opt/homebrew/sbin" "/usr/local/bin" "$HOME/.local/bin"; do
+# PATH 收敛（逐目录冒号定界去重，避免粗粒度子串误判）。注意：逐项“前置”语义下
+# 循环“最后”处理的目录最终优先级最高，故列表按目标优先级逆序书写——最终命中
+# 顺序为 ~/bin > /opt/homebrew/bin|sbin > /usr/local/bin > ~/.local/bin
+for _p in "$HOME/.local/bin" "/usr/local/bin" "/opt/homebrew/sbin" "/opt/homebrew/bin" "$HOME/bin"; do
   [[ -d "$_p" ]] && [[ ":$PATH:" != *":$_p:"* ]] && path=("$_p" $path)
 done
 unset _p
@@ -144,7 +148,9 @@ command -v mise     >/dev/null 2>&1 && eval "$(mise activate zsh)"
 command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
 # fzf 的键位绑定/补全不再在此 eval：统一由 fzf.zsh 内带守卫的
 # `command -v fzf && eval "$(fzf --zsh)"` 初始化（唯一初始化点，避免双重加载）
-command -v brew     >/dev/null 2>&1 && eval "$(brew shellenv)"
+# brew shellenv 也不再在此 eval：Zim 的 zimfw/homebrew 模块（见 dot_zimrc）
+# 已在 init.zsh 阶段注入 HOMEBREW_PREFIX 等环境（早于下方 rustup 守卫），
+# 重复 eval 非幂等且多一次子进程开销
 # rustup 工具链 PATH：静态路径替代 `brew --prefix rustup` 子进程调用（省一次启动子进程，
 # 且 rustup 卸载后不再报错）；目录守卫避免注入死路径，去重守卫（冒号定界）避免重复 source 时累积
 [[ -d "$HOME/.cargo/bin" && ":$PATH:" != *":$HOME/.cargo/bin:"* ]] && path=("$HOME/.cargo/bin" $path)
