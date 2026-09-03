@@ -45,6 +45,8 @@
       "rm *": "deny",
       "unlink *": "deny",
       "dd if=* of=*": "deny",
+      "dd of=* if=*": "deny",
+      "dd *": "deny",
       "mkfs.*": "deny",
       "python3 *": "ask",
       "node *": "ask"
