@@ -1,5 +1,7 @@
 # 维护指南
 
+> Last Updated: 2026-09-04 — large-scale workflow 优化（code/annotate/docs 原子提交，见 git log）
+
 ## 日常修改流程
 
 本仓库是 chezmoi 的源目录——**永远编辑源文件，不要直接改 `$HOME` 下的目标文件**（否则下次 `apply` 会被覆盖，产生漂移）。

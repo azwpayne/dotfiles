@@ -1,5 +1,7 @@
 # 文件映射与命名约定
 
+> Last Updated: 2026-09-04 — large-scale workflow 优化（code/annotate/docs 原子提交，见 git log）
+
 本仓库是 chezmoi 的源目录（`~/.local/share/chezmoi`）。chezmoi 通过文件名前缀编码目标路径与属性，
 `chezmoi apply` 时按规则渲染到 `$HOME`。
 

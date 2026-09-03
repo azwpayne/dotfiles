@@ -1,5 +1,7 @@
 # Shell 栈：Zsh / Zim / Starship / Fish
 
+> Last Updated: 2026-09-04 — large-scale workflow 优化（code/annotate/docs 原子提交，见 git log）
+
 ## 启动链路
 
 交互式 zsh 启动时按以下顺序执行（`~/.zshrc` 经 `symlink_dot_zshrc.tmpl` 指向 `~/.config/zsh/.zshrc`，源码为 `private_dot_config/zsh/dot_zshrc`）。顺序即语义——同名定义后加载者生效，例如 `k` 别名由 `sdk.zsh` 按需定义，因此 `aliases.zsh` 有意不定义 `k`。

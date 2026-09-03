@@ -1,5 +1,7 @@
 # Neovim：LazyVim 配置
 
+> Last Updated: 2026-09-04 — large-scale workflow 优化（code/annotate/docs 原子提交，见 git log）
+
 `private_dot_config/nvim/` 是基于 [LazyVim](https://www.lazyvim.org/) starter 的 Neovim 配置，目标 Neovim ≥ 0.9（本机验证 0.12）。`chezmoi apply` 渲染为 `~/.config/nvim/`（静态文件，无模板），首次启动由 `lua/config/lazy.lua` 自动 bootstrap `lazy.nvim` 并按 `lazy-lock.json` 安装插件。
 
 > **文档分工**：本文档是 chezmoi 仓库视角，说明各组件的结构与配置意图。编辑器面向用户的安装与功能概览见 [`private_dot_config/nvim/README.md`](../private_dot_config/nvim/README.md)（仓库内文档，由 `**/README.md` 排除、不部署到 `~/.config/nvim/README.md`），二者互补不重复。所有实际配置值（extras 清单、选项、键位、自动命令、插件锁定）一律以 `lua/config/*.lua` 与 `lazy-lock.json` 为唯一权威，本文不逐行抄录。

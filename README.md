@@ -1,5 +1,7 @@
 # Dotfiles
 
+> Last Updated: 2026-09-04 — large-scale workflow 优化（code/annotate/docs 全仓并行审计 + 原子提交，见 docs/）
+
 基于 [chezmoi](https://www.chezmoi.io/) 管理的 macOS（Apple Silicon）个人开发环境配置。
 
 本仓库是 chezmoi 的**源目录**（source directory，位于 `~/.local/share/chezmoi`），

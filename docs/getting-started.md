@@ -1,5 +1,7 @@
 # 安装与快速开始
 
+> Last Updated: 2026-09-04 — large-scale workflow 优化（code/annotate/docs 原子提交，见 git log）
+
 本文档说明如何在一台新的 macOS（Apple Silicon）机器上，用本仓库还原完整的开发环境。
 
 ## 1. 安装 Homebrew 与前置依赖（全部在 `chezmoi apply` 之前）

@@ -1,5 +1,7 @@
 # 开发工具链：git / gh / mise / codex / pi agent
 
+> Last Updated: 2026-09-04 — large-scale workflow 优化（code/annotate/docs 原子提交，见 git log）
+
 > 本文档只做解释性说明，**不耦合**任何代码或配置。凡是源文件已经承载的实际内容（字段值、列表项、权限矩阵等），一律以源文件为唯一权威；跨文档冲突时，一律以源文件为准。下文各节不再逐行抄录文件内容。
 
 ## Git — `dot_gitconfig` → `~/.gitconfig`
