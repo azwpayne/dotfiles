@@ -1,6 +1,7 @@
 # ============================================
 # Ghostty Terminal - Complete Configuration (chezmoi: private_dot_config/ghostty/config -> ~/.config/ghostty/config, dir 0700)
 # Theme/palette: Catppuccin Mocha (dark) — see "Theme and Colors" section.
+# Last Updated: 2026-09-03 — command synced to fish -l (tmux default-shell), tidy quick-terminal dedup note
 # ============================================
 # File: ~/.config/ghostty/config
 # Reload: Cmd+Shift+, (macOS)

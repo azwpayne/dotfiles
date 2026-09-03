@@ -10,7 +10,7 @@
 
 部署到 `~/.config/ghostty/config`。查看最终生效值用 `ghostty +show-config`（`--default --docs` 可对照默认值）；CLI 默认不在 PATH，需在 Ghostty 菜单 → "Install CLI tool" 安装，或用全路径 `/Applications/Ghostty.app/Contents/MacOS/ghostty`。
 
-- **启动即登录 shell**：`command = /bin/zsh -l`；`fish -l` / `tmux` 等方案以注释形式保留为备用。
+- **启动即 Fish 登录 shell**：`command = /opt/homebrew/bin/fish -l`（与 tmux `default-shell` 一致，`working-directory = ~/workspaces`）；`zsh -l` / `tmux` 等方案以注释形式保留为备用。
 - **外观与 macOS 集成**：Catppuccin Mocha 主题、JetBrainsMono Nerd Font Mono、毛玻璃与窗口装饰策略；具体数值（透明度、字号、padding、光标样式等）见源文件。
 - **键位**：基本沿用 Ghostty 默认，并叠加若干自定义绑定（标签 / 分屏 / 字号 / Quick Terminal 等）；完整 `keybind` 列表以源文件为准。
 - **安全与剪贴板**：允许系统剪贴板读写、粘贴保护、关闭最后窗口即退出等；逐条定义见源文件。
@@ -23,7 +23,7 @@
 
 轻量备用，Dracula 配色底，与 Ghostty 互为独立配置，切换无需改另一文件。
 
-- **启动即全屏、毛玻璃**，仅右 Option 作 Alt（与 Ghostty 策略一致）；Shell 走登录用户默认 `$SHELL`。
+- **启动即 Fish + tmux**：`shell = { program = "/opt/homebrew/bin/fish", args = ["-c", "tmux attach || tmux new -t main"] }`（共享 tmux 会话，Ghostty 已直接使用 Fish，此处通过 tmux 复用）；毛玻璃、仅右 Option 作 Alt 等与 Ghostty 策略一致。
 - **字体**与 Ghostty 共用 JetBrainsMono Nerd Font Mono、`size = 15`。
 - **配色**沿用 Dracula 调色板（`colors.primary / normal / bright / dim`）；实际 hex 值以源文件 `alacritty.toml` 的 `[colors]` 为准。
 - **键位**：复用交给 tmux，故屏蔽 `Cmd+T` / `Cmd+N`、保留 `Cmd+Enter` 切换全屏；其余自定义绑定见源文件。

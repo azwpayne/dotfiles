@@ -1,6 +1,7 @@
 # Alacritty Configuration File (chezmoi: private_dot_config/alacritty/alacritty.toml -> ~/.config/alacritty/alacritty.toml)
 # GPU-accelerated terminal. Theme: Dracula (this file only — ghostty & starship use Catppuccin Mocha).
 # `private_dot_config` ensures parent dir 0700 on deploy.
+# Last Updated: 2026-09-03 — shell synced to fish+tmux (ghostty parity), header clarified
 # Docs: https://alacritty.org/config-alacritty.html | bindings: .../config-alacritty-bindings.html
 # Reference: https://www.kevnu.com/zh/posts/18
 
