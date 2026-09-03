@@ -5,6 +5,7 @@
 #               分类：基础环境 / 提示符 / 补全 / 末尾模块（语法高亮、历史搜索、
 #               自动建议）。注释掉的模块（fzf / zsh-syntax-highlighting / zfm）
 #               未加载，由 fzf.zsh 与 fast-syntax-highlighting 等替代。
+# Last Updated: 2026-09-04 — 补全文件头分组注释、收敛 HOMEBREW_PREFIX 自适应说明
 # Author      : Payne
 # zimfw docs  : https://github.com/zimfw/zimfw
 # Update      : `zimfw install` 重新生成 ~/.zim/init.zsh；新增模块放 utility 之后、

@@ -9,8 +9,8 @@
 #               中于 source 时展开；sdk.zsh 的 `k` 会覆盖同名定义故最后加载
 # Guards      : 本文件无外部命令强依赖；update-all 内逐项 command -v 守卫
 # Depends     : lsd/bat/htop/fastfetch/yazi/nvim 等，完整清单见 README.md
-# Last Updated: 2026-09-03（新增 chezc/chezdf/chezap 三别名，修正 chezc 注释；
-#               fishconfig 归入编辑器组，与 zshconfig 并列）
+# Last Updated: 2026-09-04（y() 引入 trap 清理、增强注释；PATH 去重与 Zim
+#               硬化联动，见 dot_zshrc）
 # Author      : Payne
 # =============================================================================
 
@@ -169,12 +169,15 @@ scr() { nohup scrcpy "$@" > /dev/null 2>&1 & }   # 后台启动 scrcpy 投屏
 # =============================================================================
 
 # yazi 包装：退出时自动 cd 到最后浏览的目录
+# 健壮性：trap 保证信号/异常退出时清理 tmp；IFS= read -d '' 处理 yazi 的 NUL 分隔
 function y() {
 	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+	trap 'command rm -f -- "$tmp"' EXIT INT TERM HUP
 	command yazi "$@" --cwd-file="$tmp"
 	IFS= read -r -d '' cwd < "$tmp"
 	[ "$cwd" != "$PWD" ] && [ -d "$cwd" ] && builtin cd -- "$cwd"
-	rm -f -- "$tmp"
+	command rm -f -- "$tmp"
+	trap - EXIT INT TERM HUP
 }
 
 # ---------------------------------------------------------------------------

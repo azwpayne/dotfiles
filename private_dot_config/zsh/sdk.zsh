@@ -9,8 +9,8 @@
 # Guards      : 单项工具均 command -v / 目录存在 + 去重守卫；SDKMAN 惰性桩；
 #               补全缓存按二进制 mtime 失效并 zcompile
 # Loading-order contract: aliases.zsh -> fzf.zsh -> sdk.zsh (sdk last)
-# Last Updated: 2026-08-27（krew bin 的 PATH 追加改为目录存在性 + 去重双守卫，
-#               与 GOBIN 守卫同一惯例）
+# Last Updated: 2026-09-04（GOBIN 追加补冒号定界去重，与 krew 一致；收敛
+#               brew 前缀与 _load_cached_completion 注释）
 # Author      : Payne
 # =============================================================================
 
@@ -57,8 +57,9 @@ fi
 export GOPROXY='https://goproxy.cn,direct'           # 国内模块代理
 export GOPATH="${HOME}/WorkSpaces/project/go"        # 个人 Go 工作区
 export GOBIN="${GOPATH}/bin"
-# PATH 收敛：仅当 GOBIN 实际存在时加入，避免死路径；去重守卫保证重复 source 幂等
-[[ -d "$GOBIN" ]] && export PATH="$PATH:${GOBIN}"
+# PATH 收敛：仅当 GOBIN 实际存在且尚未在 PATH 时加入，避免死路径与重复累积
+# 去重守卫使用冒号定界（":$PATH:"），与 dot_zshrc / krew 处的双守卫惯例一致
+[[ -d "$GOBIN" && ":$PATH:" != *":$GOBIN:"* ]] && export PATH="$PATH:${GOBIN}"
 
 ########## Rust ##########
 # rustup 环境（brew 安装的 rustup 无此文件时静默跳过）

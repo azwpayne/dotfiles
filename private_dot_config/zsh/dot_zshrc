@@ -8,10 +8,12 @@
 #      由 fzf.zsh 内带守卫地 eval 一次，唯一初始化点，避免双重加载）
 #   ③ 外部配置 source（aliases → fzf → sdk，顺序即语义）
 # Guards     : 所有工具初始化均 command -v 守卫，未装静默跳过；PATH 追加均带
-#              目录存在性 + 去重双守卫
+#              目录存在性 + 去重双守卫（冒号定界 + typeset -U 去重）
 # Loading-order contract: compinit(Zim) -> aliases.zsh -> fzf.zsh -> sdk.zsh
 #   aliases 先于 fzf（后者 Ctrl-G 绑定在 source 时展开 $EDITOR）；
 #   sdk 最后（compdef 依赖 compinit，且其 k 别名有意覆盖同名定义）。
+# Last Updated: 2026-09-04 — 硬化 Zim 下载回退与失败清理、细化 PATH 去重
+#               为逐目录冒号定界 + typeset -U、收敛外部加载为 (N) null_glob
 # Author     : Payne
 # =============================================================================
 
@@ -97,14 +99,25 @@ ZSH_AUTOSUGGEST_MANUAL_REBIND=1
 # ------------------
 
 ZIM_HOME=${ZDOTDIR:-${HOME}}/.zim
-# Download zimfw plugin manager if missing.
-if [[ ! -e ${ZIM_HOME}/zimfw.zsh ]]; then
+# Download zimfw plugin manager if missing or empty (zero-byte on prior failure).
+# Robustness: curl → wget fallback, each checked for existence; failure cleans up
+# zero-byte file and prints colored error, avoiding cryptic zimfw init failure.
+if [[ ! -s ${ZIM_HOME}/zimfw.zsh ]]; then
+  mkdir -p ${ZIM_HOME}
   if (( ${+commands[curl]} )); then
-    curl -fsSL --create-dirs -o ${ZIM_HOME}/zimfw.zsh \
-        https://github.com/zimfw/zimfw/releases/latest/download/zimfw.zsh
+    if ! curl -fsSL --create-dirs -o ${ZIM_HOME}/zimfw.zsh \
+        https://github.com/zimfw/zimfw/releases/latest/download/zimfw.zsh; then
+      command rm -f -- ${ZIM_HOME}/zimfw.zsh
+      print -P "%F{red}✗ zimfw download failed via curl%f" >&2
+    fi
+  elif (( ${+commands[wget]} )); then
+    if ! wget -nv -O ${ZIM_HOME}/zimfw.zsh \
+        https://github.com/zimfw/zimfw/releases/latest/download/zimfw.zsh; then
+      command rm -f -- ${ZIM_HOME}/zimfw.zsh
+      print -P "%F{red}✗ zimfw download failed via wget%f" >&2
+    fi
   else
-    mkdir -p ${ZIM_HOME} && wget -nv -O ${ZIM_HOME}/zimfw.zsh \
-        https://github.com/zimfw/zimfw/releases/latest/download/zimfw.zsh
+    print -P "%F{red}✗ curl and wget not found — cannot install zimfw%f" >&2
   fi
 fi
 # Install missing modules, and update ${ZIM_HOME}/init.zsh if missing or outdated.
@@ -117,8 +130,13 @@ source ${ZIM_HOME}/init.zsh
 
 
 
-[[ "$PATH" != *"$HOME/bin"* ]] && export PATH="${HOME}/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:$HOME/.local/bin:$PATH"
-
+# PATH 去重：zsh 的 typeset -U 保证 path 数组唯一（自动去重，保留首次出现）
+typeset -U path PATH
+# PATH 收敛（按优先级前置，首项最先命中；逐目录冒号定界去重，避免粗粒度子串误判）
+for _p in "$HOME/bin" "/opt/homebrew/bin" "/opt/homebrew/sbin" "/usr/local/bin" "$HOME/.local/bin"; do
+  [[ -d "$_p" ]] && [[ ":$PATH:" != *":$_p:"* ]] && path=("$_p" $path)
+done
+unset _p
 
 # init（逐项守卫：工具未安装时静默跳过，不再打印 command not found）
 command -v zoxide   >/dev/null 2>&1 && eval "$(zoxide init zsh)"
@@ -128,12 +146,14 @@ command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
 # `command -v fzf && eval "$(fzf --zsh)"` 初始化（唯一初始化点，避免双重加载）
 command -v brew     >/dev/null 2>&1 && eval "$(brew shellenv)"
 # rustup 工具链 PATH：静态路径替代 `brew --prefix rustup` 子进程调用（省一次启动子进程，
-# 且 rustup 卸载后不再报错）；目录守卫避免注入死路径，去重守卫避免重复 source 时累积
-[[ -d "$HOME/.cargo/bin" && "$PATH" != *"$HOME/.cargo/bin"* ]] && export PATH="$HOME/.cargo/bin:$PATH"
-[[ -d "${HOMEBREW_PREFIX:-/opt/homebrew}/opt/rustup/bin" && "$PATH" != *"${HOMEBREW_PREFIX:-/opt/homebrew}/opt/rustup/bin"* ]] && export PATH="${HOMEBREW_PREFIX:-/opt/homebrew}/opt/rustup/bin:$PATH"
+# 且 rustup 卸载后不再报错）；目录守卫避免注入死路径，去重守卫（冒号定界）避免重复 source 时累积
+[[ -d "$HOME/.cargo/bin" && ":$PATH:" != *":$HOME/.cargo/bin:"* ]] && path=("$HOME/.cargo/bin" $path)
+[[ -d "${HOMEBREW_PREFIX:-/opt/homebrew}/opt/rustup/bin" && ":$PATH:" != *":${HOMEBREW_PREFIX:-/opt/homebrew}/opt/rustup/bin:"* ]] && path=("${HOMEBREW_PREFIX:-/opt/homebrew}/opt/rustup/bin" $path)
 
 # ---------------------------------------------------------------------------
 # 外部配置加载（Loading-order contract：aliases → fzf → sdk，顺序即语义）
 # - 守卫：PATH 插入均目录存在+去重；工具 init 均 command -v 守卫
+# - (N) 使无匹配时不产生字面量，避免 source 报错；每个文件存在才 source
 # ---------------------------------------------------------------------------
-for file in ~/.config/zsh/*.zsh; do source "$file"; done
+for file in ~/.config/zsh/*.zsh(N); do [[ -f "$file" ]] && source "$file"; done
+unset file

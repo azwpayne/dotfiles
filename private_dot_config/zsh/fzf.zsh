@@ -7,8 +7,8 @@
 #               $EDITOR——Ctrl-G 绑定在 source 时展开）、在 sdk.zsh 之前
 # Guards      : 前缀探测带缓存与自愈；fzf 初始化与补全均 command -v 守卫
 # Depends     : 必需 fzf、fzf-tab；主力 fd（缺失时回退 rg）；预览用 bat/lsd
-# Last Updated: 2026-08-27（exclude_list 中 .pyc 修正为 \*.pyc：原写法只匹配字面上
-#               名为 .pyc 的文件，字节码 foo.pyc 并未被排除）
+# Last Updated: 2026-09-04（PATH 追加改为冒号定界去重，与 dot_zshrc 惯例
+#               一致；FZF_PREFIX 探测注释收敛）
 # Author      : Payne
 # =============================================================================
 
@@ -43,8 +43,8 @@ if [[ -z "${FZF_PREFIX:-}" ]]; then
     [[ -n "${FZF_PREFIX:-}" ]] && echo "$FZF_PREFIX" > "$FZF_PREFIX_CACHE"
 fi
 
-# 仅当探测成功且 PATH 尚未包含时追加，避免死路径与重复累积
-if [[ -n "${FZF_PREFIX:-}" && ! "$PATH" == *"$FZF_PREFIX/bin"* ]]; then
+# 仅当探测成功且 PATH 尚未包含时追加，避免死路径与重复累积（冒号定界去重）
+if [[ -n "${FZF_PREFIX:-}" && ":$PATH:" != *":$FZF_PREFIX/bin:"* ]]; then
     export PATH="${PATH:+$PATH:}$FZF_PREFIX/bin"
 fi
 
