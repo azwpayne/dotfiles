@@ -4,7 +4,8 @@
 # Description : 按目标名匹配（非源名）；`chezmoi diff/apply` 自动跳过匹配项，
 #               避免仓库文档/本地覆盖/敏感词污染 $HOME。
 # Usage       : `chezmoi ignored` 查看被排除列表；`chezmoi managed` 不含此处条目
-# Last Updated: 2026-09-03 — 分组注释、收敛 fish 本地状态与敏感词说明
+# Last Updated: 2026-09-04 — 分组注释校验、与 .gitignore 职责边界说明收敛
+#               （managed 86 = 57 core + 29 fish，含 **/README.md 等 12 行）
 # =============================================================================
 
 # 本地覆盖与备份（机器特定覆盖，不跨机同步）

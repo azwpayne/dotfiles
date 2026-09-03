@@ -1,4 +1,12 @@
-# Global gitignore (chezmoi: dot_gitignore_global -> ~/.gitignore_global)
+# =============================================================================
+# dot_gitignore_global — 全局 Git 忽略 (chezmoi: -> ~/.gitignore_global)
+# =============================================================================
+# Description : 通过 dot_gitconfig core.excludesfile 全局生效；项目特定忽略
+#               请放在仓库本地 .gitignore。分类见下，OS/编辑器/日志/构建等
+# Usage       : chezmoi apply 部署后 `git config --get core.excludesfile`
+# Last Updated: 2026-09-04 — 分组注释收敛、保留 *.git 显式注释说明
+# Author      : Payne
+# =============================================================================
 # Loaded via `core.excludesfile` in dot_gitconfig; applies to all repos.
 # Keep project-specific ignores in repo-local .gitignore. Categories below.
 
