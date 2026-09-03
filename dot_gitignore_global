@@ -35,11 +35,12 @@ __pycache__/
 node_modules/
 *.cache
 
-# --- Build outputs ---
-dist/
-build/
-target/
-bin/
+# --- Build outputs（锚定仓库根目录，避免误伤子目录里正常入库的 dist/bin 等） ---
+/dist/
+/build/
+/target/
+# bin/ 已移除：无锚定的 bin/ 会把任何仓库 scripts/bin 目录无声排除，
+# git add . 静默跳过而无警告；项目级忽略请写入各仓库自身 .gitignore
 
 # --- Coding agent ---
 **/.claude
