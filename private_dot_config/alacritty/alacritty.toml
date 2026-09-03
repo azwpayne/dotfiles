@@ -31,7 +31,7 @@ bold = { family = "JetBrainsMono Nerd Font Mono", style = "Bold" }
 italic = { family = "JetBrainsMono Nerd Font Mono", style = "Italic" }
 bold_italic = { family = "JetBrainsMono Nerd Font Mono", style = "Bold Italic" }
 
-# Palette: Dracula — ghostty & starship use Catppuccin Mocha (intentional split).
+# Palette: Catppuccin Mocha (active) — matches ghostty & local starship; the Dracula block below is kept fully commented as an alternative template.
 [colors]
 # primary = { background = '0x282a36', foreground = '0xf8f8f2' }
 # cursor = { background = '0x44475a', foreground = '0xf8f8f2' }

@@ -1,6 +1,6 @@
 # 安装与快速开始
 
-> Last Updated: 2026-09-04 — large-scale workflow 优化（code/annotate/docs 原子提交，见 git log）
+> Last Updated: 2026-09-04 — 大规模工作流审计收敛：sdk.zsh 禁用方式改为 glob 语义（无逐文件 source 行）、starship 配置未入库、brew shellenv 归 Zim 模块
 
 本文档说明如何在一台新的 macOS（Apple Silicon）机器上，用本仓库还原完整的开发环境。
 
@@ -27,7 +27,7 @@ brew install fzf starship zoxide mise fd ripgrep
 
 > **为什么要在 `apply` 之前**：`apply` 后一般会立即 `exec zsh` 首次启动（Zim 拉模块、
 > 各工具初始化、补全加载），上述前置若缺装会导致功能明显退化甚至 git 全局断链。
-> 守卫化说明：`~/.config/zsh/.zshrc`（经 symlink 兼容 `~/.zshrc`）中 `zoxide` / `mise` / `starship` / `brew` 的 `eval` 均带
+> 守卫化说明：`~/.config/zsh/.zshrc`（经 symlink 兼容 `~/.zshrc`）中 `zoxide` / `mise` / `starship` 的 `eval` 均带
 > `command -v` 守卫，rustup/cargo 的 PATH 注入为目录存在性 + 去重双守卫（静态路径，
 > 不再调用 `brew --prefix` 子进程），fzf 初始化统一收敛到 `fzf.zsh`（带守卫），
 > 缺装时全部**静默跳过、不再报 `command not found`**——因此其余体验增强类工具
@@ -101,8 +101,9 @@ exec zsh   # 重启 shell 使全部配置生效（或重新打开终端）
 | Neovim | 首次运行 `nvim` 时 `lazy.nvim` 自动 `bootstrap` 并按 `lazy-lock.json` 安装 43 个插件（需网络） | 首次运行 `nvim` |
 | `mise` 工具链 | `mise activate` 已挂接；按需执行 `mise install` 安装 `private_dot_config/mise/config.toml` 声明的工具（详见该文件） | 手动执行 |
 
-> `~/.config/zsh/.zshrc` 中 `sdk.zsh` 为无条件 `source`（注释与代码已一致，如需禁用需注释 source 行）；
-> `SDKMAN` 为惰性加载——首次调用 `sdk` 时才真正 source init 并注入 PATH（Java 等
+> `~/.config/zsh/.zshrc` 以 glob（`for file in ~/.config/zsh/*.zsh(N)`）加载三模块，没有逐文件 source 行；
+> 如需禁用 `sdk.zsh`，重命名/移除已部署文件（如 `mv ~/.config/zsh/sdk.zsh ~/.config/zsh/sdk.zsh.disabled`）
+> 或改 `dot_zshrc` 中的 glob 行。`SDKMAN` 为惰性加载——首次调用 `sdk` 时才真正 source init 并注入 PATH（Java 等
 > candidate 的可用性随之延迟到首次 `sdk` 调用）；`fzf` 键位绑定只在 `fzf.zsh` 内
 > `eval "$(fzf --zsh)"` 一次，`~/.zshrc` 不再重复。详见 [shell.md](shell.md)。
 
@@ -115,7 +116,7 @@ exec zsh   # 重启 shell 使全部配置生效（或重新打开终端）
 | `git-lfs` | Git LFS filter——`dot_gitconfig` 配置 `[filter "lfs"] required = true`，缺失时**全机所有仓库**的 clone/push 直接失败（硬性中断，非静默退化） | `brew install git-lfs && git lfs install` |
 | `fzf` | `Ctrl-R` / `Ctrl-T` / `Alt-C` 及所有 `f*` 函数（`frg` / `fkill` / `ftm` / `fl*`） | `brew install fzf` |
 | `fzf-tab` | 补全菜单模糊化（Zim 模块 `Aloxaf/fzf-tab`） | 无需手动安装，由 `zimfw` 按 `private_dot_config/zsh/dot_zimrc` 的 `zmodule Aloxaf/fzf-tab` 首次启动时自动安装并加载 |
-| `starship` | 提示符（`starship.toml` Catppuccin Mocha） | `brew install starship` |
+| `starship` | 提示符（配置为机器本地 `~/.config/starship.toml` Catppuccin Mocha，未随仓库分发，跨机需自行拷贝） | `brew install starship` |
 | `zoxide` | `z` 目录跳转 | `brew install zoxide` |
 | `mise` | 运行时管理（`bun` / `deno` / `go` / `node` / `pnpm`） | `brew install mise` |
 | `fd` | `fzf` 默认文件列表命令 | `brew install fd` |

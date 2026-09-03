@@ -1,6 +1,6 @@
 # 终端：Ghostty（主力）与 Alacritty（备用）
 
-> Last Updated: 2026-09-04 — large-scale workflow 优化（code/annotate/docs 原子提交，见 git log）
+> Last Updated: 2026-09-04 — 大规模工作流审计收敛：Alacritty 活跃配色实为 Catppuccin Mocha（Dracula 块已整体注释）
 
 两套配置共用 `JetBrainsMono Nerd Font Mono`（字号均为 15），可独立安装、互不依赖。Ghostty 为日常主力（支持热重载、Quick Terminal），Alacritty 为轻量备用。
 
@@ -23,11 +23,11 @@
 
 ## Alacritty — `private_dot_config/alacritty/alacritty.toml`
 
-轻量备用，Dracula 配色底，与 Ghostty 互为独立配置，切换无需改另一文件。
+轻量备用，Catppuccin Mocha 配色（与 Ghostty 同主题；Dracula 调色板整块注释保留为模板），与 Ghostty 互为独立配置，切换无需改另一文件。
 
 - **启动即 Fish + tmux**：`shell = { program = "/opt/homebrew/bin/fish", args = ["-c", "tmux attach || tmux new -t main"] }`（共享 tmux 会话，Ghostty 已直接使用 Fish，此处通过 tmux 复用）；毛玻璃、仅右 Option 作 Alt 等与 Ghostty 策略一致。
 - **字体**与 Ghostty 共用 JetBrainsMono Nerd Font Mono、`size = 15`。
-- **配色**沿用 Dracula 调色板（`colors.primary / normal / bright / dim`）；实际 hex 值以源文件 `alacritty.toml` 的 `[colors]` 为准。
+- **配色**：活跃调色板为 Catppuccin Mocha（`colors.primary / normal / bright` 的 `#1e1e2e` / `#f38ba8` 系列）；Dracula 块整体注释保留，需要时取消注释切换。实际 hex 值以源文件 `alacritty.toml` 的 `[colors]` 为准。
 - **键位**：复用交给 tmux，故屏蔽 `Cmd+T` / `Cmd+N`、保留 `Cmd+Enter` 切换全屏；其余自定义绑定见源文件。
 
 ## 字体安装与校验

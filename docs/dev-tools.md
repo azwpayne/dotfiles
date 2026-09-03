@@ -1,6 +1,6 @@
 # 开发工具链：git / gh / mise / codex / pi agent
 
-> Last Updated: 2026-09-04 — large-scale workflow 优化（code/annotate/docs 原子提交，见 git log）
+> Last Updated: 2026-09-04 — 大规模工作流审计收敛：shell.readAccess=policy 说明、model-tiers 字段描述对齐实际、model-tiers.json 已入库
 
 > 本文档只做解释性说明，**不耦合**任何代码或配置。凡是源文件已经承载的实际内容（字段值、列表项、权限矩阵等），一律以源文件为唯一权威；跨文档冲突时，一律以源文件为准。下文各节不再逐行抄录文件内容。
 
@@ -56,7 +56,7 @@ mise 工具链由 `private_dot_config/mise/config.toml` 声明（工具与版本
 
 ### sandbox.json — 文件系统与网络沙箱
 
-`private_dot_pi/private_agent/sandbox.json` 定义 agent 的文件系统与网络沙箱策略。沙箱总开关开启后，文件系统采用窄白名单读取（`allowRead`）与大范围 `denyRead` / `denyWrite` 拒绝读写，网络默认关闭（禁网）但允许本地端口绑定与全部 Unix socket，并仅对 github.com 系列域名开放白名单；Windows 容器模式在 macOS 上不生效。所有规则条目以 `private_dot_pi/private_agent/sandbox.json` 为唯一权威。
+`private_dot_pi/private_agent/sandbox.json` 定义 agent 的文件系统与网络沙箱策略。沙箱总开关开启后，文件系统采用窄白名单读取（`allowRead`）与大范围 `denyRead` / `denyWrite` 拒绝读写；`shell.readAccess = "policy"` 使该读策略对 bash/shell 命令同样生效（denied 路径无法用 `cat` 等绕过；曾为 `host` 全豁免，已收紧），网络默认关闭（禁网）但允许本地端口绑定与全部 Unix socket，并仅对 github.com 系列域名开放白名单；Windows 容器模式在 macOS 上不生效。所有规则条目以 `private_dot_pi/private_agent/sandbox.json` 为唯一权威。
 
 > 网络默认关闭（禁网策略）：沙箱内禁止出站网络，仅放行本地端口绑定与 Unix socket；`allowedDomains` 域名白名单仅在网络启用时作为出站限制生效（当前不生效），`deniedDomains` 为空。
 
@@ -70,7 +70,7 @@ mise 工具链由 `private_dot_config/mise/config.toml` 声明（工具与版本
 
 ### workflows/model-tiers.json — 工作流三档模型分层
 
-位于 `private_dot_pi/workflows/model-tiers.json`（部署到 `~/.pi/workflows/model-tiers.json`）。三档 `small` / `medium` / `big` 分别绑定不同模型并随档位递增思考预算，成本分层意图明显：轻量与中档任务下沉到低成本模型，重档拉满思考，主模型由 `settings.json` 的 `defaultModel` 指定。实值以 `private_dot_pi/workflows/model-tiers.json` 为唯一权威。
+位于 `private_dot_pi/workflows/model-tiers.json`（部署到 `~/.pi/workflows/model-tiers.json`）。三档 `small` / `medium` / `big` 分别绑定不同模型，成本分层意图明显：轻量与中档任务下沉到低成本模型，主模型由 `settings.json` 的 `defaultModel` 指定（本文件仅做档位→模型映射，无思考预算等其他字段）。实值以 `private_dot_pi/workflows/model-tiers.json` 为唯一权威。
 
 ### extensions/pi-permission-system/config.json — 工具级权限矩阵
 

@@ -1,6 +1,6 @@
 # Shell 栈：Zsh / Zim / Starship / Fish
 
-> Last Updated: 2026-09-04 — large-scale workflow 优化（code/annotate/docs 原子提交，见 git log）
+> Last Updated: 2026-09-04 — 大规模工作流审计收敛：Fish 为 Ghostty 登录 shell（fish -l）、brew shellenv 改由 Zim homebrew 模块注入、Starship 配置未入库的说明
 
 ## 启动链路
 
@@ -8,7 +8,7 @@
 
 1. **Zim 引导**：缺失时下载 zimfw，随后 `zimfw init` 生成并加载 `~/.zim/init.zsh`（含补全、高亮、自动建议等）。
 2. **PATH 注入**：前置 `~/bin`、Homebrew、`/usr/local/bin`、`~/.local/bin` 等，并按目录存在性守卫注入 cargo/rustup 路径。
-3. **工具初始化**：`zoxide` / `mise` / `starship` / `brew` 等按 `command -v` 守卫顺序 `eval` 初始化，未安装静默跳过；`fzf` 键位绑定唯一收敛于 `fzf.zsh`（`~/.zshrc` 不再重复）。
+3. **工具初始化**：`zoxide` / `mise` / `starship` 按 `command -v` 守卫顺序 `eval` 初始化，未安装静默跳过；`brew shellenv` 由 Zim 的 `zimfw/homebrew` 模块在 init.zsh 阶段注入（早于 rustup 守卫，避免重复 eval）；`fzf` 键位绑定唯一收敛于 `fzf.zsh`（`~/.zshrc` 不再重复）。
 4. **三模块加载**：依次 `source` `aliases.zsh`（导出 `$EDITOR`/`$VISUAL`）→ `fzf.zsh`（依赖 `$EDITOR` 的 Ctrl-G 绑定）→ `sdk.zsh`（惰性加载 SDKMAN、缓存补全等）。
 5. **SDK 环境**：`sdk.zsh` 无条件加载，内部逐项守卫（SDKMAN 惰性、kubectl/docker 补全缓存）。
 
@@ -22,11 +22,9 @@ Zim 模块由 `private_dot_config/zsh/dot_zimrc`（经 `symlink_dot_zimrc.tmpl` 
 
 > 已设置 `ZSH_AUTOSUGGEST_MANUAL_REBIND=1` 以提升末尾模块性能；历史的 `ZSH_HIGHLIGHT_HIGHLIGHTERS` 配置因子模块未启用而删除。
 
-## Starship 提示符（starship.toml）
+## Starship 提示符（机器本地 starship.toml）
 
-Starship 采用 Catppuccin Mocha 单行 powerline 布局，主题与调色板在 `private_dot_config/starship.toml` 中定义（`palette = 'catppuccin_mocha'`）。`format` 将 OS、用户、目录、git、语言版本、conda、时间、耗时等段以电源线符号衔接为单行，`$line_break` 已移除。单字符提示符 `❯` 依上条命令成败变色，耗时段按阈值显示。各段样式、符号与阈值等细节以 `starship.toml` 为唯一权威，已用 starship 1.26 验证。
-
-> `[docker_context]` 等已配置但未加入 `format` 的段默认不显示，按需追加即可。
+Starship 由 zsh（`eval "$(starship init zsh)"`）与 fish（`config.fish` 内 `starship init fish`）双侧初始化；提示符配置 `starship.toml` **不在仓库内**（已于 0ad1efc 移除），实际位于机器本地 `~/.config/starship.toml`（Catppuccin Mocha 单行 powerline 布局）。跨机迁移需自行拷贝该文件；仓库侧仅保证 starship 二进制与初始化路径可用。
 
 ## fzf 集成要点（fzf.zsh）
 
@@ -64,4 +62,4 @@ fzf 前缀按平台自适应探测（Apple Silicon `/opt/homebrew` → Intel `/u
 
 ## Fish 的角色
 
-Fish 不是登录 shell：Ghostty 通过 `command = /bin/zsh -l` 启动登录 zsh；Alacritty 未设置 `shell`（按系统默认）。仓库中 `private_dot_config/private_fish/`（chezmoi `private_` 前缀，部署后为 `~/.config/fish/`）提供辅助交互环境：`config.fish` 在 interactive 时初始化 Starship，通过 `fish_plugins`（14 插件）管理 fzf.fish 等插件，并通过 `symlink_` 保留 OrbStack 的 docker/kubectl/orbctl 补全。`conf.d` 与 `functions` 目录分别承载环境与函数。Fish 侧已初始化 Starship 与 fzf 键位，但未接入 zoxide/mise/brew 等 zsh 栈，详见 `private_dot_config/private_fish/` 源目录与 [layout.md](layout.md)。
+Fish 是 Ghostty 的登录 shell：Ghostty 以 `command = /opt/homebrew/bin/fish -l` 启动（`zsh -l` / `tmux` 方案注释保留）；Alacritty 经 `shell = { program = "/opt/homebrew/bin/fish", args = ["-c", "tmux attach || tmux new -t main"] }` 进入 tmux；tmux `default-shell` 亦为 Fish。Zsh 栈（XDG 收敛 + Zim 三模块）完整保留为次选入口（`~/.zshrc` 经 symlink 指向 `~/.config/zsh/.zshrc`）。仓库中 `private_dot_config/private_fish/`（chezmoi `private_` 前缀，部署后为 `~/.config/fish/`）提供：`config.fish` 在 interactive 时初始化 Starship，`fish_plugins`（14 插件）经 fisher 管理 fzf.fish 等插件，`conf.d` 五文件（00_env/00_aliases/01_dev/01_rev/fzf）承载环境与函数，`symlink_` 保留 OrbStack 的 docker/kubectl/orbctl 补全。Fish 侧已初始化 Starship 与 fzf 键位，但未接入 zoxide/mise/brew 等 zsh 栈（mise 仅 zsh 侧 activate），详见 `private_dot_config/private_fish/` 源目录与 [layout.md](layout.md)。

@@ -1,6 +1,6 @@
 # 维护指南
 
-> Last Updated: 2026-09-04 — large-scale workflow 优化（code/annotate/docs 原子提交，见 git log）
+> Last Updated: 2026-09-04 — 大规模工作流审计收敛：fish -n 逐文件校验循环（多文件传参不生效）、chezmoi edit ~/.zshrc 指向模板的说明、行号引用对齐 39/193
 
 ## 日常修改流程
 
@@ -8,8 +8,9 @@
 
 ```bash
 # 1. 编辑源文件（chezmoi edit 会直接打开源目录中的对应文件）
-chezmoi edit ~/.zshrc          # 实际源文件为 private_dot_config/zsh/dot_zshrc，经 symlink 指向
-chezmoi edit ~/.config/zsh/.zshrc  # 同上（XDG 路径）
+chezmoi edit ~/.config/zsh/.zshrc  # XDG 真实入口（源 private_dot_config/zsh/dot_zshrc）
+chezmoi edit ~/.zshrc          # 注意：~/.zshrc 解析到的是一行符号链接模板 symlink_dot_zshrc.tmpl
+                                # （改 zshrc 内容请用上面一行，chezmoi source-path 实测）
 # 或直接：
 $EDITOR ~/.local/share/chezmoi/private_dot_config/zsh/dot_zshrc
 # 其他示例：
@@ -89,8 +90,9 @@ git config --get-regexp proxy               # 应为 socks5://127.0.0.1:5376（�
 # 或校验源文件：
 git config --file ~/.local/share/chezmoi/dot_gitconfig --get-regexp proxy
 
-# fish 配置语法检查
-fish -n ~/.config/fish/config.fish ~/.config/fish/conf.d/*.fish   # fish -n 支持多文件；conf.d 现含 00_env.fish / fzf.fish
+# fish 配置语法检查（fish -n 只校验首个文件，必须逐个检查；实测多文件传参时后续文件被静默跳过）
+for f in ~/.config/fish/config.fish ~/.config/fish/conf.d/*.fish; fish -n $f; or exit 1; end
+# conf.d 现含五文件：00_env / 00_aliases / 01_dev / 01_rev / fzf
 
 # mise 环境体检
 mise doctor
@@ -135,7 +137,7 @@ HTTP/HTTPS 远程均生效），已与 `private_dot_ssh/private_config` 的 `Pro
 
 | 维度 | `auto_update` | `update-all` |
 | --- | --- | --- |
-| 定义位置 | `aliases.zsh:32` | `aliases.zsh:178` |
+| 定义位置 | `aliases.zsh:39` | `aliases.zsh:193` |
 | 覆盖目标 | 6 项（同 `update-all`，经委托实现） | 6 项：`brew` / `sdk` / `rustup` / `tldr` / `uv` / `mise`（含 `mise upgrade`） |
 | 参数 | 无参数，固定调用 `update-all` 全量 | 支持 `update-all brew mise` 参数过滤，未传参则全量；未知目标报错并提示可用列表 |
 | 守卫与容错 | 由 `update-all` 实现 | 循环内 `command -v $name` 守卫 + `eval` 失败则 `failed++` |

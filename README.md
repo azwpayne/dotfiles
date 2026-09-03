@@ -1,6 +1,6 @@
 # Dotfiles
 
-> Last Updated: 2026-09-04 — large-scale workflow 优化（code/annotate/docs 全仓并行审计 + 原子提交，见 docs/）
+> Last Updated: 2026-09-04 — 大规模工作流审计收敛：Fish 登录 shell、Alacritty Catppuccin、starship.toml 未入库、结构树/计数与实际文件对齐（87 = 51 + 36）
 
 基于 [chezmoi](https://www.chezmoi.io/) 管理的 macOS（Apple Silicon）个人开发环境配置。
 
@@ -16,10 +16,10 @@
 | 领域 | 方案 | 说明 |
 | --- | --- | --- |
 | Shell | Zsh + [Zim](https://zimfw.sh/) + 自有模块 | `aliases.zsh` / `fzf.zsh` / `sdk.zsh` 三模块化加载；`update-all` 批量更新（`brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise`，支持参数过滤与失败计数） |
-| Fish | Fish + [Fisher](https://github.com/jorgebucaran/fisher) + Starship | 辅助 shell（非登录）；`fish_plugins` 锁定 14 个插件（fzf.fish / forgit / autopair / done 等），`conf.d` 设定 LANG/EDITOR 等环境，补全含 OrbStack docker/kubectl/orbctl 符号链接 |
-| 提示符 | [Starship](https://starship.rs/) | Catppuccin Mocha powerline 风格 |
+| Fish | Fish + [Fisher](https://github.com/jorgebucaran/fisher) + Starship | Ghostty 登录 shell（`fish -l`，tmux `default-shell` 同步）；`fish_plugins` 锁定 14 个插件（fzf.fish / forgit / autopair / done 等），`conf.d` 五文件设定 PATH/LANG/EDITOR 等环境，补全含 OrbStack docker/kubectl/orbctl 符号链接 |
+| 提示符 | [Starship](https://starship.rs/) | Catppuccin Mocha powerline 风格（`starship.toml` 为机器本地文件，未入库） |
 | 模糊搜索 | fzf + fzf-tab + fd | Ctrl-R 历史、Ctrl-T 文件、Alt-C 目录、`frg`/`fkill`/`ftm`/`fl*` 交互函数 |
-| 终端 | Ghostty（主力）/ Alacritty（备用） | JetBrainsMono Nerd Font Mono，Catppuccin / Dracula 配色 |
+| 终端 | Ghostty（主力）/ Alacritty（备用） | JetBrainsMono Nerd Font Mono，Catppuccin Mocha 配色（Dracula 以注释模板保留于 alacritty） |
 | 编辑器 | Neovim + [LazyVim](https://www.lazyvim.org/) | 10 个 extras（9 语言 + 1 UI，见 `lua/config/lazy.lua`），插件版本由 `lazy-lock.json` 锁定 |
 | 运行时管理 | mise | 多运行时一键切换（工具清单见 `private_dot_config/mise/config.toml`） |
 | Git 工作流 | git + gh (CLI) | LFS、GitHub 走本地 SOCKS5 代理、`push.default=current` + `autoSetupRemote` |
@@ -87,8 +87,7 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 │   │   ├── sdk.zsh                    →  ~/.config/zsh/sdk.zsh
 │   │   ├── dot_gitignore              →  ~/.config/zsh/.gitignore
 │   │   └── README.md                  →  (不部署) 模块文档，由 **/README.md 排除
-│   ├── starship.toml                  →  ~/.config/starship.toml      Starship 提示符
-│   ├── ghostty/config                 →  ~/.config/ghostty/config     Ghostty 终端
+│   ├── ghostty/config                 →  ~/.config/ghostty/config     Ghostty 终端（command = fish -l）
 │   ├── alacritty/alacritty.toml       →  ~/.config/alacritty/alacritty.toml  Alacritty 备用
 │   ├── mise/config.toml               →  ~/.config/mise/config.toml   mise 工具链
 │   ├── nvim/                          →  ~/.config/nvim/              LazyVim 配置（含 lazy-lock.json / stylua.toml）
@@ -96,7 +95,7 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 │       ├── config.fish                →  ~/.config/fish/config.fish
 │       ├── fish_plugins                →  ~/.config/fish/fish_plugins     Fisher 14 插件清单
 │       ├── private_completions/       →  ~/.config/fish/completions/  symlink_docker/kubectl/orbctl.fish → OrbStack
-│       └── private_conf.d/, private_functions/ → conf.d（00_env/fzf 初始化）与 functions/（fzf.fish 插件函数）
+│       └── private_conf.d/, private_functions/ → conf.d（00_env / 00_aliases / 01_dev / 01_rev / fzf 五文件）与 functions/（fzf.fish 插件函数）
 ├── private_dot_ssh/
 │   └── private_config                 →  ~/.ssh/config                ★ GitHub 走 ssh.github.com:443 + 自适应 SOCKS5 ProxyCommand（含 OrbStack Include；~/.ssh 目录 0700）
 └── private_dot_pi/
@@ -110,7 +109,7 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
         └── model-tiers.json           →  ~/.pi/workflows/model-tiers.json 三档模型分层（成本分级）
 ```
 
-> 根级 `README.md` / `LICENSE` / `docs/` 与全部嵌套 `README.md` / `LICENSE`（含 `zsh/README.md`、`nvim/README.md`、`nvim/LICENSE`）均由 `.chezmoiignore`（`**/README.md`、`**/LICENSE` 等按目标名书写的模式）排除、不部署；历史上的 `**/REAMDME.md` 拼写失配与 `dot_git`/`dot_DS_Store`/`dot_gitconfig` 源名失配已修复。`managed` 目标数演进：核心 55 → zsh 收敛后 57（`dot_zshrc/dot_zimrc` → `private_dot_config/zsh/dot_*` + 2 条 `symlink_*.tmpl`），鱼 shell 扩容后曾达 81（纳入 `.config/fish/fish_variables` 后为 82）；当前 `chezmoi managed | wc -l` 为 86（核心 57 + fish 等 29），详见 [layout.md](layout.md) 目标映射；后续去重又清理了被更宽模式覆盖的冗余行，目标数不再单调变化。
+> 根级 `README.md` / `LICENSE` / `docs/` 与全部嵌套 `README.md` / `LICENSE`（含 `zsh/README.md`、`nvim/README.md`、`nvim/LICENSE`）均由 `.chezmoiignore`（`**/README.md`、`**/LICENSE` 等按目标名书写的模式）排除、不部署；历史上的 `**/REAMDME.md` 拼写失配与 `dot_git`/`dot_DS_Store`/`dot_gitconfig` 源名失配已修复。`managed` 目标数演进：核心 55 → zsh 收敛后 57（`dot_zshrc/dot_zimrc` → `private_dot_config/zsh/dot_*` + 2 条 `symlink_*.tmpl`），鱼 shell 扩容后曾达 81（纳入 `.config/fish/fish_variables` 后为 82）；当前 `chezmoi managed | wc -l` 为 87（核心 51 + fish 36；2026-09-04 `model-tiers.json` 入库后 +1），详见 [layout.md](layout.md) 目标映射；后续去重又清理了被更宽模式覆盖的冗余行，目标数不再单调变化。
 
 ## 📚 文档索引
 
