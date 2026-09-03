@@ -3,6 +3,9 @@
 # Installs default fzf keybindings via fzf_configure_bindings (see functions/fzf_configure_bindings.fish).
 # Guarded so re-sourcing is a no-op; skips entirely when non-interactive and not in CI
 # to keep shell startup fast. Uninstall hook cleans bindings and vars on `fisher remove`.
+# Ownership note: this is a customized copy (guard + comments); the upstream plugin also
+# ships conf.d/fzf.fish, so `fisher update` may overwrite the deployed file — re-run
+# `chezmoi apply` to restore this version (known tradeoff, see .gitignore header).
 
 if set -q __fish_fzf_loaded
     exit
