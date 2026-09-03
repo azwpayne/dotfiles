@@ -10,9 +10,10 @@
 # Guards      : PROXY 端口统一 5376（与 dot_gitconfig / ssh config 一致）；
 #               update-all 内逐项 type -q / command -q 守卫；y() 带 tmp
 #               清理；find-large / serve 参数回退默认值幂等。
-# Last Updated: 2026-09-04 — 修复 find-large/serve 变量失配、收敛
-#               update-all 任务清单与可用列表、去重 colortest、整合系统
-#               别名重复段、完善文件头与分组注释
+# Last Updated: 2026-09-04 — 大规模工作流审计修复：移除 BSD 上非法的
+#               --preserve-root 别名（与 zsh 侧同因移除）、tree-size 改用
+#               BSD/GNU 兼容的 du -d 1、speedtest URL 修正为 sivel/speedtest-cli、
+#               timer 结束音改 printf '\a'（fish 的 echo 无 -a 选项）
 # Author      : Payne
 # =============================================================================
 
@@ -97,7 +98,9 @@ function recent --description 'Show recently modified files (default 10)'
 end
 
 function tree-size --description 'Visualize directory sizes'
-    du -h --max-depth=1 2>/dev/null | sort -hr | head -20
+    # command 绕开本文件 du='du -kh' 别名；-d 1 为 BSD/GNU 通用的深度写法
+    # （原 --max-depth=1 仅 GNU du 支持，BSD 下静默失败输出为空）
+    command du -h -d 1 2>/dev/null | sort -hr | head -20
 end
 
 # ---------------------------------------------------------------------------
@@ -137,7 +140,7 @@ function netcheck --description 'Quick network diagnostics'
     dig google.com +short 2>/dev/null | head -1; echo
 
     echo (set_color cyan)"⚡ Speed Test (Download):"(set_color normal)
-    curl -s https://raw.githubusercontent.com/sivelabs/speedtest-cli/master/speedtest.py | python3 - --simple 2>/dev/null | head -1
+    curl -s https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py | python3 - --simple 2>/dev/null | head -1
 end
 
 # ---------------------------------------------------------------------------
@@ -353,9 +356,9 @@ alias cat='bat --paging=never'
 alias cp='cp -ir'
 alias mv='mv -i'
 alias mkdir='mkdir -p -v'
-alias chown='chown --preserve-root'
-alias chmod='chmod --preserve-root'
-alias chgrp='chgrp --preserve-root'
+# --preserve-root 别名已移除：BSD 的 chmod/chown/chgrp 不支持该选项
+# （alias 展开为 command chmod --preserve-root 后每次调用都报 illegal option，
+# 与 zsh aliases.zsh 侧同因移除；macOS 根分区本身 SIP 只读，无需此护栏）
 
 # ---------------------------------------------------------------------------
 # 备份与工具
@@ -388,7 +391,7 @@ function timer --description "简单倒计时"
         set seconds (math $seconds - 1)
     end
     echo -e "\n⏰ Time's up!"
-    echo -a "\007"
+    printf '\a'
 end
 
 function decide --description "从多个选项中随机选择一个"
