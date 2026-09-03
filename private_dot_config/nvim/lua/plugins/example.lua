@@ -33,13 +33,10 @@ return {
     -- ============================================================================
     -- Example: Configure Trouble (diagnostic window)
     -- ============================================================================
-    -- Configure LazyVim to use diagnostic signs with Trouble
-    {
-        "folke/trouble.nvim",
-        opts = { use_diagnostic_signs = true },
-    },
-
-    -- Disable Trouble if you don't need it
+    -- Removed spec: { "folke/trouble.nvim", opts = { use_diagnostic_signs = true } }
+    -- was a trouble v2-era option — v3 (lazy-lock bd67efe) has no such field and
+    -- renders diagnostic icons via its own defaults, so the spec was a no-op.
+    -- Disable Trouble entirely via the line below if not needed:
     -- { "folke/trouble.nvim", enabled = false },
 
     -- ============================================================================

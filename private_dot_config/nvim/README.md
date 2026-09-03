@@ -1,6 +1,6 @@
 # 💤 LazyVim
 
-> Last Updated: 2026-09-04 — 同步 lua/config 4 文件头重构与 init.lua 委派说明
+> Last Updated: 2026-09-04 — 大规模工作流审计修复：移除 trouble v2 选项与 bd 键位、剪贴板/补全回归上游默认、stylua 2 空格重排 example.lua、autocmd 表对齐真实组名
 
 A starter template for [LazyVim](https://github.com/LazyVim/LazyVim) — deployed via [chezmoi](https://www.chezmoi.io/) from `private_dot_config/nvim/` → `~/.config/nvim/`.
 
@@ -59,11 +59,11 @@ nvim
 ├── lua/
 │   ├── config/
 │   │   ├── lazy.lua          bootstrap + spec (LazyVim + 10 extras + plugins)
-│   │   ├── options.lua       global options (clipboard / numbers / 4-space indent / search / truecolor)
+│   │   ├── options.lua       global options (numbers / 4-space indent / search / truecolor; clipboard & completion inherit LazyVim defaults)
 │   │   ├── keymaps.lua       custom keymaps (loaded after LazyVim defaults)
 │   │   └── autocmds.lua      autocmds (loaded on VeryLazy)
 │   └── plugins/
-│       └── example.lua       example specs (effective: catppuccin / trouble / telescope / pyright / treesitter / mason; nvim-cmp & second lualine spec disabled)
+│       └── example.lua       example specs (effective: catppuccin / telescope / pyright / treesitter / mason; trouble spec removed, nvim-cmp & second lualine spec disabled; stylua 2-space layout)
 ├── lazy-lock.json            43 plugins locked by commit (reproducible)
 ├── lazyvim.json              LazyVim metadata (extras=[], news 11866, version 8 — extras empty is expected, real list is in lazy.lua)
 ├── stylua.toml               Spaces 2 / 120 columns
@@ -111,10 +111,10 @@ See [`docs/neovim.md`](../../docs/neovim.md) for the full chezmoi mapping (`dot_
 ### Plugin Highlights (from lua/plugins/example.lua)
 
 - **catppuccin** — set as LazyVim default `colorscheme` (overrides tokyonight)
-- **trouble.nvim** — `use_diagnostic_signs = true`
+- **trouble.nvim** — no custom spec: the former `use_diagnostic_signs = true` was a trouble v2-era option (absent from v3 at lock bd67efe); v3 renders diagnostic icons via its own defaults
 - **telescope.nvim** — `<leader>fp` "Find Plugin File" + `horizontal / prompt_position=top / ascending` layout
 - **nvim-lspconfig** — `pyright` enabled; `tsserver` example kept commented (use the `lang.typescript` extra instead)
-- **nvim-treesitter** — `ensure_installed` includes bash/html/javascript/json/lua/markdown/markdown_inline/python/query/regex/tsx/typescript/vim/yaml (tsx/typescript appended twice via `list_extend`)
+- **nvim-treesitter** — `ensure_installed` includes bash/html/javascript/json/lua/markdown/markdown_inline/python/query/regex/tsx/typescript/vim/yaml (single spec; tsx/typescript listed once — the former duplicate spec was merged)
 - **mason.nvim** — `ensure_installed` includes stylua / shellcheck / shfmt / flake8
 - **lualine.nvim** — appends `😄` component (the second "empty override" spec is now commented out — an opts-function return value replaces merged opts and would wipe LazyVim's entire lualine config)
 - **nvim-cmp + cmp-emoji** — **disabled (commented out)**: inert dead config — LazyVim v14 ships blink.cmp and drops nvim-cmp specs unless the `lazyvim.plugins.extras.coding.nvim-cmp` extra is imported, so it never loaded (cmp-emoji is absent from the lock). To enable, import that extra first and run `:Lazy sync`
@@ -127,8 +127,7 @@ See [`docs/neovim.md`](../../docs/neovim.md) for the full chezmoi mapping (`dot_
 - **Line numbers**: `number` + `relativenumber` (absolute current, relative others)
 - **Indent**: `tabstop=4` `shiftwidth=4` `expandtab` `smartindent` `autoindent` `wrap=false` (4-space)
 - **Scroll**: `scrolloff=8`
-- **Clipboard**: `unnamedplus` (system clipboard)
-- **Completion**: `completeopt=menu,menuone,noselect`
+- **Clipboard / completion**: NOT set here — LazyVim's defaults are inherited (clipboard is SSH-aware upstream: empty over `SSH_CONNECTION` so the OSC52 provider works remotely; `completeopt=menu,menuone,noselect` is already the upstream default. Former static overrides removed.)
 - **Search**: `ignorecase` + `smartcase` + `hlsearch` + `incsearch` + `inccommand=nosplit` + `showmatch` (smart case, incremental highlight)
 - **Colors**: `termguicolors` + `colorcolumn="100"` (true color, 100-column ruler)
 - **Cursorline**: highlighted only in Normal mode (toggled via `InsertEnter`/`InsertLeave` autocmd)
@@ -143,8 +142,9 @@ Leader is `<Space>` (LazyVim default). Custom mappings loaded after defaults (so
 | `<leader><space>` | n    | `<cmd>nohlsearch<CR>`       | Clear search highlights      |
 | `<leader>sv`      | n    | `<C-w>v`                    | Split window vertically      |
 | `<leader>sh`      | n    | `<C-w>s`                    | Split window horizontally    |
-| `<leader>bd`      | n    | `<cmd>bdelete<CR>`          | Close current buffer         |
 | `<leader>rl`      | n    | `<cmd>set relativenumber!<CR>` | Toggle relative line numbers |
+
+> **Note**: a former `<leader>bd` → raw `<cmd>bdelete<CR>` map was removed — it silently overrode LazyVim's built-in `<leader>bd` (Snacks.bufdelete, keeps window layout) while claiming to complement it; LazyVim's `<leader>bD` remains the raw `:bd` variant.
 
 > **Note**: historical `<leader>u` (UndotreeToggle) and `<leader>f` (LSP format) maps were removed — the former errored `E492` because `mbbill/undotree` is neither in `lazy-lock.json` nor in `lua/plugins/`, and both clobbered LazyVim's `<leader>u` / `<leader>f` group prefixes. To restore undotree, first add a real spec (e.g. `return { "mbbill/undotree" }` + `:Lazy sync`), then map keys; formatting uses LazyVim's built-in `<leader>cf` / `<leader>uf`.
 
@@ -154,10 +154,11 @@ All other keys are LazyVim defaults (flash, neo-tree, snacks, bufferline, which-
 
 | Event | Group | Pattern | Action |
 | ----- | ----- | ------- | ------ |
-| `TextYankPost` | — | `*` | Highlight yank 300 ms with `IncSearch` |
-| `VimResized` | `ResizeWindows` | `*` | `tabdo wincmd =` — equalize splits |
-| `InsertEnter`/`InsertLeave` | `HighlightCursorLine` | `*` | Cursorline only in Normal mode |
-| `FileType` | `FileTypeSettings` | `python` | Force `tabstop=4` `shiftwidth=4` `expandtab` |
+| `TextYankPost` | `user_yank_highlight` | `*` | Highlight yank 300 ms with `IncSearch` |
+| `VimResized` | `user_resize_splits` | `*` | `tabdo wincmd =` — equalize splits |
+| `InsertEnter`/`InsertLeave` | `user_cursorline_toggle` | `*` | Cursorline only in Normal mode |
+
+> No per-filetype autocmds: the former `FileType python` row was stale (removed from autocmds.lua as redundant) — indentation is set globally in `options.lua` (4-space) and per-filetype needs would go in `autocmds.lua`.
 
 > Format-on-save is now handled solely by LazyVim's built-in autoformat (on by default; toggle with `<leader>uf` / `<leader>uF`). The custom `FormatOnSave` `BufWritePre` autocmd was removed — it double-formatted every save and kept running even after autoformat was disabled.
 

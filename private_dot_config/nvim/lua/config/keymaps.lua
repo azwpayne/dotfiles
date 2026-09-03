@@ -24,8 +24,10 @@ vim.keymap.set("n", "<leader><space>", "<cmd>nohlsearch<CR>", { desc = "Clear se
 vim.keymap.set("n", "<leader>sv", "<C-w>v", { desc = "Split window vertically" })
 vim.keymap.set("n", "<leader>sh", "<C-w>s", { desc = "Split window horizontally" })
 
--- Buffer: close current buffer, keep window layout (complements LazyVim's bufdelete).
-vim.keymap.set("n", "<leader>bd", "<cmd>bdelete<CR>", { desc = "Close current buffer" })
+-- Buffer: no custom <leader>bd — LazyVim already ships <leader>bd
+-- (Snacks.bufdelete, keeps window layout) and <leader>bD (raw :bd).
+-- A former raw `bdelete` on <leader>bd silently clobbered the Snacks variant
+-- while its comment claimed to complement it.
 
 -- Toggle relative numbers (useful for pair/mob or presentations).
 vim.keymap.set("n", "<leader>rl", "<cmd>set relativenumber!<CR>", { desc = "Toggle relative line numbers" })

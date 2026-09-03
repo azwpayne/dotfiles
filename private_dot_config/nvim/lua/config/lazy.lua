@@ -5,7 +5,7 @@
 --               core + 10 extras (9 lang + mini-animate) + 本地 plugins/*
 --               spec。install 回退与 checker 静默检查。
 -- Usage       : 由 init.lua `require("config.lazy")` 加载；首次启动自动 clone
--- Guards      : vim.uv / vim.loop 双兼容，fs_stat 判空，shell_error 守卫 + 清理
+-- Guards      : vim.uv / vim.loop 双兼容，fs_stat 判空，shell_error 守卫 + 失败退出
 -- Last Updated: 2026-09-04 — 补全文件头、安装回退与性能禁用插件注释收敛
 -- Author      : Payne
 -- =============================================================================
