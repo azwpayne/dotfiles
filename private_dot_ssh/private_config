@@ -1,3 +1,13 @@
+# =============================================================================
+# private_config — SSH 客户端配置 (chezmoi: -> ~/.ssh/config, 0600)
+# =============================================================================
+# Description : OrbStack Include 置顶 + github.com 走 ssh.github.com:443 +
+#               自适应 SOCKS5 ProxyCommand (5376 探活, 失败直连) + Host * 默认
+# Usage       : `ssh -G dev` 排错, `ssh -T git@github.com` 测连通性
+# Guards      : 0600 必需 (0644 被 ssh 拒绝), ProxyCommand bash -c 探活
+# Last Updated: 2026-09-04 — 补全文件头、Guard 与 ProxyCommand 5376 统一说明
+# Author      : Payne
+# =============================================================================
 # SSH client config (chezmoi: private_dot_ssh/private_config -> ~/.ssh/config, 0600)
 # `private_` prefix ensures 0600 permissions (required by ssh; 0644 is rejected).
 # OrbStack Include must stay at top before any Host block to provide `orb` hosts.

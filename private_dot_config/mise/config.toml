@@ -2,7 +2,7 @@
 # `mise use -g <tool>@<version>` 更新本文件；`mise install` 同步安装。
 # 每个条目跟踪最新稳定版 ("latest")；如需锁定版本可改为具体版本号 (如 node = "20")。
 # 工具清单与安装说明见 docs/dev-tools.md 与 aliases.zsh 的 update-all。
-# Last Updated: 2026-09-03 — 补全工具用途注释，收敛最新版策略说明
+# Last Updated: 2026-09-04 — 补全工具用途注释、latest 策略与 mise upgrade 关联说明
 # Author: Payne
 
 [tools]

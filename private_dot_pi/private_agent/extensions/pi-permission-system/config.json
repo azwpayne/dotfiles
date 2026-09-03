@@ -27,14 +27,16 @@
       "*.env": "deny",
       "*.env.*": "deny",
       "~/.ssh/*": "deny",
-      "~/.aws/*": "deny"
+      "~/.aws/*": "deny",
+      "~/.gnupg/*": "deny"
     },
     "edit": {
       "*": "allow",
       "*.env": "deny",
       "*.env.*": "deny",
       "~/.ssh/*": "deny",
-      "~/.aws/*": "deny"
+      "~/.aws/*": "deny",
+      "~/.gnupg/*": "deny"
     },
     "bash": {
       "*": "allow",
@@ -44,8 +46,8 @@
       "unlink *": "deny",
       "dd if=* of=*": "deny",
       "mkfs.*": "deny",
-      "python3 *": "allow",
-      "node *": "allow"
+      "python3 *": "ask",
+      "node *": "ask"
     },
     "path": {
       "*": "allow",
@@ -55,11 +57,13 @@
       "*.pem": "deny",
       "*.key": "deny",
       "~/.ssh/*": "deny",
+      "~/.aws/*": "deny",
+      "~/.gnupg/*": "deny",
       "/etc/*": "deny",
       "/var/*": "deny"
     },
     "external_directory": {
-      "*": "allow",
+      "*": "ask",
       "~/.cargo/registry/*": "allow",
       "~/.npm/*": "allow",
       "~/.cache/*": "allow"
