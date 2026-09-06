@@ -17,6 +17,10 @@
 # Author      : Payne
 # =============================================================================
 
+alias chezc='code ~/.local/share/chezmoi'        # 编辑 chezmoi 源目录 (~/.local/share/chezmoi)
+alias chezdf='chezmoi diff'                      # 预览 chezmoi 变更 (apply 前必跑)
+alias chezap='chezmoi apply -v'                  # 应用 chezmoi 变更 (verbose)
+
 # ---------------------------------------------------------------------------
 # Kubernetes / 容器 (与 zsh sdk.zsh 的 k→kubectl 一致，fish 侧别名形态)
 # ---------------------------------------------------------------------------
