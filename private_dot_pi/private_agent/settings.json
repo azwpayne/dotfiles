@@ -40,7 +40,6 @@
     "npm:@quintinshaw/pi-dynamic-workflows",
     "npm:pi-background-tasks@latest"
   ],
-  "defaultProvider": "opencode",
   "defaultTools": [
     "read",
     "write",
@@ -50,7 +49,8 @@
     "find",
     "ls"
   ],
-  "defaultModel": "muse-spark-1.2-contributor-free",
+  "defaultProvider": "cc-switch-zhipu-glm",
+  "defaultModel": "glm-5.3-flash",
   "defaultThinkingLevel": "max",
   "httpProxy": "http://127.0.0.1:5376"
 }
