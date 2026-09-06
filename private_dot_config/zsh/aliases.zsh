@@ -193,7 +193,7 @@ function y() {
 function update-all() {
     local -A tasks=(
         brew  "brew update -f && brew upgrade -f --greedy-latest -y && brew cu -y -a && brew cleanup --prune=all"
-        sdk   "sdk upgrade && sdk selfupdate && sdk flush"
+        # sdk   "sdk upgrade && sdk selfupdate && sdk flush"
         rustup  "rustup update && rustup upgrade"
         tldr  "tldr --update"
         uv    "uv tool upgrade --all"
