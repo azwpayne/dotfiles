@@ -3,8 +3,7 @@
 # =============================================================================
 # Description : Git 不跟踪的文件；`.chezmoiignore` 负责 chezmoi 部署排除，
 #               本文件负责 Git 提交排除。二者模式语法相似但生效域不同。
-# Last Updated: 2026-09-04 — 新增 fzf.fish 否定模式（原 0*\.fish 永不匹配它，
-#               导致自诒“仓库已提交”的文件实际未入库，fresh clone 会丢失）
+# Last Updated: 2026-09-07 — 新增忽略审计测试残留 .tmp-empty-config.toml；更正 Fish 段入库清单注释
 # =============================================================================
 
 # --- OS / IDE / 日志 ---
@@ -18,9 +17,13 @@
 # --- Coding agent 运行时（本地状态，不入库）---
 .pi/
 
+# --- 审计/测试残留（防复发，替代本地 .git/info/exclude）---
+.tmp-empty-config.toml
+
 # --- Fish — Fisher 生成与机器本地状态 ---
 # Fisher 在目标机按 fish_plugins 清单生成函数/补全；仓库仅提交用户手写的
-# 00_*.fish / fzf.fish / fish_plugins 与 symlink_* ，其余由 .keep 占位。
+# config.fish、0*.fish（00_*/01_*）、fzf.fish、fish_plugins 与 completions/symlink_*，
+# 其余 fisher 生成物不入库、由 .keep 占位。
 # 注意：patrickf1/fzf.fish 插件自身也安装 conf.d/fzf.fish，fisher update
 # 可能覆盖部署目标，下次 chezmoi apply 会再写回 —— 两工具对该路径存在
 # 所有权竞争，属已知取舍（保留 chezmoi 为最终真相源）。
