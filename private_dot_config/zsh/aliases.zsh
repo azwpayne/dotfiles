@@ -184,7 +184,7 @@ scr() { nohup scrcpy "$@" > /dev/null 2>&1 & }   # 后台启动 scrcpy 投屏
 
 # yazi 包装：退出时自动 cd 到最后浏览的目录
 # 健壮性：trap 保证信号/异常退出时清理 tmp；IFS= read -d '' 处理 yazi 的 NUL 分隔
-function y() {
+y() {
 	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
 	trap 'command rm -f -- "$tmp"' EXIT INT TERM HUP
 	command yazi "$@" --cwd-file="$tmp"
@@ -204,7 +204,7 @@ function y() {
 #     2>! 强制覆盖：Zim 设 NO_CLOBBER，普通 2> 会对 mktemp 已创建文件报 file exists
 #   - 成功时透传 stderr 警告；失败时取末 5 行作摘要，累计 failed/attempted 计时
 # ---------------------------------------------------------------------------
-function update-all() {
+update-all() {
     local -A tasks=(
         brew  "brew update -f && brew upgrade -f --greedy-latest -y && brew cu -y -a && brew cleanup --prune=all"
         sdk   "sdk upgrade && sdk selfupdate && sdk flush"
