@@ -30,19 +30,33 @@ alias fishconfig='code ${HOME}/.config/fish'     # 编辑 fish 配置 (~/.config
 alias zshconfig='code ~/.zshrc'                  # 编辑 ~/.zshrc
 alias zshsource='source ~/.zshrc'                # 重新加载配置
 
+
+# 启用终端代理 (127.0.0.1:5376, HTTP/HTTPS + SOCKS5)
+onproxy() {
+    local host="127.0.0.1" port=5376
+    local http="http://$host:$port" socks="socks5://$host:$port"
+    export all_proxy="$socks" http_proxy="$http" https_proxy="$http" \
+           ALL_PROXY="$socks" HTTP_PROXY="$http" HTTPS_PROXY="$http"
+    printf "🚀 终端代理已开启：\n   HTTP/HTTPS: $http\n   SOCKS5: $socks"
+}
+
+# 关闭终端代理
+ofproxy() {
+    unset all_proxy http_proxy https_proxy ALL_PROXY HTTP_PROXY HTTPS_PROXY
+    printf "⛵️ 终端代理已关闭。"
+}
+
 # =============================================================================
 # 包管理器更新
 # =============================================================================
-
 # 一键全量更新（薄包装：可选 onproxy 后委托 update-all，无参即全量）
 # 守卫：onproxy 仅在函数存在时调用；实际更新由 update-all 逐项 command -v 守卫
-auto_update() {
+auto-update() {
     echo "🚀 开始更新 ..."
     (( $+functions[onproxy] )) && onproxy
+    echo -e "\n"
     update-all
 }
-
-# 注：conda 已卸载（sdk.zsh 中对应的 conda init 也已停用），不再纳入更新流程。
 
 # =============================================================================
 # Unix 命令增强
@@ -193,7 +207,7 @@ function y() {
 function update-all() {
     local -A tasks=(
         brew  "brew update -f && brew upgrade -f --greedy-latest -y && brew cu -y -a && brew cleanup --prune=all"
-        # sdk   "sdk upgrade && sdk selfupdate && sdk flush"
+        sdk   "sdk upgrade && sdk selfupdate && sdk flush"
         rustup  "rustup update && rustup upgrade"
         tldr  "tldr --update"
         uv    "uv tool upgrade --all"
