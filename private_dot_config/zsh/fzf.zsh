@@ -7,9 +7,9 @@
 #               $EDITOR——Ctrl-G 绑定在 source 时展开）、在 sdk.zsh 之前
 # Guards      : 前缀探测带缓存与自愈；fzf 初始化与补全均 command -v 守卫
 # Depends     : 必需 fzf、fzf-tab；主力 fd（缺失时回退 rg）；预览用 bat/lsd
-# Last Updated: 2026-09-04（大规模工作流审计：fd 排除清单改为 source 时展开的
-#               逐项 --exclude 参数，不再依赖执行端 shell 的花括号展开；
-#               PATH 追加冒号定界去重与 FZF_PREFIX 探测注释保持不变）
+# Last Updated: 2026-09-07（exclude_list 展开进两个 export 后即 unset，
+#               不再泄漏为交互环境全局变量；fd 排除清单 source 时展开的
+#               逐项 --exclude 参数方案保持不变）
 # Author      : Payne
 # =============================================================================
 
@@ -86,6 +86,8 @@ unset _fzf_fd_exclude_args
 
 export FZF_DEFAULT_COMMAND="fd --max-depth=5 --type f --hidden --follow ${exclude_list}"
 export FZF_ALT_C_COMMAND="fd --max-depth=5 --type d --follow ${exclude_list}"
+# 值已在 source 时展开完毕，unset 避免泄漏为交互环境全局变量
+unset exclude_list
 
 # 备选：如果未安装 fd，回退到 rg（但效果稍差）
 if ! command -v fd &> /dev/null; then
