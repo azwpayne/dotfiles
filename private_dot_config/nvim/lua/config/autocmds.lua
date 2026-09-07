@@ -4,32 +4,16 @@
 -- Description : 在 VeryLazy 事件后加载，仅追加用户覆盖；LazyVim 已定义部分
 --               autocmd，此文件仅增量。上游已接管 format-on-save，此处不重复。
 -- Usage       : 每个 autocmd 使用独立 augroup + { clear = true }，重载不重叠
--- Guards      : 事件均幂等；TextYankPost/VimResized/InsertEnter-Leave 已去重
+-- Guards      : 事件均幂等；TextYankPost/VimResized 上游 v16 已覆盖，不重复定义
 -- Author      : Payne
 -- =============================================================================
 -- Custom autocmds loaded on the VeryLazy event (after LazyVim defaults).
 -- LazyVim already defines its own autocmds; this file only adds user overrides.
+-- Upstream v16 covers TextYankPost (on_yank highlight, default IncSearch) and
+-- VimResized (`tabdo wincmd =` + restores the current tab), so neither is
+-- re-defined here.
 -- Each autocmd uses a dedicated augroup with { clear = true } so reloading
 -- the config does not duplicate handlers.
-
--- Highlight yanked text briefly for visual feedback.
--- TextYankPost fires for any yank (including normal-mode `yy`), not just visual.
-vim.api.nvim_create_autocmd("TextYankPost", {
-  group = vim.api.nvim_create_augroup("user_yank_highlight", { clear = true }),
-  desc = "Highlight yanked text with IncSearch (300ms)",
-  callback = function()
-    vim.highlight.on_yank({ timeout = 300, higroup = "IncSearch" })
-  end,
-})
-
--- Keep splits proportional when the terminal window is resized.
-vim.api.nvim_create_autocmd("VimResized", {
-  group = vim.api.nvim_create_augroup("user_resize_splits", { clear = true }),
-  desc = "Equalize all splits on VimResized",
-  callback = function()
-    vim.cmd("tabdo wincmd =")
-  end,
-})
 
 -- Show cursorline only in Normal mode; hide it while typing.
 -- LazyVim enables cursorline by default; this toggles it off on InsertEnter.
