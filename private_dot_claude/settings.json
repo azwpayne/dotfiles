@@ -42,9 +42,6 @@
   },
   "includeCoAuthoredBy": false,
   "model": "opusplan[1m]",
-  "permissions": {
-    "defaultMode": "auto"
-  },
   "preferredNotifChannel": "auto",
   "sandbox": {
     "enabled": true,
