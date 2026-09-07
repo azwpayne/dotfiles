@@ -5,8 +5,7 @@
 #               自适应 SOCKS5 ProxyCommand (5376 探活, 失败直连) + Host * 默认
 # Usage       : `ssh -G dev` 排错, `ssh -T git@github.com` 测连通性
 # Guards      : 0600 必需 (0644 被 ssh 拒绝), ProxyCommand bash -c 探活
-# Last Updated: 2026-09-04 — 大规模工作流审计：github-work 块改为显式模板
-#               （原 IdentitiesOnly 无密钥可谈且绕过 443+SOCKS5 路由，实际不可用）
+# Last Updated: 2026-09-07 — bastion 块补充示例占位注释（example.com 为保留域名）
 # Author      : Payne
 # =============================================================================
 # SSH client config (chezmoi: private_dot_ssh/private_config -> ~/.ssh/config, 0600)
@@ -57,6 +56,7 @@ Host sec
 # jump server
 # 直接 ssh inner 即可穿透跳板机。ProxyJump 支持多级：ProxyJump bastion,inner1
 ## 跳板机本身
+# 示例占位（example.com 为保留域名），按实际跳板机环境修改后再使用
 Host bastion
     HostName jump.example.com
     User jumpuser
