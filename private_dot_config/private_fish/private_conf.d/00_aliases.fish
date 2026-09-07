@@ -205,7 +205,7 @@ end
 function update-all --description "一键更新所有开发环境 (fish 版)"
     # 与 zsh 侧对齐：均含 mise，fish 额外支持 pi；sdk 为可选 (SDKMAN)
     onproxy
-    set -l tasks brew sdk rust tldr uv mise pi
+    set -l tasks brew rust tldr uv mise pi
 
     set -l targets
     if test (count $argv) -eq 0
