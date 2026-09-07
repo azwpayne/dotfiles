@@ -14,6 +14,7 @@
 # =============================================================================
 
 alias chezc='code ~/.local/share/chezmoi'        # 编辑 chezmoi 源目录 (~/.local/share/chezmoi)
+alias chezs='chezmoi status'                     # 查看 chezmoi 状态
 alias chezdf='chezmoi diff'                      # 预览 chezmoi 变更 (apply 前必跑)
 alias chezap='chezmoi apply -v'                  # 应用 chezmoi 变更 (verbose)
 
