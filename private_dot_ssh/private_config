@@ -23,7 +23,8 @@
 
 Include ~/.orbstack/ssh/config
 
-# server
+# server（模板占位：主机/密钥均为示例，按实际环境修改后再使用；
+# ~/.ssh 下并无 id_rsa_dev/tst/ops/sec，直接连接会认证失败）
 Host dev
     HostName 192.168.1.100
     User ubuntu
@@ -61,7 +62,7 @@ Host bastion
     User jumpuser
     IdentityFile ~/.ssh/id_bastion
 
-## 内网机器，通过 bastion 跳转
+## 内网机器，通过 bastion 跳转（同属模板：id_inner 密钥缺省，需自备）
 Host inner
     HostName 10.0.0.5
     User root
