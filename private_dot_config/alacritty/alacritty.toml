@@ -1,5 +1,5 @@
 # Alacritty Configuration File (chezmoi: private_dot_config/alacritty/alacritty.toml -> ~/.config/alacritty/alacritty.toml)
-# GPU-accelerated terminal. Theme: Catppuccin Mocha (active [colors] below, matching ghostty & local starship; the original Dracula block is kept fully commented as an alternative template).
+# GPU-accelerated terminal. Theme: Catppuccin Mocha (active [colors] below, same Catppuccin Mocha theme family as ghostty & local starship, though ANSI bright variants differ from ghostty's bundled theme; the original Dracula block is kept fully commented as an alternative template).
 # `private_dot_config` ensures parent dir 0700 on deploy.
 # Docs: https://alacritty.org/config-alacritty.html | bindings: .../config-alacritty-bindings.html
 # Reference: https://www.kevnu.com/zh/posts/18
@@ -30,7 +30,7 @@ bold = { family = "JetBrainsMono Nerd Font Mono", style = "Bold" }
 italic = { family = "JetBrainsMono Nerd Font Mono", style = "Italic" }
 bold_italic = { family = "JetBrainsMono Nerd Font Mono", style = "Bold Italic" }
 
-# Palette: Catppuccin Mocha (active) — matches ghostty & local starship; the Dracula block below is kept fully commented as an alternative template.
+# Palette: Catppuccin Mocha (active) — same Catppuccin Mocha theme family as ghostty & local starship (ANSI bright variants differ from ghostty's bundled theme); the Dracula block below is kept fully commented as an alternative template.
 [colors]
 # primary = { background = '0x282a36', foreground = '0xf8f8f2' }
 # cursor = { background = '0x44475a', foreground = '0xf8f8f2' }
