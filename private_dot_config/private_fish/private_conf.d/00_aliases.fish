@@ -202,9 +202,13 @@ end
 # 任务: brew / sdk / rust / tldr / uv / mise / pi (fzf 侧 pi 更新)
 # 守卫: type -q / command -q 逐项守卫，未装跳过；失败计数与耗时统计
 # ---------------------------------------------------------------------------
+function auto-update --description "一键更新所有开发环境 (fish 版)"
+    onproxy
+    update-all
+end
+
 function update-all --description "一键更新所有开发环境 (fish 版)"
     # 与 zsh 侧对齐：均含 mise，fish 额外支持 pi；sdk 为可选 (SDKMAN)
-    onproxy
     set -l tasks brew rust tldr uv mise pi
 
     set -l targets
