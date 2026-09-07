@@ -49,8 +49,8 @@
     "find",
     "ls"
   ],
-  "defaultProvider": "opencode",
-  "defaultModel": "muse-spark-1.3-contributor-free",
+  "defaultProvider": "cc-switch-zhipu-glm",
+  "defaultModel": "glm-5.3-flash",
   "defaultThinkingLevel": "max",
   "httpProxy": "http://127.0.0.1:5376"
 }
