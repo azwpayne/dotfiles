@@ -9,8 +9,9 @@
 #               中于 source 时展开；sdk.zsh 最后因其 compdef 注册需 compinit
 # Guards      : 本文件无外部命令强依赖；update-all 内逐项 command -v 守卫
 # Depends     : lsd/bat/htop/fastfetch/yazi/nvim 等，完整清单见 README.md
-# Last Updated: 2026-09-04（y() 引入 trap 清理、增强注释；PATH 去重与 Zim
-#               硬化联动，见 dot_zshrc）
+# Last Updated: 2026-09-07（新增 onproxy/ofproxy 终端代理开关；auto_update
+#               改名 auto-update 并经 $+functions 守卫调用；另含 chezc ~ 展开、
+#               去 function 关键字等清理）
 # Author      : Payne
 # =============================================================================
 
