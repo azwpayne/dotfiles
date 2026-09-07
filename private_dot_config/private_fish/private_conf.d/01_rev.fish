@@ -9,8 +9,8 @@
 # Guards      : jadx-gui/scrcpy/JEB 均带存在性守卫；jobs disown 避免挂起
 # Author      : Payne
 # =============================================================================
-# about android reverse engineering
-alias pkid='java -jar ~/Applications/ApkScan-PKID.jar'
+# 原 pkid 别名已移除：指向的 ~/Applications/ApkScan-PKID.jar 已不存在
+# （与 zsh 侧 aliases.zsh 同因移除），java 虽在但调用必失败
 
 function jdx --description '后台启动 jadx-gui 反编译 (fish 包装)'
     if not type -q jadx-gui

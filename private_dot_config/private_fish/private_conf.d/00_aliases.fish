@@ -193,7 +193,7 @@ function ofproxy --description "关闭终端代理"
 end
 
 # ---------------------------------------------------------------------------
-# update-all — 声明式批量更新 (fish 版, 与 zsh 的 update-all 任务清单对齐)
+# update-all — 声明式批量更新 (fish 版; 默认清单与 zsh 有意不同, 非对齐关系)
 # 用法: update-all [targets...]  无参全量；有参按名过滤（sdk 可经参数指定）
 #       auto-update = onproxy + update-all（先开代理再全量更新）
 # 任务: brew / rust / tldr / uv / mise / pi (fzf 侧 pi 更新；sdk 已移出默认任务)
@@ -205,7 +205,8 @@ function auto-update --description "一键更新所有开发环境 (fish 版)"
 end
 
 function update-all --description "一键更新所有开发环境 (fish 版)"
-    # 与 zsh 侧对齐：均含 mise，fish 额外支持 pi；sdk 为可选 (SDKMAN)
+    # 默认清单与 zsh 有意不同：fish 含 pi 不含 sdk（sdk 仅可经参数指定），
+    # zsh 含 sdk 不支持 pi；目标名 rust 对应 zsh 侧的 rustup
     set -l tasks brew rust tldr uv mise pi
 
     set -l targets
@@ -291,9 +292,10 @@ function update-all --description "一键更新所有开发环境 (fish 版)"
     set -l secs (math -s0 "$duration % 60")
 
     if test $failed -eq 0
-        echo (set_color --bold green)"✨ All updates completed in {$mins}m{$secs}s"(set_color normal)
+        # 耗时拼接需引号分断：fish 双引号内 {$mins} 的花括号按字面输出，${mins} 为语法错误
+        echo (set_color --bold green)"✨ All updates completed in "$mins"m"$secs"s"(set_color normal)
     else
-        echo (set_color --bold red)"⚠️  $failed update(s) failed, completed in {$mins}m{$secs}s"(set_color normal)
+        echo (set_color --bold red)"⚠️  $failed update(s) failed, completed in "$mins"m"$secs"s"(set_color normal)
         return 1
     end
 end

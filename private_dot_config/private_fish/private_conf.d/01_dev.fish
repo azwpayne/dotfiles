@@ -7,9 +7,10 @@
 #               为注释模板，按需启用。
 # Usage       : 由 Fish 自动 source（conf.d 字典序，01_ 在 00_ 之后）；
 #               无需手动 source，alias 仅在交互 shell 生效。
-# Guards      : 无外部强依赖；uv_resync 带目录存在性检查；AI 助手别名
-#               (cla/clp 等) 为普通别名、未加 type -q 守卫，二进制缺失时
-#               错误在调用时暴露（属预期）。
+# Guards      : 无外部强依赖；uv_resync 直接 rm -rf .venv uv.lock 后重建并
+#               uv sync --upgrade，无目录守卫（在项目根目录使用）；
+#               AI 助手别名 (cla/clp 等) 为普通别名、未加 type -q 守卫，
+#               二进制缺失时错误在调用时暴露（属预期）。
 # Author      : Payne
 # =============================================================================
 
@@ -87,8 +88,8 @@ end
 # ~~~ 数据库工具 ~~~
 alias mongo-local="mongosh mongodb://localhost:27017"
 alias redis-cli="redis-cli -h localhost"
-alias mysql-local="mysql -u root -p"
-alias pg-local="psql -U postgres"
+# 原 mysql-local / pg-local 别名已移除：本机无 mysql/psql（含 mise），
+# 调用必失败；与 zsh 侧数据库别名清理保持一致
 
 
 # =============================================================================
