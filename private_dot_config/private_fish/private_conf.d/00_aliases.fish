@@ -10,10 +10,8 @@
 # Guards      : PROXY 端口统一 5376（与 dot_gitconfig / ssh config 一致）；
 #               update-all 内逐项 type -q / command -q 守卫；y() 带 tmp
 #               清理；find-large / serve 参数回退默认值幂等。
-# Last Updated: 2026-09-04 — 大规模工作流审计修复：移除 BSD 上非法的
-#               --preserve-root 别名（与 zsh 侧同因移除）、tree-size 改用
-#               BSD/GNU 兼容的 du -d 1、speedtest URL 修正为 sivel/speedtest-cli、
-#               timer 结束音改 printf '\a'（fish 的 echo 无 -a 选项）
+# Last Updated: 2026-09-07 — iterm/iterm_ghostty 别名改单引号（运行时取 $PWD）、
+#               update-all 头部注释与实际任务清单对齐（sdk 移出默认任务）
 # Author      : Payne
 # =============================================================================
 
@@ -43,9 +41,9 @@ alias wp="cd ~/WorkSpaces"
 alias wi="cd ~/WisdomSpaces"
 alias finder="open ."
 
-# 终端：Ghostty / iTerm 快速打开当前目录
-alias iterm_ghostty="open -a ghostty $PWD"
-alias iterm="open -a iTerm $PWD"
+# 终端：Ghostty / iTerm 快速打开当前目录（单引号保证运行时取 $PWD，与 zsh 侧一致）
+alias iterm_ghostty='open -a ghostty $PWD'
+alias iterm='open -a iTerm $PWD'
 
 # 编辑器快捷入口（XDG 路径）
 alias fishconfig="code ~/.config/fish"
@@ -198,8 +196,9 @@ end
 
 # ---------------------------------------------------------------------------
 # update-all — 声明式批量更新 (fish 版, 与 zsh 的 update-all 任务清单对齐)
-# 用法: update-all [targets...]  无参全量；有参按名过滤
-# 任务: brew / sdk / rust / tldr / uv / mise / pi (fzf 侧 pi 更新)
+# 用法: update-all [targets...]  无参全量；有参按名过滤（sdk 可经参数指定）
+#       auto-update = onproxy + update-all（先开代理再全量更新）
+# 任务: brew / rust / tldr / uv / mise / pi (fzf 侧 pi 更新；sdk 已移出默认任务)
 # 守卫: type -q / command -q 逐项守卫，未装跳过；失败计数与耗时统计
 # ---------------------------------------------------------------------------
 function auto-update --description "一键更新所有开发环境 (fish 版)"
