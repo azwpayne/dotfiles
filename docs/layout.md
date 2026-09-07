@@ -66,7 +66,6 @@
 | `private_dot_config/nvim/README.md` | —（不部署） | LazyVim 上游模板自带；由 `**/README.md` 排除，仅仓库内查阅（历史排除模式误写为 `**/REAMDME.md` 未生效，已修复） |
 | `private_dot_config/nvim/LICENSE` | —（不部署） | 上游 LazyVim starter 原件（Apache-2.0，与根 LICENSE 同哈希）；由 `**/LICENSE` 排除 |
 | `private_dot_config/nvim/dot_gitignore` | `~/.config/nvim/.gitignore` | 忽略插件数据等运行时目录 |
-| `private_dot_config/nvim/dot_neoconf.json` | `~/.config/nvim/.neoconf.json` | neoconf 本地配置 |
 | `private_dot_config/mise/config.toml` | `~/.config/mise/config.toml` | mise 工具链声明（工具与版本见 `private_dot_config/mise/config.toml`） |
 | `private_dot_claude/settings.json` | `~/.claude/settings.json` (0644) | Claude Code 设置（statusLine（bun 动态解析）、插件开关、环境变量、沙箱；`private_` 前缀作用于父目录，目录 0700、文件保持默认 0644） |
 | `dot_codex/private_config.toml` | `~/.codex/config.toml` (0600) | cc-switch 本地代理配置（`private_` 0600，详见 `dot_codex/private_config.toml`，确保目录存在且权限正确） |

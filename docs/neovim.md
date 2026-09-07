@@ -15,7 +15,7 @@
 - `lazy-lock.json`：插件 commit 级锁定（可复现环境）。
 - `lazyvim.json`：LazyVim 元数据（运行时写入，`extras` 为空是预期行为，真实启用清单以 `lazy.lua` 的 `import` 为准）。
 - `stylua.toml`：Lua 格式化规则。
-- `dot_gitignore` → `.gitignore`、`dot_neoconf.json` → `.neoconf.json`、`LICENSE`、`README.md`：均按 `.chezmoiignore` 规则部分排除、不部署。
+- `dot_gitignore` → `.gitignore`、`LICENSE`、`README.md`：均按 `.chezmoiignore` 规则部分排除、不部署。
 
 > 完整映射与忽略规则见 [layout.md](layout.md)。
 

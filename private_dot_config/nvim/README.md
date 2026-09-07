@@ -66,7 +66,6 @@ nvim
 ├── lazyvim.json              LazyVim metadata (extras=[], news 11866, version 8 — extras empty is expected, real list is in lazy.lua)
 ├── stylua.toml               Spaces 2 / 120 columns
 ├── .gitignore                ignores tag / log / data
-├── .neoconf.json             neoconf / lua_ls project settings（inert：仅被 neoconf.nvim 读取，需 lazyvim.plugins.extras.lsp.neoconf extra——未导入）
 ├── LICENSE                   Apache-2.0 (LazyVim starter, 与根 LICENSE 同源同哈希)；仓库内，**/LICENSE 排除，不部署
 └── README.md                 this file（仓库内，**/README.md 排除，不部署）
 ```
@@ -196,7 +195,7 @@ vim.keymap.set("n", "<leader>sv", "<C-w>v", { desc = "Split window vertically" }
 
 - This README = **repository view** (kept in the source tree; excluded by `.chezmoiignore` `**/README.md`, not deployed to `~/.config/nvim/README.md`) — installation, features, keymaps, settings.
 - [`docs/neovim.md`](../../docs/neovim.md) = **repository view (maintainer)** — source structure, file-by-file mapping, extras provenance, lock verification, autocmd groups, and the `update-all` boundary.
-- Both share the same numbers: **10 extras (9 lang + mini-animate)** and **43 locked plugins** / **6 custom keymaps**; conflicts — `lua/config/*.lua` + `lazy-lock.json` win.
+- Both share the same numbers: **10 extras (9 lang + mini-animate)** and **43 locked plugins** / **5 custom keymaps**; conflicts — `lua/config/*.lua` + `lazy-lock.json` win.
 
 ## License
 

@@ -135,7 +135,7 @@ HTTP/HTTPS 远程均生效），已与 `private_dot_ssh/private_config` 的 `Pro
 
 | 维度 | `auto-update` | `update-all` |
 | --- | --- | --- |
-| 定义位置 | `aliases.zsh:55` | `aliases.zsh:208` |
+| 定义位置 | `aliases.zsh:52` | `aliases.zsh:205` |
 | 覆盖目标 | 6 项（同 `update-all`，经委托实现） | 6 项：`brew` / `sdk` / `rustup` / `tldr` / `uv` / `mise`（含 `mise upgrade`） |
 | 参数 | 无参数，固定调用 `update-all` 全量 | 支持 `update-all brew mise` 参数过滤，未传参则全量；未知目标报错并提示可用列表 |
 | 守卫与容错 | 由 `update-all` 实现 | 循环内 `command -v $name` 守卫 + `eval` 失败则 `failed++` |
@@ -169,9 +169,9 @@ HTTP/HTTPS 远程均生效），已与 `private_dot_ssh/private_config` 的 `Pro
 
 `.chezmoiignore`（仓库根）控制 `chezmoi add` / `apply` 时忽略的**目标名**模式（模式按部署后的目标路径匹配，不是源文件名），当前包括：
 
-- 本地覆盖与备份：`*.local`、`*.local.*`、`*.bak`、`**/.DS_Store`
+- 本地覆盖与备份：`*.local`、`*.local.*`、`*.bak`、`**/.DS_Store`、`nvim.log`
 - 仓库文档：`**/README.md`（根级与嵌套，含 `zsh/README.md`、`nvim/README.md`）、`**/LICENSE`（含 `nvim/LICENSE`）、`docs/`
-- 敏感信息：`*token*`、`*secret*`、`*credential*`
+- 敏感信息：`**/*token*`、`**/*secret*`、`**/*credential*`（`**` 前缀覆盖嵌套目录）
 - 构建产物：`node_modules/`、`.pnpm-store/`
 - fish 机器本地状态：`.config/fish/fish_variables`（fish Universal Variables，仅本机）
 
