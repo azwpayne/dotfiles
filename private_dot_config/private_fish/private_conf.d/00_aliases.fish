@@ -197,7 +197,7 @@ end
 # update-all — 声明式批量更新 (fish 版; 默认清单与 zsh 有意不同, 非对齐关系)
 # 用法: update-all [targets...]  无参全量；有参按名过滤（sdk 可经参数指定）
 #       auto-update = onproxy + update-all（先开代理再全量更新）
-# 任务: brew / rust / tldr / uv / mise / pi (fzf 侧 pi 更新；sdk 已移出默认任务)
+# 任务: brew / rust / tldr / uv / mise / pi (fish 侧含 pi 更新；sdk 已移出默认任务)
 # 守卫: type -q / command -q 逐项守卫，未装跳过；失败计数与耗时统计
 # ---------------------------------------------------------------------------
 function auto-update --description "一键更新所有开发环境 (fish 版)"
