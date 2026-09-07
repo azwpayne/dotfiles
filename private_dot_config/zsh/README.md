@@ -16,7 +16,7 @@
 
 ### 加载顺序契约（重要）
 
-``~/.config/zsh/.zshrc`（兼容路径 `~/.zshrc`）按 **compinit（Zim 框架）→ `aliases.zsh` → `fzf.zsh` → `sdk.zsh`** 的顺序 source 本仓库文件。**顺序即语义**，重排会静默改变行为：
+`~/.config/zsh/.zshrc`（兼容路径 `~/.zshrc`）按 **compinit（Zim 框架）→ `aliases.zsh` → `fzf.zsh` → `sdk.zsh`** 的顺序 source 本仓库文件。**顺序即语义**，重排会静默改变行为：
 
 - `aliases.zsh` 必须先于 `fzf.zsh`（后者 Ctrl-G 绑定在 source 时展开 `$EDITOR`）；
 - `sdk.zsh` 必须在 compinit 之后且最后加载（内含 `compdef` 注册，需 compinit 已完成；`k` 别名仅在此定义，`aliases.zsh` 有意不重复）。
@@ -61,7 +61,7 @@ fzf 安装前缀的探测顺序、缓存文件位置（`~/.fzf_prefix_cache`）�
 
 ### 环境变量
 
-关键环境变量（`LANG`、`EDITOR`/`VISUAL`、`GOPROXY`/`GOPATH`/`GOBIN`、`ANDROID_NDK_HOME`、`FZF_PREFIX`/`FZF_PREFIX_CACHE`、`PATH` 增量等）的精确值、定义位置与守卫条件（目录存在性 + 去重、重复 source 幂等）以 `dot_zshrc` / `aliases.zsh` / `fzf.zsh` / `sdk.zsh` 源码为准，本文不建字段-值表以避免与源码重复。
+关键变量（`LANG`、`EDITOR`/`VISUAL`、`GOPROXY`/`GOPATH`/`GOBIN`、`ANDROID_NDK_HOME`、`FZF_PREFIX`/`FZF_PREFIX_CACHE`、`PATH` 增量等）的精确值、定义位置与守卫条件（目录存在性 + 去重、重复 source 幂等）以 `dot_zshrc` / `aliases.zsh` / `fzf.zsh` / `sdk.zsh` 源码为准，本文不建字段-值表以避免与源码重复。
 
 ### 启动必需（缺失会导致功能缺失）
 
