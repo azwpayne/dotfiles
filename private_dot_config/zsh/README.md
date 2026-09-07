@@ -1,6 +1,6 @@
 # zsh 配置仓库
 
-> Last Updated: 2026-09-04 — 同步 dot_zshrc PATH typeset -U / y() trap / sdk GOBIN 去重硬化
+> Last Updated: 2026-09-07 — 同步 aliases.zsh onproxy/ofproxy 与 auto-update 改名；修正速查表、可选组件清单及 zsh -n 验收命令（改逐文件循环）
 
 个人 zsh 配置模块集合。目标环境：**macOS (Apple Silicon) + Homebrew (`/opt/homebrew`) + zsh 5.9**。
 
@@ -29,7 +29,7 @@
 
 ### 编辑器契约
 
-`EDITOR`/`VISUAL` 的定义位置、值与导出方式以 `aliases.zsh` 源码为准（当前为 `nvim`，环境变量而非 alias，供 git/crontab/fzf 等读取）。`fzf.zsh` 的 `FZF_DEFAULT_OPTS` 中 `ctrl-g:execute($EDITOR {} &> /dev/tty)` 在 source 时展开该变量，故 `aliases.zsh` 必须先于 `fzf.zsh` 加载。不要将 `export EDITOR=...` 改为 `alias`。详见两文件的相关注释；`dot_zshrc` 顶部被注释的 SSH 分支以源码注释为准。
+`EDITOR`/`VISUAL` 的定义位置、值与导出方式以 `aliases.zsh` 源码为准（当前为 `nvim`，环境变量而非 alias，供 git/crontab/fzf 等读取）。`fzf.zsh` 的 `FZF_DEFAULT_OPTS` 中 `ctrl-g:execute($EDITOR {} &> /dev/tty)` 在 source 时展开该变量，故 `aliases.zsh` 必须先于 `fzf.zsh` 加载。不要将 `export EDITOR=...` 改为 `alias`。详见两文件的相关注释。
 
 ### 前缀缓存
 
@@ -45,7 +45,8 @@ fzf 安装前缀的探测顺序、缓存文件位置（`~/.fzf_prefix_cache`）�
 
 | 函数 | 所在文件 | 用途 |
 | --- | --- | --- |
-| `auto_update` | aliases.zsh | 一键全量更新入口（可选 `onproxy` 后委托 `update-all`） |
+| `auto-update` | aliases.zsh | 一键全量更新入口（可选 `onproxy` 后委托 `update-all`） |
+| `onproxy` / `ofproxy` | aliases.zsh | 开启/关闭终端代理环境变量 |
 | `update-all [targets...]` | aliases.zsh | 声明式批量更新，支持参数过滤与耗时/失败统计 |
 | `ruff_auto [dir]` | aliases.zsh | ruff 自动修复并格式化 |
 | `y [args]` | aliases.zsh | yazi 包装：退出后 cd 到最后浏览目录 |
@@ -56,7 +57,7 @@ fzf 安装前缀的探测顺序、缓存文件位置（`~/.fzf_prefix_cache`）�
 | `ftm [session]` | fzf.zsh | fzf 选择/创建 tmux 会话 |
 | `flf` / `flkill` / `flnet` / `fluser` | fzf.zsh | lsof+fzf 浏览/杀进程/网络/按用户过滤 |
 
-> `auto_update` 为薄包装，`update-all` 为关联数组驱动的声明式实现；二者分工与行为差异见源码注释与 `docs/shell.md`。破坏性命令 `uv_resync` 见注意事项，不在此表展开。
+> `auto-update` 为薄包装，`update-all` 为关联数组驱动的声明式实现；二者分工与行为差异见源码注释与 `docs/shell.md`。破坏性命令 `uv_resync` 见注意事项，不在此表展开。
 
 ## 依赖清单
 
@@ -72,7 +73,7 @@ fzf 安装前缀的探测顺序、缓存文件位置（`~/.fzf_prefix_cache`）�
 
 ### 有守卫的可选组件（未安装时静默跳过）
 
-`pnpm`（tabtab 补全）、SDKMAN（惰性加载，详见 `sdk.zsh` 注释）、`docker`/`kubectl`+`kubecolor`（补全缓存于 `~/.cache/zsh/` 并 `zcompile`，二进制更新自动重建；`k` 别名带守卫）、krew、`~/.cargo/env`、`onproxy`（仓库外可选）。`update-all` 的 6 目标 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise` 逐项 `command -v` 守卫，未安装跳过、失败汇总并返回非零。详见 `sdk.zsh` 与 `aliases.zsh` 源码。
+`pnpm`（tabtab 补全）、SDKMAN（惰性加载，详见 `sdk.zsh` 注释）、`docker`/`kubectl`+`kubecolor`（补全缓存于 `~/.cache/zsh/` 并 `zcompile`，二进制更新自动重建；`k` 别名带守卫）、krew、`~/.cargo/env`。`update-all` 的 6 目标 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise` 逐项 `command -v` 守卫，未安装跳过、失败汇总并返回非零。详见 `sdk.zsh` 与 `aliases.zsh` 源码。
 
 ### 运行时工具（对应别名/函数调用时才需要）
 
@@ -87,7 +88,7 @@ fzf 安装前缀的探测顺序、缓存文件位置（`~/.fzf_prefix_cache`）�
 
 ## 修改与验收流程
 
-1. 改完后跑语法检查：`zsh -n aliases.zsh fzf.zsh sdk.zsh dot_zshrc dot_zimrc`（或 `zsh -n ~/.config/zsh/.zshrc`）
+1. 改完后逐文件跑语法检查（实测 `zsh -n` 多文件传参时只解析首个）：`for f in aliases.zsh fzf.zsh sdk.zsh dot_zshrc dot_zimrc; do zsh -n "$f" || exit 1; done`（或 `zsh -n ~/.config/zsh/.zshrc`）
 2. 干净启动验证无报错：`zsh -ic 'exit'`
 3. 抽查关键定义：`zsh -ic 'type k df du; echo $EDITOR; echo $LANG'`
 4. 提交：小步提交，说明动机；重大重构前先打 tag 以便回退（本仓库历史上并无 `baseline` 标签，不要创建同名标签造成混淆）。
