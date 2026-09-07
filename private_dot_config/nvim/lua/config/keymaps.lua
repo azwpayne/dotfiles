@@ -18,7 +18,8 @@ vim.keymap.set("i", "jk", "<ESC>", { desc = "Exit insert mode with jk" })
 
 -- Clear hlsearch highlight without disabling hlsearch globally.
 -- Deliberate override: this shadows LazyVim's default <leader><space>
--- "Find Files (Root Dir)" (snacks_picker); user keymaps load later on VeryLazy
+-- "Find Files (Root Dir)" (fzf-lua, auto-enabled as LazyVim's default picker);
+-- user keymaps load later on VeryLazy
 -- and win — same documented-override precedent as the <leader>bd note below.
 vim.keymap.set("n", "<leader><space>", "<cmd>nohlsearch<CR>", { desc = "Clear search highlights" })
 

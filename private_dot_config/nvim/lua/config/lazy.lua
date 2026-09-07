@@ -1,7 +1,7 @@
 -- =============================================================================
 -- lazy.lua — LazyVim 引导与插件编排 (chezmoi: lua/config/lazy.lua)
 -- =============================================================================
--- Description : Bootstrap lazy.nvim (shallow, blobless, stable) + LazyVim
+-- Description : Bootstrap lazy.nvim (blobless partial clone, stable) + LazyVim
 --               core + 10 extras (9 lang + mini-animate) + 本地 plugins/*
 --               spec。install 回退与 checker 静默检查。
 -- Usage       : 由 init.lua `require("config.lazy")` 加载；首次启动自动 clone
@@ -11,7 +11,8 @@
 -- Entry point required by init.lua (`require("config.lazy")`).
 
 -- Bootstrap lazy.nvim into stdpath("data")/lazy/lazy.nvim if missing.
--- Uses shallow, blobless clone of the stable branch for speed.
+-- Uses a blobless (partial) clone of the stable branch for speed — no --depth,
+-- so lazy.nvim can still resolve plugins' history/tags when needed.
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
   local lazyrepo = "https://github.com/folke/lazy.nvim.git"
