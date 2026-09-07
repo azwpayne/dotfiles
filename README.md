@@ -1,6 +1,6 @@
 # Dotfiles
 
-> Last Updated: 2026-09-04 — 大规模工作流审计收敛：Fish 登录 shell、Alacritty Catppuccin、starship.toml 未入库、结构树/计数与实际文件对齐（87 = 51 + 36）
+> Last Updated: 2026-09-07 — 同步 model-tiers.json 删除与 dot_neoconf.json 移除：结构树删该行、managed 计数校正为 85 = 49 + 36，补 fish themes/ 目录、修正 layout.md 链接与 claude 权限标注
 
 基于 [chezmoi](https://www.chezmoi.io/) 管理的 macOS（Apple Silicon）个人开发环境配置。
 
@@ -80,7 +80,7 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 ├── dot_codex/
 │   └── private_config.toml            →  ~/.codex/config.toml         cc-switch 本地代理配置（0600，详见 dot_codex/private_config.toml）
 ├── private_dot_claude/
-│   └── settings.json                  →  ~/.claude/settings.json       Claude Code 设置（0600；statusLine bun 动态解析/插件/环境）
+│   └── settings.json                  →  ~/.claude/settings.json       Claude Code 设置（目录 0700 / 文件 0644；statusLine bun 动态解析/插件/环境）
 ├── private_dot_config/
 │   ├── zsh/                           →  ~/.config/zsh/               ★ 三模块 zsh 配置 + 入口文件（含独立 README，不部署）
 │   │   ├── dot_zshrc                  →  ~/.config/zsh/.zshrc         Zsh 入口：Zim 引导 + 工具 eval + 模块加载（symlink 目标，真实文件）
@@ -98,7 +98,8 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 │       ├── config.fish                →  ~/.config/fish/config.fish
 │       ├── fish_plugins                →  ~/.config/fish/fish_plugins     Fisher 14 插件清单
 │       ├── private_completions/       →  ~/.config/fish/completions/  symlink_docker/kubectl/orbctl.fish → OrbStack
-│       └── private_conf.d/, private_functions/ → conf.d（00_env / 00_aliases / 01_dev / 01_rev / fzf 五文件）与 functions/（fzf.fish 插件函数）
+│       ├── private_conf.d/, private_functions/ → conf.d（00_env / 00_aliases / 01_dev / 01_rev / fzf 五文件）与 functions/（fzf.fish 插件函数）
+│       └── themes/                    →  ~/.config/fish/themes/       空占位目录（仅 .keep）
 ├── private_dot_ssh/
 │   └── private_config                 →  ~/.ssh/config                ★ GitHub 走 ssh.github.com:443 + 自适应 SOCKS5 ProxyCommand（含 OrbStack Include；~/.ssh 目录 0700）
 └── private_dot_pi/
@@ -108,11 +109,10 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
     │   ├── landstrip.json             →  ~/.pi/agent/landstrip.json   子代理与任务权限
     │   └── extensions/pi-permission-system/config.json → 细粒度工具权限矩阵（允许优先：默认 allow，敏感路径/高危命令 deny）
     └── workflows/
-        ├── settings.json              →  ~/.pi/workflows/settings.json 工作流设置（并发/进度面板）
-        └── model-tiers.json           →  ~/.pi/workflows/model-tiers.json 三档模型分层（成本分级）
+        └── settings.json              →  ~/.pi/workflows/settings.json 工作流设置（并发/进度面板）
 ```
 
-> 根级 `README.md` / `LICENSE` / `docs/` 与全部嵌套 `README.md` / `LICENSE`（含 `zsh/README.md`、`nvim/README.md`、`nvim/LICENSE`）均由 `.chezmoiignore`（`**/README.md`、`**/LICENSE` 等按目标名书写的模式）排除、不部署；历史上的 `**/REAMDME.md` 拼写失配与 `dot_git`/`dot_DS_Store`/`dot_gitconfig` 源名失配已修复。`managed` 目标数演进：核心 55 → zsh 收敛后 57（`dot_zshrc/dot_zimrc` → `private_dot_config/zsh/dot_*` + 2 条 `symlink_*.tmpl`），鱼 shell 扩容后曾达 81（纳入 `.config/fish/fish_variables` 后为 82）；当前 `chezmoi managed | wc -l` 为 87（核心 51 + fish 36；2026-09-04 `model-tiers.json` 入库后 +1），详见 [layout.md](layout.md) 目标映射；后续去重又清理了被更宽模式覆盖的冗余行，目标数不再单调变化。
+> 根级 `README.md` / `LICENSE` / `docs/` 与全部嵌套 `README.md` / `LICENSE`（含 `zsh/README.md`、`nvim/README.md`、`nvim/LICENSE`）均由 `.chezmoiignore`（`**/README.md`、`**/LICENSE` 等按目标名书写的模式）排除、不部署；历史上的 `**/REAMDME.md` 拼写失配与 `dot_git`/`dot_DS_Store`/`dot_gitconfig` 源名失配已修复。`managed` 目标数演进：核心 55 → zsh 收敛后 57（`dot_zshrc/dot_zimrc` → `private_dot_config/zsh/dot_*` + 2 条 `symlink_*.tmpl`），鱼 shell 扩容后曾达 81（纳入 `.config/fish/fish_variables` 后为 82）；当前 `chezmoi managed | wc -l` 为 85（核心 49 + fish 36；2026-09-07 `model-tiers.json` 移除与 `dot_neoconf.json` 删除后），详见 [docs/layout.md](docs/layout.md) 目标映射；后续去重又清理了被更宽模式覆盖的冗余行，目标数不再单调变化。
 
 ## 📚 文档索引
 
