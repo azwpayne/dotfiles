@@ -51,13 +51,10 @@ zmodule asciiship
 #
 # Completion
 #
-# Homebrew completions — inject brew's site-functions into fpath (Apple Silicon / Intel).
+# Homebrew：注入 brew shellenv（HOMEBREW_PREFIX/PATH/fpath 等）并提供 brew/cask 别名。
+# fpath 无需额外声明：shell 启动时 HOMEBREW_PREFIX 未设，模块 else 分支 eval 的
+# brew shellenv 会无条件前置 brew 的 site-functions（fpath[1,0]），补全直接可用。
 zmodule zimfw/homebrew
-if [[ -d "${HOMEBREW_PREFIX:-/opt/homebrew}/share/zsh/site-functions" ]]; then
-  zmodule "${HOMEBREW_PREFIX:-/opt/homebrew}/share/zsh" --fpath site-functions
-elif [[ -d /usr/local/share/zsh/site-functions ]]; then
-  zmodule /usr/local/share/zsh --fpath site-functions   # Intel Mac
-fi
 
 # Additional completion definitions for Zsh.
 zmodule zsh-users/zsh-completions --fpath src
