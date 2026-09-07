@@ -5,7 +5,7 @@
 --               which-key 与 :map 查询，使用 vim.keymap.set（noremap+silent）。
 -- Usage       : Leader 为 <Space>（LazyVim 默认）；按 <leader> 等待 which-key
 -- Guards      : 无；键位定义幂等，重复加载覆盖同名映射
--- Last Updated: 2026-09-04 — 补全文件头、分组注释、收敛 desc 约束说明
+-- Last Updated: 2026-09-07 — 标注 <leader><space> 刻意覆盖上游 Find Files (Root Dir)
 -- Author      : Payne
 -- =============================================================================
 -- Custom keymaps loaded *after* LazyVim defaults, so you can override LazyVim here.
@@ -18,6 +18,9 @@ vim.keymap.set("i", "jk", "<ESC>", { desc = "Exit insert mode with jk" })
 -- Normal mode — leader mappings
 
 -- Clear hlsearch highlight without disabling hlsearch globally.
+-- Deliberate override: this shadows LazyVim's default <leader><space>
+-- "Find Files (Root Dir)" (snacks_picker); user keymaps load later on VeryLazy
+-- and win — same documented-override precedent as the <leader>bd note below.
 vim.keymap.set("n", "<leader><space>", "<cmd>nohlsearch<CR>", { desc = "Clear search highlights" })
 
 -- Splits (discoverable via leader; same as <C-w>v / <C-w>s).

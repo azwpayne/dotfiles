@@ -2,9 +2,6 @@
 -- Every file under lua/plugins/ is auto-loaded by lazy.nvim; returned tables are merged.
 -- Active specs below DO take effect (template guard `if true then return {} end` is disabled).
 -- Commented blocks are inert examples — uncomment to enable.
-
--- starter comment kept only for history: unlike the pristine template, several specs below DO take effect (guard is commented out)
--- stylua: ignore
 -- if true then return {} end
 
 -- every spec file under the "plugins" directory will be loaded automatically by lazy.nvim
