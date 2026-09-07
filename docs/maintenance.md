@@ -1,6 +1,6 @@
 # 维护指南
 
-> Last Updated: 2026-09-04 — 大规模工作流审计收敛：fish -n 逐文件校验循环（多文件传参不生效）、chezmoi edit ~/.zshrc 指向模板的说明、行号引用对齐 39/193
+> Last Updated: 2026-09-07 — 更新入口随提交 62b58f8 由 auto_update 改名 auto-update（历史记录保留旧名）、验证命令同步、FAQ 行号引用对齐 aliases.zsh:55 / 208
 
 ## 日常修改流程
 
@@ -46,10 +46,10 @@ git -C ~/.local/share/chezmoi add -A && git -C ~/.local/share/chezmoi commit -m 
 | `zimfw upgrade` | 升级 `zimfw` 自身（`zsh`） |
 | `zimfw init` | 重建 `${ZIM_HOME}/init.zsh`（改动 `~/.config/zsh/.zimrc` 后需要，`dot_zshrc` 会按 `-nt` 时间戳自动重建） |
 | `zimfw info` | 查看 `zimfw` 版本与模块信息 |
-| `auto_update` | 一键全量更新入口：若定义了 `onproxy` 函数则先切代理，随后直接委托 `update-all` 执行（覆盖目标一致）；定义于 `private_dot_config/zsh/aliases.zsh`，详见 [dev-tools.md](dev-tools.md) |
-| `update-all [targets...]` | 关联数组驱动的批量更新，支持参数选择目标（如 `update-all brew mise`）、带失败计数与耗时统计；覆盖 `brew` / `sdk` / `rustup` / `tldr` / `uv` / `mise` 共 6 项（**已覆盖 `mise`**，与 `auto_update` 的核心差异）；定义于 `aliases.zsh`，详见 [dev-tools.md](dev-tools.md) |
+| `auto-update` | 一键全量更新入口：若定义了 `onproxy` 函数则先切代理，随后直接委托 `update-all` 执行（覆盖目标一致）；定义于 `private_dot_config/zsh/aliases.zsh`，详见 [dev-tools.md](dev-tools.md) |
+| `update-all [targets...]` | 关联数组驱动的批量更新，支持参数选择目标（如 `update-all brew mise`）、带失败计数与耗时统计；覆盖 `brew` / `sdk` / `rustup` / `tldr` / `uv` / `mise` 共 6 项（**已覆盖 `mise`**，与 `auto-update` 的核心差异）；定义于 `aliases.zsh`，详见 [dev-tools.md](dev-tools.md) |
 
-> `auto_update` 与 `update-all` 均定义于 `private_dot_config/zsh/aliases.zsh`；`auto_update` 为兼容旧习惯的一键入口（内部委托 `update-all`），`update-all` 为支持参数过滤、失败计数与耗时统计的实际实现，二者覆盖目标一致（均含 `mise`）；详见 [dev-tools.md](dev-tools.md) 对比表。
+> `auto-update` 与 `update-all` 均定义于 `private_dot_config/zsh/aliases.zsh`；`auto-update` 为兼容旧习惯的一键入口（内部委托 `update-all`），`update-all` 为支持参数过滤、失败计数与耗时统计的实际实现，二者覆盖目标一致（均含 `mise`）；详见 [dev-tools.md](dev-tools.md) 对比表。
 
 ## 验收清单
 
@@ -58,10 +58,10 @@ git -C ~/.local/share/chezmoi add -A && git -C ~/.local/share/chezmoi commit -m 
 ```bash
 # zsh 模块（语法 + 干净启动 + 关键定义）
 for f in ~/.config/zsh/{aliases,fzf,sdk}.zsh ~/.config/zsh/.zshrc ~/.config/zsh/.zimrc; do zsh -n "$f" || exit 1; done
-# 逐文件校验（实测 zsh -n 多文件传参时只查首个）；覆盖 aliases.zsh 中的 auto_update / update-all（含关联数组、耗时统计）语法
+# 逐文件校验（实测 zsh -n 多文件传参时只查首个）；覆盖 aliases.zsh 中的 auto-update / update-all（含关联数组、耗时统计）语法
 zsh -ic 'exit'                              # 干净启动无报错
 zsh -ic 'type ls df du; echo $EDITOR'       # 关键别名/变量（EDITOR=nvim）
-zsh -ic 'type auto_update update-all'       # 验证更新函数已加载（update-all 支持参数过滤、失败计数与耗时统计）
+zsh -ic 'type auto-update update-all'       # 验证更新函数已加载（update-all 支持参数过滤、失败计数与耗时统计）
 # 注意：短别名 k 定义在 sdk.zsh 且仅当 kubectl 可用时才存在，无 kubectl 的机器上属预期缺失
 
 # Zim 插件管理器（改动 ~/.config/zsh/.zimrc 后；重启 shell 时 dot_zshrc 会按 -nt 时间戳自动重建 init.zsh）
@@ -130,14 +130,14 @@ HTTP/HTTPS 远程均生效），已与 `private_dot_ssh/private_config` 的 `Pro
 （`nc -z 127.0.0.1 5376`），全局替换即可。
 历史遗留的冗余 `[https …]` / `[ssh "ssh.github.com"]` 段及注释化全局代理段均已清理，无需再处理旧注释。详见 [dev-tools.md](dev-tools.md) 与 [getting-started.md](getting-started.md)。
 
-### auto_update 与 update-all 的区别
+### auto-update 与 update-all 的区别
 
-`auto_update` 现为 `update-all` 的薄包装：打印 🚀 横幅、（若定义）先执行 `onproxy` 切代理，
+`auto-update` 现为 `update-all` 的薄包装：打印 🚀 横幅、（若定义）先执行 `onproxy` 切代理，
 随后直接调用 `update-all`（无参全量）。二者覆盖目标与失败统计行为完全一致：
 
-| 维度 | `auto_update` | `update-all` |
+| 维度 | `auto-update` | `update-all` |
 | --- | --- | --- |
-| 定义位置 | `aliases.zsh:39` | `aliases.zsh:193` |
+| 定义位置 | `aliases.zsh:55` | `aliases.zsh:208` |
 | 覆盖目标 | 6 项（同 `update-all`，经委托实现） | 6 项：`brew` / `sdk` / `rustup` / `tldr` / `uv` / `mise`（含 `mise upgrade`） |
 | 参数 | 无参数，固定调用 `update-all` 全量 | 支持 `update-all brew mise` 参数过滤，未传参则全量；未知目标报错并提示可用列表 |
 | 守卫与容错 | 由 `update-all` 实现 | 循环内 `command -v $name` 守卫 + `eval` 失败则 `failed++` |

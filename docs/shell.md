@@ -1,6 +1,6 @@
 # Shell 栈：Zsh / Zim / Starship / Fish
 
-> Last Updated: 2026-09-04 — 大规模工作流审计收敛：Fish 为 Ghostty 登录 shell（fish -l）、brew shellenv 改由 Zim homebrew 模块注入、Starship 配置未入库的说明
+> Last Updated: 2026-09-07 — 包管理更新入口随提交 62b58f8 由 auto_update 改名 auto-update；修正 Fish 侧 zoxide 已接入的说明
 
 ## 启动链路
 
@@ -54,7 +54,7 @@ fzf 前缀按平台自适应探测（Apple Silicon `/opt/homebrew` → Intel `/u
 
 ### 包管理更新函数（aliases.zsh）
 
-`auto_update` 与 `update-all` 定义于 `private_dot_config/zsh/aliases.zsh`，前者为兼容旧习惯的一键入口（可选 `onproxy` 后委托后者），后者为关联数组驱动的批量更新（支持参数过滤、失败计数与耗时统计）。覆盖目标、任务定义与彩色输出细节均以 `aliases.zsh` 源文件为准，详见 [dev-tools.md](dev-tools.md) 与源文件。
+`auto-update` 与 `update-all` 定义于 `private_dot_config/zsh/aliases.zsh`，前者为兼容旧习惯的一键入口（可选 `onproxy` 后委托后者），后者为关联数组驱动的批量更新（支持参数过滤、失败计数与耗时统计）。覆盖目标、任务定义与彩色输出细节均以 `aliases.zsh` 源文件为准，详见 [dev-tools.md](dev-tools.md) 与源文件。
 
 ### fzf-tab
 
@@ -62,4 +62,4 @@ fzf 前缀按平台自适应探测（Apple Silicon `/opt/homebrew` → Intel `/u
 
 ## Fish 的角色
 
-Fish 是 Ghostty 的登录 shell：Ghostty 以 `command = /opt/homebrew/bin/fish -l` 启动（`zsh -l` / `tmux` 方案注释保留）；Alacritty 经 `shell = { program = "/opt/homebrew/bin/fish", args = ["-c", "tmux attach || tmux new -t main"] }` 进入 tmux；tmux `default-shell` 亦为 Fish。Zsh 栈（XDG 收敛 + Zim 三模块）完整保留为次选入口（`~/.zshrc` 经 symlink 指向 `~/.config/zsh/.zshrc`）。仓库中 `private_dot_config/private_fish/`（chezmoi `private_` 前缀，部署后为 `~/.config/fish/`）提供：`config.fish` 在 interactive 时初始化 Starship，`fish_plugins`（14 插件）经 fisher 管理 fzf.fish 等插件，`conf.d` 五文件（00_env/00_aliases/01_dev/01_rev/fzf）承载环境与函数，`symlink_` 保留 OrbStack 的 docker/kubectl/orbctl 补全。Fish 侧已初始化 Starship 与 fzf 键位，但未接入 zoxide/mise/brew 等 zsh 栈（mise 仅 zsh 侧 activate），详见 `private_dot_config/private_fish/` 源目录与 [layout.md](layout.md)。
+Fish 是 Ghostty 的登录 shell：Ghostty 以 `command = /opt/homebrew/bin/fish -l` 启动（`zsh -l` / `tmux` 方案注释保留）；Alacritty 经 `shell = { program = "/opt/homebrew/bin/fish", args = ["-c", "tmux attach || tmux new -t main"] }` 进入 tmux；tmux `default-shell` 亦为 Fish。Zsh 栈（XDG 收敛 + Zim 三模块）完整保留为次选入口（`~/.zshrc` 经 symlink 指向 `~/.config/zsh/.zshrc`）。仓库中 `private_dot_config/private_fish/`（chezmoi `private_` 前缀，部署后为 `~/.config/fish/`）提供：`config.fish` 在 interactive 时初始化 Starship 与 zoxide，`fish_plugins`（14 插件）经 fisher 管理 fzf.fish 等插件，`conf.d` 五文件（00_env/00_aliases/01_dev/01_rev/fzf）承载环境与函数，`symlink_` 保留 OrbStack 的 docker/kubectl/orbctl 补全。Fish 侧已初始化 Starship、zoxide（`config.fish` 的 `zoxide init fish` 与 fzf_zoxide 插件）与 fzf 键位，未接入 mise/brew 等 zsh 栈（mise 仅 zsh 侧 activate），详见 `private_dot_config/private_fish/` 源目录与 [layout.md](layout.md)。

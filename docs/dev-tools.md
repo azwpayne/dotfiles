@@ -1,6 +1,6 @@
 # 开发工具链：git / gh / mise / codex / pi agent
 
-> Last Updated: 2026-09-04 — 大规模工作流审计收敛：shell.readAccess=policy 说明、model-tiers 字段描述对齐实际、model-tiers.json 已入库
+> Last Updated: 2026-09-07 — 删除 model-tiers.json 章节（源文件已于提交 3018345 移除）；更新入口随提交 62b58f8 由 auto_update 改名 auto-update
 
 > 本文档只做解释性说明，**不耦合**任何代码或配置。凡是源文件已经承载的实际内容（字段值、列表项、权限矩阵等），一律以源文件为唯一权威；跨文档冲突时，一律以源文件为准。下文各节不再逐行抄录文件内容。
 
@@ -26,21 +26,21 @@
 
 mise 工具链由 `private_dot_config/mise/config.toml` 声明（工具与版本见该文件，当前为若干工具的 `latest`），由 `private_dot_config/zsh/dot_zshrc` 中的 `eval "$(mise activate zsh)"` 接管 zsh 环境；实际声明以源文件为准。常用操作见 `mise` 文档与 `aliases.zsh` 的 `update-all` 复用。
 
-### 包管理器更新：`aliases.zsh` 的 `auto_update` 与 `update-all`
+### 包管理器更新：`aliases.zsh` 的 `auto-update` 与 `update-all`
 
 `private_dot_config/zsh/aliases.zsh` 提供两个更新入口，实际更新逻辑已收敛为一处：
 
 | 函数 | 位置 | 覆盖目标 | 核心机制 | 适用场景 |
 | --- | --- | --- | --- | --- |
-| `auto_update` | `aliases.zsh` | 与 `update-all` 相同 | 薄包装：打印横幅后委托 `update-all` 执行，详见源文件 | 兼容旧习惯的一键入口 |
+| `auto-update` | `aliases.zsh` | 与 `update-all` 相同 | 薄包装：打印横幅后委托 `update-all` 执行，详见源文件 | 兼容旧习惯的一键入口 |
 | `update-all` | `aliases.zsh` | 多项（`brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise` 等，详见源文件） | 关联数组声明任务，支持参数过滤、守卫、失败计数与彩色输出，详见 `aliases.zsh` | 需灵活选择目标、查看统计 |
 
 要点：
 
-- 旧版 `auto_update` 曾顺序守卫调用五个 `*_update` 辅助函数（`uv_update` / `sdk_update` / `rust_update` / `tldr_update` / `brew_update`），它们已在提交 `0af1f61` 中删除；现 `auto_update` 委托 `update-all`，二者覆盖目标完全一致（均含 `mise`）。
+- 旧版 `auto_update` 曾顺序守卫调用五个 `*_update` 辅助函数（`uv_update` / `sdk_update` / `rust_update` / `tldr_update` / `brew_update`），它们已在提交 `0af1f61` 中删除；现 `auto-update` 委托 `update-all`，二者覆盖目标完全一致（均含 `mise`）。
 - `update-all` 的 `brew` 任务为激进的全量升级流程（含 `brew cu`），历史上的 `brew_update` 别名已删除，详见 `aliases.zsh` 中 `tasks` 定义。
 
-> 验证：`zsh -n ~/.config/zsh/aliases.zsh` 可覆盖两函数语法；`zsh -ic 'type update-all auto_update'` 确认已加载。
+> 验证：`zsh -n ~/.config/zsh/aliases.zsh` 可覆盖两函数语法；`zsh -ic 'type update-all auto-update'` 确认已加载。
 
 ## Codex — `dot_codex/private_config.toml`
 
@@ -67,10 +67,6 @@ mise 工具链由 `private_dot_config/mise/config.toml` 声明（工具与版本
 ### workflows/settings.json — 动态工作流设置
 
 位于 `private_dot_pi/workflows/settings.json`（部署到 `~/.pi/workflows/settings.json`）。它配置工作流运行时的并发、重试、进度面板与会话持久化等行为；实值以 `private_dot_pi/workflows/settings.json` 为唯一权威。`progressPanelMaxAgents` 用于 `pi-dynamic-workflows` 的进度面板，与 `landstrip.json` 的 `toolFilesystemPolicy` 相互独立。详见 [layout.md](layout.md)。
-
-### workflows/model-tiers.json — 工作流三档模型分层
-
-位于 `private_dot_pi/workflows/model-tiers.json`（部署到 `~/.pi/workflows/model-tiers.json`）。三档 `small` / `medium` / `big` 分别绑定不同模型，成本分层意图明显：轻量与中档任务下沉到低成本模型，主模型由 `settings.json` 的 `defaultModel` 指定（本文件仅做档位→模型映射，无思考预算等其他字段）。实值以 `private_dot_pi/workflows/model-tiers.json` 为唯一权威。
 
 ### extensions/pi-permission-system/config.json — 工具级权限矩阵
 

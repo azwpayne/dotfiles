@@ -1,6 +1,6 @@
 # 安装与快速开始
 
-> Last Updated: 2026-09-04 — 大规模工作流审计收敛：sdk.zsh 禁用方式改为 glob 语义（无逐文件 source 行）、starship 配置未入库、brew shellenv 归 Zim 模块
+> Last Updated: 2026-09-07 — 日常更新速览中的更新入口随提交 62b58f8 由 auto_update 改名 auto-update
 
 本文档说明如何在一台新的 macOS（Apple Silicon）机器上，用本仓库还原完整的开发环境。
 
@@ -145,7 +145,7 @@ brew install ruff
 brew install jadx scrcpy
 ```
 
-另需注意：VS Code 及其 `code` CLI 是 `git config editor = 'code'` 以及 `clp_cfg` / `cla_cfg` 别名的目标（`fzf` 的 `Ctrl-E` 绑定已注释停用，现为 `Ctrl-G` 走 `$EDITOR`），未安装时上述功能退化。
+另需注意：VS Code 及其 `code` CLI 是 `git config editor = code` 以及 `clp_cfg` / `cla_cfg` 别名的目标（`fzf` 的 `Ctrl-E` 绑定已注释停用，现为 `Ctrl-G` 走 `$EDITOR`），未安装时上述功能退化。
 
 ### 有守卫的可选组件（未安装时静默跳过）
 
@@ -197,6 +197,6 @@ git config --get-regexp proxy        # 应为 socks5://127.0.0.1:5376（与 SSH 
                                      # git config --file ~/.local/share/chezmoi/dot_gitconfig --get-regexp proxy
 ```
 
-> **日常更新速览**：`private_dot_config/zsh/aliases.zsh` 提供 `auto_update`（若定义了 `onproxy` 函数则先切代理，随后直接委托 `update-all` 执行，覆盖目标一致）与更细粒度的 `update-all [brew|mise|rustup|tldr|uv|sdk]`（关联数组 6 项，支持参数过滤、失败计数与耗时统计，**含 `mise`**；**失败即红**——失败目标打印红色 `✗` 与错误摘要、结尾汇总 `N/M 目标失败` 并返回非零，成功目标保持绿色 `✓`）；验证通过后可按需执行 `zsh -ic 'auto_update'` 或 `zsh -ic 'update-all'`，详见 [maintenance.md](maintenance.md) 与 [dev-tools.md](dev-tools.md) 的对比表及 `aliases.zsh` 源码。
+> **日常更新速览**：`private_dot_config/zsh/aliases.zsh` 提供 `auto-update`（若定义了 `onproxy` 函数则先切代理，随后直接委托 `update-all` 执行，覆盖目标一致）与更细粒度的 `update-all [brew|mise|rustup|tldr|uv|sdk]`（关联数组 6 项，支持参数过滤、失败计数与耗时统计，**含 `mise`**；**失败即红**——失败目标打印红色 `✗` 与错误摘要、结尾汇总 `N/M 目标失败` 并返回非零，成功目标保持绿色 `✓`）；验证通过后可按需执行 `zsh -ic 'auto-update'` 或 `zsh -ic 'update-all'`，详见 [maintenance.md](maintenance.md) 与 [dev-tools.md](dev-tools.md) 的对比表及 `aliases.zsh` 源码。
 
 全部通过后即可进入日常使用；更多维护流程见 [maintenance.md](maintenance.md)，完整映射见 [layout.md](layout.md)。

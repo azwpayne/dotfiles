@@ -1,6 +1,6 @@
 # 文件映射与命名约定
 
-> Last Updated: 2026-09-04 — 大规模工作流审计收敛：Ghostty `fish -l`、Alacritty Catppuccin Mocha、starship.toml 未入库、tmux/claude 补行、conf.d 五文件枚举、敏感词 `**/` 深化、计数 87 = 51 + 36
+> Last Updated: 2026-09-07 — 删除 model-tiers.json 映射行并记录其移除（提交 3018345）；计数更新至 85（计入 dot_neoconf.json 删除）；aliases.zsh 一键入口随提交 62b58f8 改名 auto-update；claude 行权限标注修正
 
 本仓库是 chezmoi 的源目录（`~/.local/share/chezmoi`）。chezmoi 通过文件名前缀编码目标路径与属性，
 `chezmoi apply` 时按规则渲染到 `$HOME`。
@@ -45,7 +45,7 @@
 | --- | --- | --- |
 | `private_dot_config/zsh/dot_zshrc` | `~/.config/zsh/.zshrc` | Zsh 入口：Zim 引导、PATH、工具 eval（zoxide/mise/starship/fzf/brew）、模块加载入口（aliases→fzf→sdk）—— 与 `symlink_dot_zshrc.tmpl` 配合 |
 | `private_dot_config/zsh/dot_zimrc` | `~/.config/zsh/.zimrc` | Zim 模块清单（仅供 zimfw 读取，非 shell 启动时 source）—— 与 `symlink_dot_zimrc.tmpl` 配合 |
-| `private_dot_config/zsh/aliases.zsh` | `~/.config/zsh/aliases.zsh` | 别名与通用函数（`update-all`、`auto_update`、`y`、`ruff_auto` 等）；`update-all` 为关联数组 6 目标 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise`，支持传参过滤、失败计数与耗时统计；`auto_update` 为兼容旧习惯的一键入口（可选 `onproxy` 切代理后直接委托 `update-all`，覆盖目标一致，均含 `mise`）；新增 `chezc/chezdf/chezap` 三别名 |
+| `private_dot_config/zsh/aliases.zsh` | `~/.config/zsh/aliases.zsh` | 别名与通用函数（`update-all`、`auto-update`、`y`、`ruff_auto` 等）；`update-all` 为关联数组 6 目标 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise`，支持传参过滤、失败计数与耗时统计；`auto-update` 为兼容旧习惯的一键入口（可选 `onproxy` 切代理后直接委托 `update-all`，覆盖目标一致，均含 `mise`）；新增 `chezc/chezdf/chezap` 三别名 |
 | `private_dot_config/zsh/fzf.zsh` | `~/.config/zsh/fzf.zsh` | fzf 前缀探测/缓存、全局选项、Ctrl-R/T/Alt-C 及 `frg`/`fkill`/`ftm`/`fl*` 函数 |
 | `private_dot_config/zsh/sdk.zsh` | `~/.config/zsh/sdk.zsh` | SDK 环境与补全（pnpm/SDKMAN(可选)/Android NDK/Python(uv)/Go/Rust/Docker/kubectl+kubecolor） |
 | `private_dot_config/zsh/dot_gitignore` | `~/.config/zsh/.gitignore` | 忽略运行时产物（`*.zwc`、`.fzf_prefix_cache`、`.DS_Store`） |
@@ -70,7 +70,7 @@
 | `private_dot_config/nvim/dot_gitignore` | `~/.config/nvim/.gitignore` | 忽略插件数据等运行时目录 |
 | `private_dot_config/nvim/dot_neoconf.json` | `~/.config/nvim/.neoconf.json` | neoconf 本地配置 |
 | `private_dot_config/mise/config.toml` | `~/.config/mise/config.toml` | mise 工具链声明（工具与版本见 `private_dot_config/mise/config.toml`） |
-| `private_dot_claude/settings.json` | `~/.claude/settings.json` (0600) | Claude Code 设置（statusLine（bun 动态解析）、插件开关、环境变量、沙箱；`private_` 使文件 0600） |
+| `private_dot_claude/settings.json` | `~/.claude/settings.json` (0644) | Claude Code 设置（statusLine（bun 动态解析）、插件开关、环境变量、沙箱；`private_` 前缀作用于父目录，目录 0700、文件保持默认 0644） |
 | `dot_codex/private_config.toml` | `~/.codex/config.toml` (0600) | cc-switch 本地代理配置（`private_` 0600，详见 `dot_codex/private_config.toml`，确保目录存在且权限正确） |
 
 > `~/.config/gh/config.yml` 与 `hosts.yml` 由 `gh auth login` 在目标机生成，含凭据，**不入库**（见下文“不在仓库内的重要文件”）。
@@ -100,7 +100,6 @@
 | `private_dot_pi/private_agent/landstrip.json` | `~/.pi/agent/landstrip.json` (0644) | 子代理与任务权限配置 |
 | `private_dot_pi/private_agent/extensions/pi-permission-system/config.json` | `~/.pi/agent/extensions/pi-permission-system/config.json` (0644) | 工具级权限矩阵（允许优先：默认 allow，敏感路径/高危命令 deny） |
 | `private_dot_pi/workflows/settings.json` | `~/.pi/workflows/settings.json` (0644) | workflow 运行时配置（并发、进度面板） |
-| `private_dot_pi/workflows/model-tiers.json` | `~/.pi/workflows/model-tiers.json` (0644) | 三档模型分层（成本分级） |
 
 > 权限实测（stat）：`private_dot_pi`/`private_agent` 目录前缀使 `~/.pi`、`~/.pi/agent` 为 0700，其内文件（含 `extensions/**`）均为 0644；
 > `workflows/` 目录无 `private_` 前缀，`~/.pi/workflows` 为 0755。
@@ -118,7 +117,7 @@
 `dot_gitconfig` → `~/.gitconfig` 恢复其本来的正常部署语义；`chezmoi managed`
 目标数由 59 降至 55（不再包含嵌套 README×2、`nvim/LICENSE`）。后续去重又删除了被更宽模式
 覆盖或已无对应文件的冗余行（根级 `README.md` / `LICENSE`、`docs/**`、`**/.git`、`*client_secret*`、
-两条 `**.md` 与已不存在的 `REPO-INSIGHT.md`），`managed` 目标数保持 55 不变（核心 targets 不变），其后 fish 配置扩容实测曾达 81（纳入 `.config/fish/fish_variables` 后为 82，详见布局映射）；2026-09 zsh XDG 收敛（`dot_zshrc/dot_zimrc` → `private_dot_config/zsh/dot_*` + 2 条 `symlink_*.tmpl`）后核心再度上升，2026-09-04 `model-tiers.json` 入库；当前总计 `chezmoi managed | wc -l` 为 87（核心 51 + fish 36，按目标路径是否以 `.config/fish` 开头划分，实测为准）。
+两条 `**.md` 与已不存在的 `REPO-INSIGHT.md`），`managed` 目标数保持 55 不变（核心 targets 不变），其后 fish 配置扩容实测曾达 81（纳入 `.config/fish/fish_variables` 后为 82，详见布局映射）；2026-09 zsh XDG 收敛（`dot_zshrc/dot_zimrc` → `private_dot_config/zsh/dot_*` + 2 条 `symlink_*.tmpl`）后核心再度上升；2026-09-04 `model-tiers.json` 入库，2026-09-07 又随提交 `3018345` 删除（`private_dot_pi/workflows/` 仅余 `settings.json`），同日 `private_dot_config/nvim/dot_neoconf.json` 亦删除，总计相应减二，应为 85（核心 49 + fish 36，按目标路径是否以 `.config/fish` 开头划分，以重新实测为准）。
 
 ## 仓库特性说明
 
