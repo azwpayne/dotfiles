@@ -2,8 +2,6 @@
 # `mise use -g <tool>@<version>` 更新本文件；`mise install` 同步安装。
 # 每个条目跟踪最新稳定版 ("latest")；如需锁定版本可改为具体版本号 (如 node = "20")。
 # 工具清单与安装说明见 docs/dev-tools.md 与 aliases.zsh 的 update-all。
-# Last Updated: 2026-09-04 — GOPATH 统一说明（zsh/fish 均为 ~/.local/share/go）、
-#               node 注释改为最新稳定版策略（与 latest 跟踪策略一致）
 # Author: Payne
 
 [tools]

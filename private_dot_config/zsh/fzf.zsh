@@ -7,9 +7,6 @@
 #               $EDITOR——Ctrl-G 绑定在 source 时展开）、在 sdk.zsh 之前
 # Guards      : 前缀探测带缓存与自愈；fzf 初始化与补全均 command -v 守卫
 # Depends     : 必需 fzf、fzf-tab；主力 fd（缺失时回退 rg）；预览用 bat/lsd
-# Last Updated: 2026-09-07（exclude_list 展开进两个 export 后即 unset，
-#               不再泄漏为交互环境全局变量；fd 排除清单 source 时展开的
-#               逐项 --exclude 参数方案保持不变）
 # Author      : Payne
 # =============================================================================
 

@@ -1,6 +1,5 @@
 # Neovim：LazyVim 配置
 
-> Last Updated: 2026-09-04 — 大规模工作流审计收敛：剪贴板/补全回归上游默认、bd 键位交还 LazyVim、Python 缩进 autocmd 已不存在
 
 `private_dot_config/nvim/` 是基于 [LazyVim](https://www.lazyvim.org/) starter 的 Neovim 配置，目标 Neovim ≥ 0.9（本机验证 0.12）。`chezmoi apply` 渲染为 `~/.config/nvim/`（静态文件，无模板），首次启动由 `lua/config/lazy.lua` 自动 bootstrap `lazy.nvim` 并按 `lazy-lock.json` 安装插件。
 

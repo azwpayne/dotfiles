@@ -12,9 +12,6 @@
 # Loading-order contract: compinit(Zim) -> aliases.zsh -> fzf.zsh -> sdk.zsh
 #   aliases 先于 fzf（后者 Ctrl-G 绑定在 source 时展开 $EDITOR）；
 #   sdk 最后（其 compdef 注册依赖 compinit 完成）。
-# Last Updated: 2026-09-04 — 大规模工作流审计修复：PATH 优先级语义修正
-#               （列表改逆序，~/bin 真正最高）、删除与 Zim homebrew 模块重复的
-#               brew shellenv eval、zimfw/init.zsh source 增加存在性守卫
 # Author     : Payne
 # =============================================================================
 

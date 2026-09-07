@@ -1,7 +1,5 @@
 # zsh 配置仓库
 
-> Last Updated: 2026-09-07 — 同步 aliases.zsh onproxy/ofproxy 与 auto-update 改名；修正速查表、可选组件清单及 zsh -n 验收命令（改逐文件循环）
-
 个人 zsh 配置模块集合。目标环境：**macOS (Apple Silicon) + Homebrew (`/opt/homebrew`) + zsh 5.9**。
 
 本仓库包含按模块拆分的配置文件；入口文件为 `private_dot_config/zsh/dot_zshrc`（部署为 `~/.config/zsh/.zshrc`，经 `symlink_dot_zshrc.tmpl` 在 `~/.zshrc` 建立符号链接兼容）。**各源码文件头部与内联注释为单一事实来源（SSOT）**，本文仅作高层索引与契约说明，不复述字段值与代码清单。

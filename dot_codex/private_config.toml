@@ -4,7 +4,6 @@
 # No secrets committed — auth via `requires_openai_auth` prompt / env.
 # `wire_api = "responses"` selects OpenAI Responses API; websockets disabled.
 # See: https://github.com/openai/codex — config reference.
-# Last Updated: 2026-09-03 — sanitized for portability; machine-specific
 # MCP/marketplace/notify paths are kept as commented examples, not active.
 
 model_provider = "cc-switch-official"

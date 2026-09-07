@@ -6,8 +6,6 @@
 --               刻意不覆盖（上游默认更优，见下方说明）。
 -- Usage       : 在 LazyVim defaults 之后加载，值在此覆盖同名项；`:h <option>`
 -- Guards      : 无外部依赖；所有选项幂等，重复加载安全
--- Last Updated: 2026-09-07 — 移除与 LazyVim 默认逐字重复的 9 项及 autoindent
---               （smartindent 已蕴含），仅保留真实增量覆盖
 -- Author      : Payne
 -- =============================================================================
 -- Global editor options. Loaded *after* LazyVim's defaults, so values here

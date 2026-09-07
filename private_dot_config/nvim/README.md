@@ -1,7 +1,5 @@
 # 💤 LazyVim
 
-> Last Updated: 2026-09-04 — 大规模工作流审计修复：移除 trouble v2 选项与 bd 键位、剪贴板/补全回归上游默认、stylua 2 空格重排 example.lua、autocmd 表对齐真实组名
-
 A starter template for [LazyVim](https://github.com/LazyVim/LazyVim) — deployed via [chezmoi](https://www.chezmoi.io/) from `private_dot_config/nvim/` → `~/.config/nvim/`.
 
 > **chezmoi 视角**：本文件由源目录 `.chezmoiignore` 的 `**/README.md` 排除、**不**部署到 `~/.config/nvim/README.md`，仅仓库内查阅。仓库级一致性校验（extras 清单 / 43 锁定 / 选项与键位逐行核对）见 [`docs/neovim.md`](../../docs/neovim.md)，二者互补不重复；改动配置以 `lua/config/*.lua` 与 `lazy-lock.json` 为权威。

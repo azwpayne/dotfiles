@@ -1,7 +1,5 @@
 # Shell 栈：Zsh / Zim / Starship / Fish
 
-> Last Updated: 2026-09-07 — 包管理更新入口随提交 62b58f8 由 auto_update 改名 auto-update；修正 Fish 侧 zoxide 已接入的说明
-
 ## 启动链路
 
 交互式 zsh 启动时按以下顺序执行（`~/.zshrc` 经 `symlink_dot_zshrc.tmpl` 指向 `~/.config/zsh/.zshrc`，源码为 `private_dot_config/zsh/dot_zshrc`）。顺序即语义——同名定义后加载者生效，例如 `k` 别名由 `sdk.zsh` 按需定义，因此 `aliases.zsh` 有意不定义 `k`。

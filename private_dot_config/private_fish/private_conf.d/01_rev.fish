@@ -7,7 +7,6 @@
 # Usage       : 由 Fish 自动 source；函数在交互时调用，缺装时黄字提示
 #               不阻断启动。JEB 路径为机器本地约定，缺失时提示不报错。
 # Guards      : jadx-gui/scrcpy/JEB 均带存在性守卫；jobs disown 避免挂起
-# Last Updated: 2026-09-07 — 补全文件头、Guard 说明、JEB 路径注释收敛
 # Author      : Payne
 # =============================================================================
 # about android reverse engineering

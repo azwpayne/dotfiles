@@ -1,7 +1,5 @@
 # 文件映射与命名约定
 
-> Last Updated: 2026-09-07 — 删除 model-tiers.json 映射行并记录其移除（提交 3018345）；计数更新至 85（计入 dot_neoconf.json 删除）；aliases.zsh 一键入口随提交 62b58f8 改名 auto-update；claude 行权限标注修正
-
 本仓库是 chezmoi 的源目录（`~/.local/share/chezmoi`）。chezmoi 通过文件名前缀编码目标路径与属性，
 `chezmoi apply` 时按规则渲染到 `$HOME`。
 

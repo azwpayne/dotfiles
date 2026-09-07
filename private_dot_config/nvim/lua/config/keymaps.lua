@@ -5,7 +5,6 @@
 --               which-key 与 :map 查询，使用 vim.keymap.set（noremap+silent）。
 -- Usage       : Leader 为 <Space>（LazyVim 默认）；按 <leader> 等待 which-key
 -- Guards      : 无；键位定义幂等，重复加载覆盖同名映射
--- Last Updated: 2026-09-07 — 标注 <leader><space> 刻意覆盖上游 Find Files (Root Dir)
 -- Author      : Payne
 -- =============================================================================
 -- Custom keymaps loaded *after* LazyVim defaults, so you can override LazyVim here.

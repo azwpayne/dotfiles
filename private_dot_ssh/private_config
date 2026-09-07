@@ -5,7 +5,6 @@
 #               自适应 SOCKS5 ProxyCommand (5376 探活, 失败直连) + Host * 默认
 # Usage       : `ssh -G dev` 排错, `ssh -T git@github.com` 测连通性
 # Guards      : 0600 必需 (0644 被 ssh 拒绝), ProxyCommand bash -c 探活
-# Last Updated: 2026-09-07 — bastion 块补充示例占位注释（example.com 为保留域名）
 # Author      : Payne
 # =============================================================================
 # SSH client config (chezmoi: private_dot_ssh/private_config -> ~/.ssh/config, 0600)

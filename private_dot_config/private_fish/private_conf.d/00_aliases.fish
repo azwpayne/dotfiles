@@ -10,8 +10,6 @@
 # Guards      : PROXY 端口统一 5376（与 dot_gitconfig / ssh config 一致）；
 #               update-all 内逐项 type -q / command -q 守卫；y() 带 tmp
 #               清理；find-large / serve 参数回退默认值幂等。
-# Last Updated: 2026-09-07 — iterm/iterm_ghostty 别名改单引号（运行时取 $PWD）、
-#               update-all 头部注释与实际任务清单对齐（sdk 移出默认任务）
 # Author      : Payne
 # =============================================================================
 

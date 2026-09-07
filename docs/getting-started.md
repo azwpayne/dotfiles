@@ -1,7 +1,5 @@
 # 安装与快速开始
 
-> Last Updated: 2026-09-07 — 日常更新速览中的更新入口随提交 62b58f8 由 auto_update 改名 auto-update
-
 本文档说明如何在一台新的 macOS（Apple Silicon）机器上，用本仓库还原完整的开发环境。
 
 ## 1. 安装 Homebrew 与前置依赖（全部在 `chezmoi apply` 之前）

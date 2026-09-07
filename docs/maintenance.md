@@ -1,7 +1,5 @@
 # 维护指南
 
-> Last Updated: 2026-09-07 — 更新入口随提交 62b58f8 由 auto_update 改名 auto-update（历史记录保留旧名）、验证命令同步、FAQ 行号引用对齐 aliases.zsh:55 / 208
-
 ## 日常修改流程
 
 本仓库是 chezmoi 的源目录——**永远编辑源文件，不要直接改 `$HOME` 下的目标文件**（否则下次 `apply` 会被覆盖，产生漂移）。

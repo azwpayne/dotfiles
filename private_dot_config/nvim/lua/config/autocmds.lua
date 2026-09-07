@@ -5,7 +5,6 @@
 --               autocmd，此文件仅增量。上游已接管 format-on-save，此处不重复。
 -- Usage       : 每个 autocmd 使用独立 augroup + { clear = true }，重载不重叠
 -- Guards      : 事件均幂等；TextYankPost/VimResized/InsertEnter-Leave 已去重
--- Last Updated: 2026-09-04 — 补全文件头、事件去重与 VeryLazy 约束说明
 -- Author      : Payne
 -- =============================================================================
 -- Custom autocmds loaded on the VeryLazy event (after LazyVim defaults).

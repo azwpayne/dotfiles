@@ -6,7 +6,6 @@
 --               spec。install 回退与 checker 静默检查。
 -- Usage       : 由 init.lua `require("config.lazy")` 加载；首次启动自动 clone
 -- Guards      : vim.uv / vim.loop 双兼容，fs_stat 判空，shell_error 守卫 + 失败退出
--- Last Updated: 2026-09-07 — 修正 performance.rtp 注释：仅 gzip 相对 starter 重启，移除失效 plugins/editing 引用
 -- Author      : Payne
 -- =============================================================================
 -- Entry point required by init.lua (`require("config.lazy")`).

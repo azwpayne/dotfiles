@@ -9,9 +9,6 @@
 # Guards      : 单项工具均 command -v / 目录存在 + 去重守卫；SDKMAN 惰性桩；
 #               补全缓存按二进制 mtime 失效并 zcompile
 # Loading-order contract: aliases.zsh -> fzf.zsh -> sdk.zsh (sdk last)
-# Last Updated: 2026-09-04（大规模工作流审计：krew 去重守卫改为与 GOBIN 一致的
-#               冒号定界匹配，消除子串误判；GOPATH 统一 ~/.local/share/go；
-#               修正头注中已过时的 k 覆盖说明——aliases.zsh 已不定义 k）
 # Author      : Payne
 # =============================================================================
 

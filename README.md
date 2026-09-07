@@ -1,6 +1,5 @@
 # Dotfiles
 
-> Last Updated: 2026-09-07 — 同步 model-tiers.json 删除与 dot_neoconf.json 移除：结构树删该行、managed 计数校正为 85 = 49 + 36，补 fish themes/ 目录、修正 layout.md 链接与 claude 权限标注
 
 基于 [chezmoi](https://www.chezmoi.io/) 管理的 macOS（Apple Silicon）个人开发环境配置。
 
