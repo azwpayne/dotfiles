@@ -25,6 +25,8 @@ vim.keymap.set("n", "<leader><space>", "<cmd>nohlsearch<CR>", { desc = "Clear se
 
 -- Splits (discoverable via leader; same as <C-w>v / <C-w>s).
 vim.keymap.set("n", "<leader>sv", "<C-w>v", { desc = "Split window vertically" })
+-- Deliberate override: shadows fzf default-picker <leader>sh "Help Pages"
+-- (same documented-override precedent as <leader><space> above).
 vim.keymap.set("n", "<leader>sh", "<C-w>s", { desc = "Split window horizontally" })
 
 -- Buffer: no custom <leader>bd — LazyVim already ships <leader>bd

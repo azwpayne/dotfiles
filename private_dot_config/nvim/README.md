@@ -189,7 +189,7 @@ vim.keymap.set("n", "<leader>sv", "<C-w>v", { desc = "Split window vertically" }
 - **Check**: `:Lazy` — plugin status; `:checkhealth` — LSP / treesitter / providers.
 - **Update**: `:Lazy update` (updates `lazy-lock.json`) · **Restore**: `:Lazy restore` · **Sync**: `:Lazy sync`.
 - **Checker**: `lua/config/lazy.lua` sets `checker.enabled=true, notify=false` (silent background check).
-- **Shell**: `update-all` / `auto_update` in `private_dot_config/zsh/aliases.zsh` cover brew/mise/sdk/… **only** — run `:Lazy update` separately for Neovim.
+- **Shell**: `update-all` / `auto-update` in `private_dot_config/zsh/aliases.zsh` cover brew/mise/sdk/… **only** — run `:Lazy update` separately for Neovim.
 
 ## Relationship to docs/neovim.md
 
