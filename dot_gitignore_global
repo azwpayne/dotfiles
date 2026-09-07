@@ -23,7 +23,8 @@
 
 # --- Logs / LaTeX intermediates ---
 *.aux
-*.log*
+*.log
+*.log.*
 
 # --- Python / virtualenvs ---
 *.venv
