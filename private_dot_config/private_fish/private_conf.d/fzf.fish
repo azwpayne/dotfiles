@@ -6,6 +6,7 @@
 # Ownership note: this is a customized copy (guard + comments); the upstream plugin also
 # ships conf.d/fzf.fish, so `fisher update` may overwrite the deployed file — re-run
 # `chezmoi apply` to restore this version (known tradeoff, see .gitignore header).
+# Last Updated: 2026-09-07 — 首次登记头注（无代码改动）
 
 if set -q __fish_fzf_loaded
     exit

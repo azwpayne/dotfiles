@@ -8,7 +8,7 @@
 # Usage       : 由 Fish 自动 source（conf.d 目录按字典序加载）；无需手动 source
 # Guards      : fish_add_path 本身幂等（去重）；rustup/go 等路径均带目录存在性
 #               + contains 守卫；kubecolor 补全仅在 binary 存在时注册
-# Last Updated: 2026-09-03 — 收敛 Homebrew 前缀处理、精简空占位、统一 GOPATH 守卫
+# Last Updated: 2026-09-07 — 收敛 Homebrew 前缀处理、精简空占位、统一 GOPATH 守卫
 # Author      : Payne
 # =============================================================================
 

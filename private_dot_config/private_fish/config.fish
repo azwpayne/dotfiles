@@ -4,6 +4,7 @@
 # Related: PATH/env lives in conf.d/00_env.fish (fish_add_path, idempotent),
 # fzf keybindings in conf.d/fzf.fish (fzf_configure_bindings), and
 # plugin declarations in fish_plugins (managed by fisher).
+# Last Updated: 2026-09-07 — 首次登记头注（无代码改动）
 
 if set -q __fish_config_loaded
     exit
