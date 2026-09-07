@@ -54,7 +54,7 @@
 | 源文件 | 目标路径 | 说明 |
 | --- | --- | --- |
 | `private_dot_config/ghostty/config` | `~/.config/ghostty/config` | Ghostty 主终端配置（JetBrainsMono Nerd Font Mono，`command = /opt/homebrew/bin/fish -l` 启动登录 Fish，Catppuccin Mocha 主题；`zsh -l` / `tmux` 方案注释保留） |
-| `private_dot_config/alacritty/alacritty.toml` | `~/.config/alacritty/alacritty.toml` | Alacritty 备用配置（活跃配色为 Catppuccin Mocha，Dracula 调色板整块注释保留为模板；`shell = fish -c "tmux attach || tmux new -t main"` 经 Fish 进 tmux） |
+| `private_dot_config/alacritty/alacritty.toml` | `~/.config/alacritty/alacritty.toml` | Alacritty 备用配置（活跃配色为 Catppuccin Mocha，Dracula 调色板整块注释保留为模板；`shell = fish -c "tmux new -A -s main"` 经 Fish 进 tmux） |
 | `dot_tmux.conf` | `~/.tmux.conf` | tmux 配置：`default-shell = /opt/homebrew/bin/fish`（登录语义，不设 default-command）、tpm 插件（yank/sensible/open/cpu/battery）、Catppuccin Mocha 状态栏、鼠标与 100k 历史 |
 | （starship.toml 不在仓库） | `~/.config/starship.toml`（机器本地） | Starship 提示符配置未入库（已于 0ad1efc 移除）；zsh/fish 两侧仅负责 `starship init`，跨机迁移需自行拷贝该文件 |
 
@@ -86,7 +86,7 @@
 | `.../themes/.keep` | —（`.keep` 仅保留空目录，不部署） | 主题目录占位 |
 | `.../private_fish_variables` | —（已加入 `.chezmoiignore`，不部署） | fish Universal Variables 机器本地状态 |
 
-> Fish 是 Ghostty 的登录 shell（`command = /opt/homebrew/bin/fish -l`）；Alacritty 经 `shell = fish -c "tmux attach || tmux new -t main"` 进入 tmux；tmux `default-shell` 同为 Fish。Zsh 栈（XDG 收敛 + Zim 三模块）完整保留为次选入口。Starship 提示符双侧复用；fisher 管理的 14 插件与 OrbStack docker/kubectl/orbctl 补全随源部署。
+> Fish 是 Ghostty 的登录 shell（`command = /opt/homebrew/bin/fish -l`）；Alacritty 经 `shell = fish -c "tmux new -A -s main"` 进入 tmux；tmux `default-shell` 同为 Fish。Zsh 栈（XDG 收敛 + Zim 三模块）完整保留为次选入口。Starship 提示符双侧复用；fisher 管理的 14 插件与 OrbStack docker/kubectl/orbctl 补全随源部署。
 
 ### pi coding agent（四件套 + workflows）
 
