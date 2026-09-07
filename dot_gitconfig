@@ -1,10 +1,12 @@
 # Git configuration (chezmoi: dot_gitconfig -> ~/.gitconfig)
 # Core / LFS / safe settings. See dot_gitignore_global for `core.excludesfile`.
-# Proxy: domain-scoped GitHub HTTPS via SOCKS5 at 127.0.0.1:5376 (no fallback).
-# For offline/direct: `git config --global --unset http.https://github.com.proxy`.
+# Proxy: see NOTE next to [http "https://github.com"] below (single source of truth).
+# Last Updated: 2026-09-07 — 代理说明去重（保留 [http] 块旁 NOTE）；core.editor 规范为不带引号的 code
 
 [core]
-	editor = 'code'
+	# git config 仅将双引号视为引用；单引号是字面字符（旧值 'code' 靠 sh 启动编辑器剥离引号才可用），
+	# 规范为不带引号的裸值，行为一致
+	editor = code
 	autocrlf = input
 	excludesfile = ~/.gitignore_global
 [filter "lfs"]
