@@ -5,13 +5,10 @@
   "permission": {
     "*": "allow",
     "mcp": {
-      "*": "allow",
-      "mcp_status": "allow",
-      "exa:*": "allow"
+      "*": "allow"
     },
     "skill": {
-      "*": "allow",
-      "librarian": "allow"
+      "*": "allow"
     },
     "read": {
       "*": "allow",
