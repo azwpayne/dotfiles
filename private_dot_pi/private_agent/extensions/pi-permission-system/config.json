@@ -4,12 +4,6 @@
   "promptMaxRows": 8,
   "permission": {
     "*": "allow",
-    "mcp": {
-      "*": "allow"
-    },
-    "skill": {
-      "*": "allow"
-    },
     "read": {
       "*": "allow",
       "*.env": "deny",
