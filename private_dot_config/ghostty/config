@@ -1,7 +1,7 @@
 # ============================================
 # Ghostty Terminal - Complete Configuration (chezmoi: private_dot_config/ghostty/config -> ~/.config/ghostty/config, dir 0700)
 # Theme/palette: Catppuccin Mocha (dark) — see "Theme and Colors" section.
-# Last Updated: 2026-09-03 — command synced to fish -l (tmux default-shell), tidy quick-terminal dedup note
+# Last Updated: 2026-09-07 — Shell Integration 段删除与生效行重复的注释行（去冗余）
 # ============================================
 # File: ~/.config/ghostty/config
 # Reload: Cmd+Shift+, (macOS)
@@ -90,7 +90,6 @@ clipboard-trim-trailing-spaces = true
 
 # --- Shell Integration ---
 # shell-integration = detect
-# shell-integration-features = no-cursor
 shell-integration-features = no-cursor
 
 
