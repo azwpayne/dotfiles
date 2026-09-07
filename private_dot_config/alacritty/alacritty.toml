@@ -14,7 +14,7 @@ LC_ALL = "zh_CN.UTF-8"
 # # shell configuration for Alacritty with tmux
 shell = { program = "/opt/homebrew/bin/fish", args = [
   "-c",
-  "tmux attach || tmux new -t main",
+  "tmux new -A -s main",
 ] }
 # shell = { program = "/bin/zsh", args = ["-l"] }
 # shell = { program = "/opt/homebrew/bin/fish", args = ["-l"] }
