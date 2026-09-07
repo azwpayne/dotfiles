@@ -4,10 +4,8 @@
 # Description : 按目标名匹配（非源名）；`chezmoi diff/apply` 自动跳过匹配项，
 #               避免仓库文档/本地覆盖/敏感词污染 $HOME。
 # Usage       : `chezmoi ignored` 查看被排除列表；`chezmoi managed` 不含此处条目
-# Last Updated: 2026-09-04 — 大规模工作流审计：敏感词模式加深为 **/*token* 等
-#               （原 *token* 不跨目录层级，嵌套路径如 ~/.config/foo/secret.txt
-#               不会被排除，与“一律排除”声明矛盾）；managed 计数校正为
-#               87 = 51 core + 36 fish（含 **/README.md 等 14 行模式）
+# Last Updated: 2026-09-07 — 计数注释校正：model-tiers.json 移除与 dot_neoconf.json
+#               删除后 managed 实测为 85 = 49 core + 36 fish（模式行本身未变）
 # =============================================================================
 
 # 本地覆盖与备份（机器特定覆盖，不跨机同步）
